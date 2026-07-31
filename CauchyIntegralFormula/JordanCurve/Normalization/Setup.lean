@@ -22,7 +22,7 @@ open Metric Set Function Bornology
 /-! ### Setup lemmas for the normalized frame (Steps A, B) -/
 
 /-- **Math.** Squared Euclidean distance in `Plane` expanded in coordinates. -/
-lemma dist_sq_coord (z w : Plane) :
+lemma dist_sq_eq_sum_coord_sq (z w : Plane) :
     dist z w ^ 2 = (z 0 - w 0) ^ 2 + (z 1 - w 1) ^ 2 := by
   rw [EuclideanSpace.dist_eq, Real.sq_sqrt (by positivity)]
   simp [Fin.sum_univ_two, Real.dist_eq, sq_abs]
@@ -44,7 +44,7 @@ theorem normalized_subset_rectangle
     nlinarith [dist_nonneg (x := z) (y := (!₂[(-1:ℝ), 0] : Plane))]
   have hzb2 : dist z (!₂[(1:ℝ), 0]) ^ 2 ≤ 4 := by
     nlinarith [dist_nonneg (x := z) (y := (!₂[(1:ℝ), 0] : Plane))]
-  rw [dist_sq_coord] at hza2 hzb2
+  rw [dist_sq_eq_sum_coord_sq] at hza2 hzb2
   have ea0 : (!₂[(-1:ℝ), 0] : Plane) 0 = -1 := by simp
   have ea1 : (!₂[(-1:ℝ), 0] : Plane) 1 = 0 := by simp
   have eb0 : (!₂[(1:ℝ), 0] : Plane) 0 = 1 := by simp
@@ -58,12 +58,14 @@ theorem normalized_subset_rectangle
   · nlinarith [sq_nonneg (z 0), sq_nonneg (z 1 - 2), sq_nonneg (z 1 + 2)]
   · nlinarith [sq_nonneg (z 0), sq_nonneg (z 1 - 2), sq_nonneg (z 1 + 2)]
 
-/-- **Math.** **`arc_path` (reusable reparametrization).** A path in a set `S ⊆ Plane`
+/-- **Math.** **`path_reparametrized_on_neg_one_one`** (reusable
+reparametrization). A path in a set `S ⊆ Plane`
 joining `a` to `b` can be reparametrized to a map `h : ℝ → Plane` on the interval
 `[-1,1]`, with `h (-1) = a`, `h 1 = b`, continuous on `[-1,1]`, and staying in `S`.
-This is exactly the shape required by the `crossing` lemma for the horizontal path
+This is exactly the shape required by the
+`transversal_paths_meet_in_rectangle` lemma for the horizontal path
 (endpoints on the left/right edges of a rectangle). -/
-theorem arc_path {S : Set Plane} {a b : Plane} (hj : JoinedIn S a b) :
+theorem path_reparametrized_on_neg_one_one {S : Set Plane} {a b : Plane} (hj : JoinedIn S a b) :
     ∃ h : ℝ → Plane, ContinuousOn h (Icc (-1:ℝ) 1) ∧ h (-1) = a ∧ h 1 = b ∧
       ∀ t ∈ Icc (-1:ℝ) 1, h t ∈ S := by
   refine ⟨fun t => hj.somePath (Set.projIcc 0 1 (by norm_num) ((t + 1) / 2)),
@@ -81,9 +83,10 @@ theorem arc_path {S : Set Plane} {a b : Plane} (hj : JoinedIn S a b) :
   · intro t _; exact hj.somePath_mem _
 
 /-- **Math.** **Setup 2 (segment meets curve).** The vertical segment from `s = !₂[0,-2]` to
-`n = !₂[0,2]` meets the curve.  Proof via the `crossing` lemma with horizontal path
+`n = !₂[0,2]` meets the curve.  Proof via the
+`transversal_paths_meet_in_rectangle` lemma with horizontal path
 `h` a curve-path from `a = !₂[-1,0]` to `b = !₂[1,0]` (the curve is path-connected,
-reparametrized by `arc_path`) staying in the rectangle `[-1,1]×[-2,2]`
+reparametrized by `path_reparametrized_on_neg_one_one`) staying in the rectangle `[-1,1]×[-2,2]`
 (`normalized_subset_rectangle`), and vertical path `v t = !₂[0, 2t]` running from the
 bottom edge `y=-2` to the top edge `y=2`.  Delivers a curve point on the vertical
 axis. -/
@@ -103,7 +106,7 @@ theorem segment_meets_curve (hbr : BrouwerFPT)
     have := h1.image hcont; rwa [image_univ] at this
   have hjoin : JoinedIn (range r) (!₂[(-1:ℝ), 0]) (!₂[(1:ℝ), 0]) :=
     hpc.joinedIn _ hm _ hp
-  obtain ⟨h, hcontOn, hh1, hh2, hhmem⟩ := arc_path hjoin
+  obtain ⟨h, hcontOn, hh1, hh2, hhmem⟩ := path_reparametrized_on_neg_one_one hjoin
   have hrect := normalized_subset_rectangle hm hp hfar
   -- vertical path `v t = !₂[0, 2t]`
   set v : ℝ → Plane := fun t => !₂[(0:ℝ), 2 * t] with hvdef
@@ -127,7 +130,7 @@ theorem segment_meets_curve (hbr : BrouwerFPT)
   have hh2' : h 1 0 = 1 := by rw [hh2]; simp
   have hv1e : v (-1) 1 = -2 := by rw [hv1]; norm_num
   have hv2e : v 1 1 = 2 := by rw [hv1]; norm_num
-  obtain ⟨s, hs, t, ht, heq⟩ := crossing hbr (by norm_num : (-1:ℝ) ≤ 1)
+  obtain ⟨s, hs, t, ht, heq⟩ := transversal_paths_meet_in_rectangle hbr (by norm_num : (-1:ℝ) ≤ 1)
     (by norm_num : (-2:ℝ) ≤ 2) h v hcontOn hvcont hhE hvE hh1' hh2' hv1e hv2e
   refine ⟨h s, hhmem s hs, ?_, ?_⟩
   · rw [heq, hv0]
@@ -137,7 +140,7 @@ theorem segment_meets_curve (hbr : BrouwerFPT)
 axis `Jax = {p ∈ range r | p 0 = 0}` is compact (closed subset of the compact
 curve) and nonempty (`segment_meets_curve`), hence attains its `y`-maximum at some
 point `l ∈ range r` with `l 0 = 0`. -/
-theorem exists_ymax_on_axis (hbr : BrouwerFPT)
+theorem exists_highest_point_of_curve_on_axis (hbr : BrouwerFPT)
     {r : sphere (0 : Plane) 1 → Plane} (hcont : Continuous r) (hinj : Injective r)
     (hm : (!₂[(-1 : ℝ), 0] : Plane) ∈ range r) (hp : (!₂[(1 : ℝ), 0] : Plane) ∈ range r)
     (hfar : ∀ z ∈ range r, ∀ w ∈ range r, dist z w ≤ 2) :
@@ -163,7 +166,7 @@ theorem exists_ymax_on_axis (hbr : BrouwerFPT)
 `(↑) '' A ⊆ Plane` is homeomorphic to `unitInterval`.  The composite coercion
 `↥A → Plane` is a continuous injection from a compact space to a Hausdorff space,
 hence a (closed) embedding, so `↥A ≃ₜ ↥(range …) = ↥((↑) '' A)`. -/
-private lemma planar_arc_homeo {K : Set Plane} {A : Set ↥K}
+private lemma arc_in_plane_homeo_unitInterval {K : Set Plane} {A : Set ↥K}
     (e : A ≃ₜ unitInterval) : Nonempty (((↑) '' A : Set Plane) ≃ₜ unitInterval) := by
   haveI : CompactSpace ↥A := e.symm.compactSpace
   let k : ↥A → Plane := fun a => ((a : ↥K) : Plane)
@@ -181,7 +184,7 @@ private lemma planar_arc_homeo {K : Set Plane} {A : Set ↥K}
 pair `a = !₂[-1,0]`, `b = !₂[1,0]` into two closed arcs `J_n`, `J_s ⊆ Plane`, each
 `≃ₜ unitInterval`, with `J_n ∪ J_s = range r` and `J_n ∩ J_s = {a, b}`, labelled so
 that the `y`-topmost axis point `l` lies in `J_n`. -/
-theorem jordan_arcs (hbr : BrouwerFPT)
+theorem exists_arc_decomposition_of_curve (hbr : BrouwerFPT)
     {r : sphere (0 : Plane) 1 → Plane} (hcont : Continuous r) (hinj : Injective r)
     (hm : (!₂[(-1 : ℝ), 0] : Plane) ∈ range r) (hp : (!₂[(1 : ℝ), 0] : Plane) ∈ range r)
     (hfar : ∀ z ∈ range r, ∀ w ∈ range r, dist z w ≤ 2) :
@@ -193,7 +196,7 @@ theorem jordan_arcs (hbr : BrouwerFPT)
       IsPathConnected (J_n \ {!₂[(-1:ℝ), 0], !₂[(1:ℝ), 0]}) ∧
       IsPathConnected (J_s \ {!₂[(-1:ℝ), 0], !₂[(1:ℝ), 0]}) ∧
       ∃ l ∈ range r, l 0 = 0 ∧ (∀ p ∈ range r, p 0 = 0 → p 1 ≤ l 1) ∧ l ∈ J_n := by
-  obtain ⟨l, hlr, hl0, hlmax⟩ := exists_ymax_on_axis hbr hcont hinj hm hp hfar
+  obtain ⟨l, hlr, hl0, hlmax⟩ := exists_highest_point_of_curve_on_axis hbr hcont hinj hm hp hfar
   set J := jordanCurveHomeo r hcont hinj with hJdef
   have hab : (!₂[(-1:ℝ), 0] : Plane) ≠ !₂[(1:ℝ), 0] := by
     intro h
@@ -218,8 +221,8 @@ theorem jordan_arcs (hbr : BrouwerFPT)
   have hBi : B₁ ∩ B₂ = {!₂[(-1:ℝ), 0], !₂[(1:ℝ), 0]} := by
     rw [hB1, hB2, ← Set.image_inter Subtype.coe_injective, hi, hJx, hJy,
       Set.image_pair]
-  have hn1 : Nonempty (B₁ ≃ₜ unitInterval) := planar_arc_homeo e1
-  have hn2 : Nonempty (B₂ ≃ₜ unitInterval) := planar_arc_homeo e2
+  have hn1 : Nonempty (B₁ ≃ₜ unitInterval) := arc_in_plane_homeo_unitInterval e1
+  have hn2 : Nonempty (B₂ ≃ₜ unitInterval) := arc_in_plane_homeo_unitInterval e2
   have hcl1 : IsClosed B₁ :=
     (isCompact_iff_compactSpace.mpr hn1.some.symm.compactSpace).isClosed
   have hcl2 : IsClosed B₂ :=

@@ -25,7 +25,7 @@ set_option maxHeartbeats 1600000 in
 -- to break the proof up rather than to keep the option.
 /-- **Math.** **Maehara Step A (normalized).** The geometric core in normalized coordinates:
 the farthest pair sits at `!₂[-1,0]`, `!₂[1,0]` (so the diameter is `2`). -/
-theorem step_A_normalized (hbr : BrouwerFPT)
+theorem exists_bounded_component_of_normalized (hbr : BrouwerFPT)
     {r : sphere (0 : Plane) 1 → Plane} (hcont : Continuous r) (hinj : Injective r)
     (hm : (!₂[(-1 : ℝ), 0] : Plane) ∈ range r) (hp : (!₂[(1 : ℝ), 0] : Plane) ∈ range r)
     (hfar : ∀ z ∈ range r, ∀ w ∈ range r, dist z w ≤ 2) :
@@ -34,7 +34,7 @@ theorem step_A_normalized (hbr : BrouwerFPT)
   obtain ⟨J_n, J_s, l, m, p, q, z₀, hUnion, hInter, hpcJn,
     ⟨hlJn, hl0, hlmax⟩, ⟨hmJn, hm0, hmmin⟩, ⟨hpJs, hp0, hpm, hpmax⟩,
     ⟨hqJs, hq0, hqmin⟩, hz₀def, hml, hqp, hpz₀, hz₀m,
-    hpcJs, hJoinJn, hJoinJs⟩ := exists_construction_points hbr hcont hinj hm hp hfar
+    hpcJs, hJoinJn, hJoinJs⟩ := exists_maehara_points_on_axis hbr hcont hinj hm hp hfar
   -- basic containments, coordinates, and rectangle bounds
   have hJnr : J_n ⊆ range r := hUnion ▸ subset_union_left
   have hJsr : J_s ⊆ range r := hUnion ▸ subset_union_right
@@ -100,7 +100,8 @@ theorem step_A_normalized (hbr : BrouwerFPT)
     rw [Metric.mem_closedBall]
     have hz1 := hz.1; have hz2 := hz.2; rw [mem_Icc] at hz1 hz2
     have hsq : dist z (0:Plane) ^ 2 ≤ 9 := by
-      rw [dist_sq_coord, show (0:Plane) 0 = 0 from by simp, show (0:Plane) 1 = 0 from by simp]
+      rw [dist_sq_eq_sum_coord_sq, show (0:Plane) 0 = 0 from by simp,
+        show (0:Plane) 1 = 0 from by simp]
       nlinarith [hz1.1, hz1.2, hz2.1, hz2.2]
     nlinarith [dist_nonneg (x := z) (y := (0:Plane)), hsq]
   have hproj0 : Continuous (fun w : Plane => w 0) := by fun_prop
@@ -145,7 +146,8 @@ theorem step_A_normalized (hbr : BrouwerFPT)
   have hαU : ∀ t : ℝ, α t ∈ U := fun t => hJoinU.somePath_mem _
   -- first exit through the frontier `E \ O`
   obtain ⟨tw, htw, hwC, hwO, hbelow⟩ :=
-    exists_first_exit hOopen hEclosed hOE hαcont.continuousOn (by rw [hα0]; exact hz₀O)
+    exists_first_exit_from_rectangle hOopen hEclosed hOE hαcont.continuousOn
+      (by rw [hα0]; exact hz₀O)
       (by rw [hα1]; exact hyE)
   have hαE : ∀ u ∈ Icc (0 : ℝ) tw, α u ∈ E := by
     intro u hu
@@ -173,7 +175,7 @@ theorem step_A_normalized (hbr : BrouwerFPT)
     have hwGlo : α tw ∈ Glo := hGloFrom (α tw) hwC.1 hwC.2 hwO hwneg
     -- piece 1 : `s → w` inside `Glo`
     obtain ⟨g1, hg1cont, hg1a, hg1b, hg1mem⟩ :=
-      arc_path (hGloPC.joinedIn (!₂[(0 : ℝ), -2]) hsGlo (α tw) hwGlo)
+      path_reparametrized_on_neg_one_one (hGloPC.joinedIn (!₂[(0 : ℝ), -2]) hsGlo (α tw) hwGlo)
     -- piece 2 : `w → z₀` along the escaping path
     set g2 : ℝ → Plane := fun t => α (tw * (1 - t) / 2) with hg2def
     have hg2cont : ContinuousOn g2 (Icc (-1 : ℝ) 1) :=
@@ -202,7 +204,7 @@ theorem step_A_normalized (hbr : BrouwerFPT)
       linarith [hy.1, hpz₀_lt]
     -- piece 4 : `m → l` inside `J_n \ {a,b}`
     obtain ⟨g4, hg4cont, hg4a, hg4b, hg4mem⟩ :=
-      arc_path (hpcJn.joinedIn m ⟨hmJn, hmab⟩ l ⟨hlJn, hlab⟩)
+      path_reparametrized_on_neg_one_one (hpcJn.joinedIn m ⟨hmJn, hmab⟩ l ⟨hlJn, hlab⟩)
     have hg4missJs : ∀ t ∈ Icc (-1 : ℝ) 1, g4 t ∉ J_s := by
       intro t ht hJs
       have hg4 := hg4mem t ht
@@ -284,7 +286,7 @@ theorem step_A_normalized (hbr : BrouwerFPT)
       linarith [hy.2, hqm]
     -- piece 2 : `q → p` inside `J_s \ {a,b}`
     obtain ⟨g2, hg2cont, hg2a, hg2b, hg2mem⟩ :=
-      arc_path (hpcJs.joinedIn q ⟨hqJs, hqab⟩ p ⟨hpJs, hpab⟩)
+      path_reparametrized_on_neg_one_one (hpcJs.joinedIn q ⟨hqJs, hqab⟩ p ⟨hpJs, hpab⟩)
     have hg2missJn : ∀ t ∈ Icc (-1 : ℝ) 1, g2 t ∉ J_n := by
       intro t ht hJn
       have hg2' := hg2mem t ht
@@ -318,7 +320,7 @@ theorem step_A_normalized (hbr : BrouwerFPT)
       exact ⟨by nlinarith [htw.1, ht.1], by nlinarith [htw.1, ht.2]⟩
     -- piece 5 : `w → n` inside `Gup`
     obtain ⟨g5, hg5cont, hg5a, hg5b, hg5mem⟩ :=
-      arc_path (hGupPC.joinedIn (α tw) hwGup (!₂[(0 : ℝ), 2]) hnGup)
+      path_reparametrized_on_neg_one_one (hGupPC.joinedIn (α tw) hwGup (!₂[(0 : ℝ), 2]) hnGup)
     have hg5missJn : ∀ t ∈ Icc (-1 : ℝ) 1, g5 t ∉ J_n := by
       intro t ht hJn; exact hGupAvoid (g5 t) (hg5mem t ht) (hJnr hJn)
     -- concatenate `s → q → p → z₀ → w → n`
@@ -357,12 +359,12 @@ theorem step_A_normalized (hbr : BrouwerFPT)
 
 /-- **Math.** **Maehara Step A (geometric core).** The complement `ℝ²∖J` of a Jordan curve
 has at least one *bounded* connected component.  Reduced to the normalized version
-`step_A_normalized` via the farthest-pair similarity `T`. -/
-theorem step_A_exists_bounded (hbr : BrouwerFPT)
+`exists_bounded_component_of_normalized` via the farthest-pair similarity `T`. -/
+theorem exists_bounded_component (hbr : BrouwerFPT)
     {r : sphere (0 : Plane) 1 → Plane} (hcont : Continuous r) (hinj : Injective r) :
     ∃ x ∈ (range r)ᶜ, IsBounded (connectedComponentIn (range r)ᶜ x) := by
   obtain ⟨a, ha, b, hb, hfar, hab⟩ := exists_farthest_pair hcont hinj
-  obtain ⟨T, hscale, hTa, hTb⟩ := exists_similarity hab
+  obtain ⟨T, hscale, hTa, hTb⟩ := exists_similarity_normalizing_farthest_pair hab
   have hdpos : 0 < dist a b := dist_pos.mpr hab
   have hcpos : (0 : ℝ) < 2 / dist a b := by positivity
   -- the transported curve `r' = T ∘ r`
@@ -384,7 +386,7 @@ theorem step_A_exists_bounded (hbr : BrouwerFPT)
         ≤ 2 / dist a b * dist a b := by
           exact mul_le_mul_of_nonneg_left (hfar z hz w hw) hcpos.le
       _ = 2 := by field_simp
-  obtain ⟨x, hx, hxb⟩ := step_A_normalized hbr hr'cont hr'inj hm' hp' hfar'
+  obtain ⟨x, hx, hxb⟩ := exists_bounded_component_of_normalized hbr hr'cont hr'inj hm' hp' hfar'
   -- transport the bounded component back by `T⁻¹`
   rw [hrange] at hx hxb
   -- `x ∈ (T '' range r)ᶜ = T '' (range r)ᶜ`

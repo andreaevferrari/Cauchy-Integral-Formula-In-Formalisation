@@ -26,7 +26,8 @@ Brouwer: if they were disjoint, the explicit normalized map
 `F(s,t) = ((v₁ t − h₁ s)/N, (h₂ s − v₂ t)/N)` (with `N` the sup-norm of
 `h s − v t`) sends the parameter square `[-1,1]²` to its boundary with no fixed
 point. Coordinates are `p 0`, `p 1` of `p : Plane`. -/
-theorem crossing (hbr : BrouwerFPT) {a b c d : ℝ} (_hab : a ≤ b) (_hcd : c ≤ d)
+theorem transversal_paths_meet_in_rectangle
+  (hbr : BrouwerFPT) {a b c d : ℝ} (_hab : a ≤ b) (_hcd : c ≤ d)
     (h v : ℝ → Plane)
     (hh : ContinuousOn h (Icc (-1) 1)) (hv : ContinuousOn v (Icc (-1) 1))
     (hhE : ∀ t ∈ Icc (-1 : ℝ) 1, h t 0 ∈ Icc a b ∧ h t 1 ∈ Icc c d)

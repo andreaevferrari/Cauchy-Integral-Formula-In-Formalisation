@@ -62,7 +62,7 @@ false of this copy — see below.
 #print axioms JordanCurve.Brouwer.brouwerFPT
 #print axioms JordanCurve.exists_unbounded_component
 #print axioms JordanCurve.unbounded_component_unique
-#print axioms JordanCurve.step_A_exists_bounded
+#print axioms JordanCurve.exists_bounded_component
 ```
 
 Each depends on exactly `propext`, `Classical.choice`, `Quot.sound` — the

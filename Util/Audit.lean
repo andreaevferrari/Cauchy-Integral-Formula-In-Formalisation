@@ -105,7 +105,7 @@ private def publicTheorems : List (Name × String) :=
        "theorem    (thm-jordan-curve: an unbounded component exists)")
   , (jc "unbounded_component_unique",
        "theorem    (thm-jordan-curve: it is the only one)")
-  , (jc "step_A_exists_bounded",
+  , (jc "exists_bounded_component",
        "theorem    (thm-jordan-curve: a bounded component exists — what `inside` means)")
   , (jc "component_boundary_eq",
        "theorem    (thm-jordan-curve: the curve is the boundary of each component)")

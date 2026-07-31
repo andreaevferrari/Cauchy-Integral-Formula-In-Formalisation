@@ -15,9 +15,9 @@ lean:
     module: CauchyIntegralFormula.JordanCurve.Curve.Basic
     line: 137
     state: proven
-  - decl: JordanCurve.step_A_exists_bounded
+  - decl: JordanCurve.exists_bounded_component
     module: CauchyIntegralFormula.JordanCurve.Component.Bounded
-    line: 361
+    line: 363
     state: proven
   - decl: JordanCurve.component_boundary_eq
     module: CauchyIntegralFormula.JordanCurve.Curve.Separation
@@ -43,5 +43,5 @@ This network does not have to, because a formal proof exists.
 > [!note]- Notes (click to expand)
 > - It is one of the earliest substantial theorems of topology, and every known proof is long out of proportion to how obvious the statement looks. There is no proof written here, and no prose proof is planned: the formal one is the proof this network stands on.
 > - The formal counterpart is not Mathlib's — Mathlib has no Jordan curve theorem, and every declaration there whose name contains `Jordan` belongs to Jordan–Hölder, Jordan algebras or the Jordan decomposition of a measure. It is vendored into this repository under `CauchyIntegralFormula/JordanCurve/`, with its provenance and the four mechanical edits recorded in `PROVENANCE.md` beside it. The mathematics is Maehara's proof via the Brouwer fixed point theorem, and it is not this repository's work.
-> - The five declarations together cover the three clauses of the statement. `jordan_curve` gives the count of two and is unconditional. The other four carry `BrouwerFPT` as an explicit hypothesis, which `JordanCurve.Brouwer.brouwerFPT` discharges in the same development — so the conditionality is bookkeeping, not a gap.
-> - The count of two does not by itself say which component is bounded, and `[[def-inside-of-path]]` needs exactly that. `exists_unbounded_component` and `unbounded_component_unique` give the unbounded one and its uniqueness, `step_A_exists_bounded` the bounded one, and `component_boundary_eq` the boundary clause.
+> - The five declarations together realCoveringAddCircle the three clauses of the statement. `jordan_curve` gives the count of two and is unconditional. The other four carry `BrouwerFPT` as an explicit hypothesis, which `JordanCurve.Brouwer.brouwerFPT` discharges in the same development — so the conditionality is bookkeeping, not a gap.
+> - The count of two does not by itself say which component is bounded, and `[[def-inside-of-path]]` needs exactly that. `exists_unbounded_component` and `unbounded_component_unique` give the unbounded one and its uniqueness, `exists_bounded_component` the bounded one, and `component_boundary_eq` the boundary clause.

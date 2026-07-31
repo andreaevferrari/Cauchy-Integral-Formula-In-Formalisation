@@ -20,7 +20,7 @@ namespace JordanCurve
 open Metric Set Function Bornology
 
 /-- **Math.** The Euclidean norm of an axis point `!₂[0,y]` equals `|y|`. -/
-private lemma norm_axis_pt (y : ℝ) : ‖(!₂[(0 : ℝ), y] : Plane)‖ = |y| := by
+private lemma norm_of_point_on_vertical_axis (y : ℝ) : ‖(!₂[(0 : ℝ), y] : Plane)‖ = |y| := by
   have e0 : (!₂[(0 : ℝ), y] : Plane) 0 = 0 := by simp
   have e1 : (!₂[(0 : ℝ), y] : Plane) 1 = y := by simp
   rw [EuclideanSpace.norm_eq, Fin.sum_univ_two, e0, e1]
@@ -36,7 +36,7 @@ private lemma axis_ray_up_unbounded (c : ℝ) :
     refine ⟨by simp, ?_⟩
     rw [mem_Ioi, hy1]; linarith [le_abs_self c, abs_nonneg M]
   have hin := hM hmem
-  rw [mem_closedBall_zero_iff, norm_axis_pt,
+  rw [mem_closedBall_zero_iff, norm_of_point_on_vertical_axis,
     abs_of_nonneg (by positivity : (0 : ℝ) ≤ |c| + |M| + 1)] at hin
   linarith [le_abs_self M, abs_nonneg c]
 
@@ -50,13 +50,13 @@ private lemma axis_ray_down_unbounded (c : ℝ) :
     refine ⟨by simp, ?_⟩
     rw [mem_Iio, hy1]; linarith [neg_abs_le c, abs_nonneg M]
   have hin := hM hmem
-  rw [mem_closedBall_zero_iff, norm_axis_pt, abs_neg,
+  rw [mem_closedBall_zero_iff, norm_of_point_on_vertical_axis, abs_neg,
     abs_of_nonneg (by positivity : (0 : ℝ) ≤ |c| + |M| + 1)] at hin
   linarith [le_abs_self M, abs_nonneg c]
 
 /-- **Math.** The complement of the normalized rectangle `[-1,1]×[-2,2]` is preconnected
 (it is the union of four half-planes chained around the rectangle). -/
-private lemma isPreconnected_rect_compl :
+private lemma isPreconnected_compl_rectangle :
     IsPreconnected {v : Plane | ¬(v 0 ∈ Icc (-1 : ℝ) 1 ∧ v 1 ∈ Icc (-2 : ℝ) 2)} := by
   have cA : Convex ℝ {v : Plane | v 0 ∈ Iio (-1 : ℝ)} :=
     (convex_Iio _).is_linear_preimage (EuclideanSpace.proj (0:Fin 2)).isLinear
@@ -96,35 +96,38 @@ private lemma isPreconnected_rect_compl :
   rw [hEq]; exact hADBC
 
 /-- **Math.** Straight segment from `P` to `Q`, reparametrized on `[-1,1]`. -/
-private noncomputable def segP (P Q : Plane) : ℝ → Plane := fun t => P + ((t + 1) / 2) • (Q - P)
+private noncomputable def segmentParam (P Q : Plane) : ℝ → Plane :=
+  fun t => P + ((t + 1) / 2) • (Q - P)
 
-private lemma segP_cont (P Q : Plane) : Continuous (segP P Q) := by unfold segP; fun_prop
+private lemma segmentParam_cont (P Q : Plane) : Continuous (segmentParam P Q) :=
+  by unfold segmentParam; fun_prop
 
-private lemma segP_neg1 (P Q : Plane) : segP P Q (-1) = P := by simp [segP]
+private lemma segmentParam_neg1 (P Q : Plane) : segmentParam P Q (-1) = P := by simp [segmentParam]
 
-private lemma segP_one (P Q : Plane) : segP P Q 1 = Q := by simp [segP]
+private lemma segmentParam_one (P Q : Plane) : segmentParam P Q 1 = Q := by simp [segmentParam]
 
-private lemma segP_coord (P Q : Plane) (t : ℝ) (i : Fin 2) :
-    segP P Q t i = P i + ((t + 1) / 2) * (Q i - P i) := by
-  simp only [segP, PiLp.add_apply, PiLp.smul_apply, PiLp.sub_apply, smul_eq_mul]
+private lemma segmentParam_coord (P Q : Plane) (t : ℝ) (i : Fin 2) :
+    segmentParam P Q t i = P i + ((t + 1) / 2) * (Q i - P i) := by
+  simp only [segmentParam, PiLp.add_apply, PiLp.smul_apply, PiLp.sub_apply, smul_eq_mul]
 
-private lemma segP_dist_le (P Q : Plane) {t : ℝ} (ht : t ∈ Icc (-1 : ℝ) 1) :
-    dist (segP P Q t) P ≤ dist Q P := by
+private lemma segmentParam_dist_to_start_le (P Q : Plane) {t : ℝ} (ht : t ∈ Icc (-1 : ℝ) 1) :
+    dist (segmentParam P Q t) P ≤ dist Q P := by
   have hs : |(t + 1) / 2| ≤ 1 := by
     rw [mem_Icc] at ht; rw [abs_le]; constructor <;> linarith [ht.1, ht.2]
-  have heq : dist (segP P Q t) P = |(t + 1) / 2| * dist Q P := by
-    rw [segP, dist_eq_norm, add_sub_cancel_left, norm_smul, Real.norm_eq_abs, ← dist_eq_norm]
+  have heq : dist (segmentParam P Q t) P = |(t + 1) / 2| * dist Q P := by
+    rw [segmentParam, dist_eq_norm, add_sub_cancel_left, norm_smul, Real.norm_eq_abs,
+      ← dist_eq_norm]
   rw [heq]
   calc |(t + 1) / 2| * dist Q P ≤ 1 * dist Q P :=
         mul_le_mul_of_nonneg_right hs dist_nonneg
     _ = dist Q P := one_mul _
 
-private lemma segP_dist_le' (P Q : Plane) {t : ℝ} (ht : t ∈ Icc (-1 : ℝ) 1) :
-    dist (segP P Q t) Q ≤ dist P Q := by
+private lemma segmentParam_dist_to_end_le (P Q : Plane) {t : ℝ} (ht : t ∈ Icc (-1 : ℝ) 1) :
+    dist (segmentParam P Q t) Q ≤ dist P Q := by
   have hs : |1 - (t + 1) / 2| ≤ 1 := by
     rw [mem_Icc] at ht; rw [abs_le]; constructor <;> linarith [ht.1, ht.2]
-  have heq : dist (segP P Q t) Q = |1 - (t + 1) / 2| * dist P Q := by
-    rw [segP, dist_eq_norm,
+  have heq : dist (segmentParam P Q t) Q = |1 - (t + 1) / 2| * dist P Q := by
+    rw [segmentParam, dist_eq_norm,
       show P + ((t + 1) / 2) • (Q - P) - Q = (1 - (t + 1) / 2) • (P - Q) from by module,
       norm_smul, Real.norm_eq_abs, ← dist_eq_norm]
   rw [heq]
@@ -134,11 +137,11 @@ private lemma segP_dist_le' (P Q : Plane) {t : ℝ} (ht : t ∈ Icc (-1 : ℝ) 1
 
 /-- **Math.** A coordinate of a segment point lies in any interval containing both endpoints'
 corresponding coordinates. -/
-private lemma segP_coord_mem_Icc {P Q : Plane} (i : Fin 2) {lo hi : ℝ}
+private lemma segmentParam_coord_mem_Icc {P Q : Plane} (i : Fin 2) {lo hi : ℝ}
     (hP : P i ∈ Icc lo hi) (hQ : Q i ∈ Icc lo hi) {t : ℝ} (ht : t ∈ Icc (-1 : ℝ) 1) :
-    segP P Q t i ∈ Icc lo hi := by
+    segmentParam P Q t i ∈ Icc lo hi := by
   rw [mem_Icc] at hP hQ ht
-  rw [segP_coord, mem_Icc]
+  rw [segmentParam_coord, mem_Icc]
   have hs0 : (0 : ℝ) ≤ (t + 1) / 2 := by linarith [ht.1]
   have hs1 : (t + 1) / 2 ≤ 1 := by linarith [ht.2]
   constructor
@@ -156,7 +159,7 @@ set_option maxHeartbeats 1600000 in
 /-- **Math.** **Maehara Step B (normalized).** Uniqueness of the bounded component in
 normalized coordinates (farthest pair at `!₂[-1,0]`, `!₂[1,0]`). Any bounded
 component equals the `z₀`-component `U`, hence all bounded components coincide. -/
-theorem step_B_normalized (hbr : BrouwerFPT)
+theorem bounded_component_unique_of_normalized (hbr : BrouwerFPT)
     {r : sphere (0 : Plane) 1 → Plane} (hcont : Continuous r) (hinj : Injective r)
     (hm : (!₂[(-1 : ℝ), 0] : Plane) ∈ range r) (hp : (!₂[(1 : ℝ), 0] : Plane) ∈ range r)
     (hfar : ∀ z ∈ range r, ∀ w ∈ range r, dist z w ≤ 2) :
@@ -168,7 +171,7 @@ theorem step_B_normalized (hbr : BrouwerFPT)
   obtain ⟨J_n, J_s, l, m, p, q, z₀, hUnion, hInter, hpcJn,
     ⟨hlJn, hl0, hlmax⟩, ⟨hmJn, hm0, hmmin⟩, ⟨hpJs, hp0, hpm, hpmax⟩,
     ⟨hqJs, hq0, hqmin⟩, hz₀def, hml, hqp, hpz₀, hz₀m,
-    hpcJs, hJoinJn, hJoinJs⟩ := exists_construction_points hbr hcont hinj hm hp hfar
+    hpcJs, hJoinJn, hJoinJs⟩ := exists_maehara_points_on_axis hbr hcont hinj hm hp hfar
   -- basic containments, coordinates, and rectangle bounds
   have hJnr : J_n ⊆ range r := hUnion ▸ subset_union_left
   have hJsr : J_s ⊆ range r := hUnion ▸ subset_union_right
@@ -242,7 +245,7 @@ theorem step_B_normalized (hbr : BrouwerFPT)
   -- the open middle axis segment `(p,m)` lies in `U`
   set Mid : Set Plane := {v : Plane | v 0 = 0 ∧ v 1 ∈ Ioo (p 1) (m 1)} with hMiddef
   have hMidPC : IsPathConnected Mid :=
-    isPathConnected_vertSeg 0
+    isPathConnected_verticalSegment 0
       ((convex_Ioo (p 1) (m 1)).isPathConnected (Set.nonempty_Ioo.mpr hpm_lt))
   have hMidc : Mid ⊆ (range r)ᶜ := by
     rintro v ⟨hv0, hv1⟩ hvr
@@ -257,12 +260,12 @@ theorem step_B_normalized (hbr : BrouwerFPT)
   -- upward and downward axis rays lie in the complement
   set RayN : Set Plane := {v : Plane | v 0 = 0 ∧ v 1 ∈ Ioi (l 1)} with hRayNdef
   have hRayNPC : IsPathConnected RayN :=
-    isPathConnected_vertSeg 0 ((convex_Ioi (l 1)).isPathConnected Set.nonempty_Ioi)
+    isPathConnected_verticalSegment 0 ((convex_Ioi (l 1)).isPathConnected Set.nonempty_Ioi)
   have hRayNc : RayN ⊆ (range r)ᶜ := by
     rintro v ⟨hv0, hv1⟩ hvr; exact absurd (hlmax v hvr hv0) (not_le.2 hv1)
   set RayS : Set Plane := {v : Plane | v 0 = 0 ∧ v 1 ∈ Iio (q 1)} with hRaySdef
   have hRaySPC : IsPathConnected RayS :=
-    isPathConnected_vertSeg 0 ((convex_Iio (q 1)).isPathConnected Set.nonempty_Iio)
+    isPathConnected_verticalSegment 0 ((convex_Iio (q 1)).isPathConnected Set.nonempty_Iio)
   have hRaySc : RayS ⊆ (range r)ᶜ := by
     rintro v ⟨hv0, hv1⟩ hvr
     rw [← hUnion] at hvr
@@ -322,60 +325,65 @@ theorem step_B_normalized (hbr : BrouwerFPT)
       have hvEc : v ∈ {u : Plane | ¬(u 0 ∈ Icc (-1 : ℝ) 1 ∧ u 1 ∈ Icc (-2 : ℝ) 2)} := hvE
       have hEcc : {u : Plane | ¬(u 0 ∈ Icc (-1 : ℝ) 1 ∧ u 1 ∈ Icc (-2 : ℝ) 2)} ⊆ (range r)ᶜ :=
         fun u hu hur => hu (hErect hur)
-      have h1 := isPreconnected_rect_compl.subset_connectedComponentIn hvEc hEcc
+      have h1 := isPreconnected_compl_rectangle.subset_connectedComponentIn hvEc hEcc
       have hup : {p : Plane | p 0 = 0 ∧ p 1 ∈ Ioi (2 : ℝ)}
           ⊆ {u : Plane | ¬(u 0 ∈ Icc (-1 : ℝ) 1 ∧ u 1 ∈ Icc (-2 : ℝ) 2)} := by
         rintro u ⟨_, hu1⟩ ⟨_, hu2⟩
         rw [mem_Icc] at hu2; rw [mem_Ioi] at hu1; linarith [hu2.2]
       exact axis_ray_up_unbounded 2 (hwb.subset (subset_trans hup (compW hvW ▸ h1)))
     -- **spine path** `β : n → s`, top to bottom, missing `W`, inside `E`
-    have hnl_cont : ContinuousOn (segP (!₂[(0 : ℝ), 2]) l) (Icc (-1 : ℝ) 1) :=
-      (segP_cont _ _).continuousOn
+    have hnl_cont : ContinuousOn (segmentParam (!₂[(0 : ℝ), 2]) l) (Icc (-1 : ℝ) 1) :=
+      (segmentParam_cont _ _).continuousOn
     obtain ⟨lm, hlm_cont, hlm_a, hlm_b, hlm_mem⟩ :=
-      arc_path (hpcJn.joinedIn l ⟨hlJn, hlab⟩ m ⟨hmJn, hmab⟩)
-    have hmp_cont : ContinuousOn (segP m p) (Icc (-1 : ℝ) 1) := (segP_cont _ _).continuousOn
+      path_reparametrized_on_neg_one_one (hpcJn.joinedIn l ⟨hlJn, hlab⟩ m ⟨hmJn, hmab⟩)
+    have hmp_cont : ContinuousOn (segmentParam m p) (Icc (-1 : ℝ) 1) :=
+      (segmentParam_cont _ _).continuousOn
     obtain ⟨pq, hpq_cont, hpq_a, hpq_b, hpq_mem⟩ :=
-      arc_path (hpcJs.joinedIn p ⟨hpJs, hpab⟩ q ⟨hqJs, hqab⟩)
-    have hqs_cont : ContinuousOn (segP q (!₂[(0 : ℝ), -2])) (Icc (-1 : ℝ) 1) :=
-      (segP_cont _ _).continuousOn
+      path_reparametrized_on_neg_one_one (hpcJs.joinedIn p ⟨hpJs, hpab⟩ q ⟨hqJs, hqab⟩)
+    have hqs_cont : ContinuousOn (segmentParam q (!₂[(0 : ℝ), -2])) (Icc (-1 : ℝ) 1) :=
+      (segmentParam_cont _ _).continuousOn
     obtain ⟨β, hβcont, hβa, hβb, hβmem⟩ :=
       concatPath5 hnl_cont hlm_cont hmp_cont hpq_cont hqs_cont
-        (by rw [segP_one, hlm_a]) (by rw [hlm_b, segP_neg1]) (by rw [segP_one, hpq_a])
-        (by rw [hpq_b, segP_neg1])
+        (by rw [segmentParam_one, hlm_a]) (by rw [hlm_b,
+          segmentParam_neg1]) (by rw [segmentParam_one, hpq_a])
+        (by rw [hpq_b, segmentParam_neg1])
     have hβE : ∀ t ∈ Icc (-1 : ℝ) 1, β t 0 ∈ Icc (-1 : ℝ) 1 ∧ β t 1 ∈ Icc (-2 : ℝ) 2 := by
       intro t ht
       rcases hβmem t ht with ((((h | h) | h) | h) | h)
       · obtain ⟨u, hu, hue⟩ := h; rw [← hue]
-        exact ⟨segP_coord_mem_Icc 0 (by rw [hn0]; exact hIcc0x) (by rw [hl0]; exact hIcc0x) hu,
-          segP_coord_mem_Icc 1 (by rw [hn1]; exact hIcc2y) hlE1 hu⟩
+        exact ⟨segmentParam_coord_mem_Icc 0 (by rw [hn0]; exact hIcc0x)
+          (by rw [hl0]; exact hIcc0x) hu,
+          segmentParam_coord_mem_Icc 1 (by rw [hn1]; exact hIcc2y) hlE1 hu⟩
       · obtain ⟨u, hu, hue⟩ := h; rw [← hue]; exact hErect (hJnr (hlm_mem u hu).1)
       · obtain ⟨u, hu, hue⟩ := h; rw [← hue]
-        exact ⟨segP_coord_mem_Icc 0 (by rw [hm0]; exact hIcc0x) (by rw [hp0]; exact hIcc0x) hu,
-          segP_coord_mem_Icc 1 hmE1 hpE1 hu⟩
+        exact ⟨segmentParam_coord_mem_Icc 0 (by rw [hm0]; exact hIcc0x)
+          (by rw [hp0]; exact hIcc0x) hu,
+          segmentParam_coord_mem_Icc 1 hmE1 hpE1 hu⟩
       · obtain ⟨u, hu, hue⟩ := h; rw [← hue]; exact hErect (hJsr (hpq_mem u hu).1)
       · obtain ⟨u, hu, hue⟩ := h; rw [← hue]
-        exact ⟨segP_coord_mem_Icc 0 (by rw [hq0]; exact hIcc0x) (by rw [hs0]; exact hIcc0x) hu,
-          segP_coord_mem_Icc 1 hqE1 (by rw [hs1]; exact hIccm2y) hu⟩
+        exact ⟨segmentParam_coord_mem_Icc 0 (by rw [hq0]; exact hIcc0x)
+          (by rw [hs0]; exact hIcc0x) hu,
+          segmentParam_coord_mem_Icc 1 hqE1 (by rw [hs1]; exact hIccm2y) hu⟩
     have hβmiss : ∀ t ∈ Icc (-1 : ℝ) 1, β t ∉ W := by
       intro t ht
       rcases hβmem t ht with ((((h | h) | h) | h) | h)
       · obtain ⟨u, hu, hue⟩ := h; rw [← hue]
         refine avoid_up _ ?_ ?_
-        · rw [segP_coord, hn0, hl0]; ring
-        · rw [segP_coord, hn1]; rw [mem_Icc] at hu; nlinarith [hu.1, hu.2, hlE1.2]
+        · rw [segmentParam_coord, hn0, hl0]; ring
+        · rw [segmentParam_coord, hn1]; rw [mem_Icc] at hu; nlinarith [hu.1, hu.2, hlE1.2]
       · obtain ⟨u, hu, hue⟩ := h; rw [← hue]
         exact fun hW => hWsub hW (hJnr (hlm_mem u hu).1)
       · obtain ⟨u, hu, hue⟩ := h; rw [← hue]
         refine avoid_mid _ ?_ ?_ ?_
-        · rw [segP_coord, hm0, hp0]; ring
-        · rw [segP_coord]; rw [mem_Icc] at hu; nlinarith [hu.1, hu.2, hpm_lt.le]
-        · rw [segP_coord]; rw [mem_Icc] at hu; nlinarith [hu.1, hu.2, hpm_lt.le]
+        · rw [segmentParam_coord, hm0, hp0]; ring
+        · rw [segmentParam_coord]; rw [mem_Icc] at hu; nlinarith [hu.1, hu.2, hpm_lt.le]
+        · rw [segmentParam_coord]; rw [mem_Icc] at hu; nlinarith [hu.1, hu.2, hpm_lt.le]
       · obtain ⟨u, hu, hue⟩ := h; rw [← hue]
         exact fun hW => hWsub hW (hJsr (hpq_mem u hu).1)
       · obtain ⟨u, hu, hue⟩ := h; rw [← hue]
         refine avoid_down _ ?_ ?_
-        · rw [segP_coord, hq0, hs0]; ring
-        · rw [segP_coord, hs1]; rw [mem_Icc] at hu; nlinarith [hu.1, hu.2, hqE1.1]
+        · rw [segmentParam_coord, hq0, hs0]; ring
+        · rw [segmentParam_coord, hs1]; rw [mem_Icc] at hu; nlinarith [hu.1, hu.2, hqE1.1]
     -- `a, b ∈ closure W` (frontier of a component is the whole curve)
     have hfrW : frontier W = range r := by
       have hexists : ∃ y ∈ (range r)ᶜ,
@@ -396,38 +404,38 @@ theorem step_B_normalized (hbr : BrouwerFPT)
       rcases hβmem t ht with ((((h | h) | h) | h) | h)
       · obtain ⟨u, hu, hue⟩ := h
         have hcz : (!₂[(-1 : ℝ), 0] : Plane) 0 = 0 := by
-          rw [← hta, ← hue, segP_coord, hn0, hl0]; ring
+          rw [← hta, ← hue, segmentParam_coord, hn0, hl0]; ring
         rw [ha0] at hcz; norm_num at hcz
       · obtain ⟨u, hu, hue⟩ := h
         exact (hlm_mem u hu).2 (by rw [hue, hta]; exact Set.mem_insert _ _)
       · obtain ⟨u, hu, hue⟩ := h
         have hcz : (!₂[(-1 : ℝ), 0] : Plane) 0 = 0 := by
-          rw [← hta, ← hue, segP_coord, hm0, hp0]; ring
+          rw [← hta, ← hue, segmentParam_coord, hm0, hp0]; ring
         rw [ha0] at hcz; norm_num at hcz
       · obtain ⟨u, hu, hue⟩ := h
         exact (hpq_mem u hu).2 (by rw [hue, hta]; exact Set.mem_insert _ _)
       · obtain ⟨u, hu, hue⟩ := h
         have hcz : (!₂[(-1 : ℝ), 0] : Plane) 0 = 0 := by
-          rw [← hta, ← hue, segP_coord, hq0, hs0]; ring
+          rw [← hta, ← hue, segmentParam_coord, hq0, hs0]; ring
         rw [ha0] at hcz; norm_num at hcz
     have hb_notβ : (!₂[(1 : ℝ), 0] : Plane) ∉ βimg := by
       rintro ⟨t, ht, htb⟩
       rcases hβmem t ht with ((((h | h) | h) | h) | h)
       · obtain ⟨u, hu, hue⟩ := h
         have hcz : (!₂[(1 : ℝ), 0] : Plane) 0 = 0 := by
-          rw [← htb, ← hue, segP_coord, hn0, hl0]; ring
+          rw [← htb, ← hue, segmentParam_coord, hn0, hl0]; ring
         rw [hb0] at hcz; norm_num at hcz
       · obtain ⟨u, hu, hue⟩ := h
         exact (hlm_mem u hu).2 (by rw [hue, htb]; exact Set.mem_insert_of_mem _ rfl)
       · obtain ⟨u, hu, hue⟩ := h
         have hcz : (!₂[(1 : ℝ), 0] : Plane) 0 = 0 := by
-          rw [← htb, ← hue, segP_coord, hm0, hp0]; ring
+          rw [← htb, ← hue, segmentParam_coord, hm0, hp0]; ring
         rw [hb0] at hcz; norm_num at hcz
       · obtain ⟨u, hu, hue⟩ := h
         exact (hpq_mem u hu).2 (by rw [hue, htb]; exact Set.mem_insert_of_mem _ rfl)
       · obtain ⟨u, hu, hue⟩ := h
         have hcz : (!₂[(1 : ℝ), 0] : Plane) 0 = 0 := by
-          rw [← htb, ← hue, segP_coord, hq0, hs0]; ring
+          rw [← htb, ← hue, segmentParam_coord, hq0, hs0]; ring
         rw [hb0] at hcz; norm_num at hcz
     obtain ⟨εa, hεa, hballa⟩ := Metric.isOpen_iff.mp hβimg_closed.isOpen_compl _ ha_notβ
     obtain ⟨εb, hεb, hballb⟩ := Metric.isOpen_iff.mp hβimg_closed.isOpen_compl _ hb_notβ
@@ -438,45 +446,47 @@ theorem step_B_normalized (hbr : BrouwerFPT)
     have ha₁E : a₁ 0 ∈ Icc (-1 : ℝ) 1 ∧ a₁ 1 ∈ Icc (-2 : ℝ) 2 := hWE ha₁W
     have hb₁E : b₁ 0 ∈ Icc (-1 : ℝ) 1 ∧ b₁ 1 ∈ Icc (-2 : ℝ) 2 := hWE hb₁W
     -- **path** `H : a → b`, left to right, inside `E`, missing `β`
-    have hHp1_cont : ContinuousOn (segP (!₂[(-1 : ℝ), 0]) a₁) (Icc (-1 : ℝ) 1) :=
-      (segP_cont _ _).continuousOn
+    have hHp1_cont : ContinuousOn (segmentParam (!₂[(-1 : ℝ), 0]) a₁) (Icc (-1 : ℝ) 1) :=
+      (segmentParam_cont _ _).continuousOn
     obtain ⟨Harc, hHarc_cont, hHarc_a, hHarc_b, hHarc_mem⟩ :=
-      arc_path (hWpc.joinedIn a₁ ha₁W b₁ hb₁W)
-    have hHp3_cont : ContinuousOn (segP b₁ (!₂[(1 : ℝ), 0])) (Icc (-1 : ℝ) 1) :=
-      (segP_cont _ _).continuousOn
+      path_reparametrized_on_neg_one_one (hWpc.joinedIn a₁ ha₁W b₁ hb₁W)
+    have hHp3_cont : ContinuousOn (segmentParam b₁ (!₂[(1 : ℝ), 0])) (Icc (-1 : ℝ) 1) :=
+      (segmentParam_cont _ _).continuousOn
     obtain ⟨H, hHcont, hHa, hHb, hHmem⟩ :=
       concatPath3 hHp1_cont hHarc_cont hHp3_cont
-        (by rw [segP_one, hHarc_a]) (by rw [hHarc_b, segP_neg1])
-    have hHa0 : H (-1) 0 = -1 := by rw [hHa, segP_neg1, ha0]
-    have hHb0 : H 1 0 = 1 := by rw [hHb, segP_one, hb0]
+        (by rw [segmentParam_one, hHarc_a]) (by rw [hHarc_b, segmentParam_neg1])
+    have hHa0 : H (-1) 0 = -1 := by rw [hHa, segmentParam_neg1, ha0]
+    have hHb0 : H 1 0 = 1 := by rw [hHb, segmentParam_one, hb0]
     have hHE : ∀ t ∈ Icc (-1 : ℝ) 1, H t 0 ∈ Icc (-1 : ℝ) 1 ∧ H t 1 ∈ Icc (-2 : ℝ) 2 := by
       intro t ht
       rcases hHmem t ht with (h | h) | h
       · obtain ⟨u, hu, hue⟩ := h; rw [← hue]
-        exact ⟨segP_coord_mem_Icc 0 (by rw [ha0]; exact hIccm1x) ha₁E.1 hu,
-          segP_coord_mem_Icc 1 (by rw [ha1]; exact hIcc0y) ha₁E.2 hu⟩
+        exact ⟨segmentParam_coord_mem_Icc 0 (by rw [ha0]; exact hIccm1x) ha₁E.1 hu,
+          segmentParam_coord_mem_Icc 1 (by rw [ha1]; exact hIcc0y) ha₁E.2 hu⟩
       · obtain ⟨u, hu, hue⟩ := h; rw [← hue]; exact hWE (hHarc_mem u hu)
       · obtain ⟨u, hu, hue⟩ := h; rw [← hue]
-        exact ⟨segP_coord_mem_Icc 0 hb₁E.1 (by rw [hb0]; exact hIcc1x) hu,
-          segP_coord_mem_Icc 1 hb₁E.2 (by rw [hb1]; exact hIcc0y) hu⟩
+        exact ⟨segmentParam_coord_mem_Icc 0 hb₁E.1 (by rw [hb0]; exact hIcc1x) hu,
+          segmentParam_coord_mem_Icc 1 hb₁E.2 (by rw [hb1]; exact hIcc0y) hu⟩
     have hHmiss : ∀ t ∈ Icc (-1 : ℝ) 1, H t ∉ βimg := by
       intro t ht
       rcases hHmem t ht with (h | h) | h
       · obtain ⟨u, hu, hue⟩ := h; rw [← hue]; intro hmemβ
-        have hin : segP (!₂[(-1 : ℝ), 0]) a₁ u ∈ Metric.ball (!₂[(-1 : ℝ), 0] : Plane) εa := by
+        have hin : segmentParam (!₂[(-1 : ℝ), 0]) a₁ u ∈ Metric.ball (!₂[(-1 : ℝ), 0] : Plane) εa :=
+          by
           rw [Metric.mem_ball]
-          calc dist (segP (!₂[(-1 : ℝ), 0]) a₁ u) (!₂[(-1 : ℝ), 0])
-                ≤ dist a₁ (!₂[(-1 : ℝ), 0]) := segP_dist_le _ _ hu
+          calc dist (segmentParam (!₂[(-1 : ℝ), 0]) a₁ u) (!₂[(-1 : ℝ), 0])
+                ≤ dist a₁ (!₂[(-1 : ℝ), 0]) := segmentParam_dist_to_start_le _ _ hu
             _ < εa := by rw [dist_comm]; exact ha₁d
         exact hballa hin hmemβ
       · obtain ⟨u, hu, hue⟩ := h; rw [← hue]; intro hmemβ
         obtain ⟨t', ht', ht'e⟩ := hmemβ
         exact hβmiss t' ht' (by rw [ht'e]; exact hHarc_mem u hu)
       · obtain ⟨u, hu, hue⟩ := h; rw [← hue]; intro hmemβ
-        have hin : segP b₁ (!₂[(1 : ℝ), 0]) u ∈ Metric.ball (!₂[(1 : ℝ), 0] : Plane) εb := by
+        have hin : segmentParam b₁ (!₂[(1 : ℝ), 0]) u ∈ Metric.ball (!₂[(1 : ℝ), 0] : Plane) εb :=
+          by
           rw [Metric.mem_ball]
-          calc dist (segP b₁ (!₂[(1 : ℝ), 0]) u) (!₂[(1 : ℝ), 0])
-                ≤ dist b₁ (!₂[(1 : ℝ), 0]) := segP_dist_le' _ _ hu
+          calc dist (segmentParam b₁ (!₂[(1 : ℝ), 0]) u) (!₂[(1 : ℝ), 0])
+                ≤ dist b₁ (!₂[(1 : ℝ), 0]) := segmentParam_dist_to_end_le _ _ hu
             _ < εb := by rw [dist_comm]; exact hb₁d
         exact hballb hin hmemβ
     -- reorient `β` bottom-to-top and cross with `H`
@@ -489,12 +499,13 @@ theorem step_B_normalized (hbr : BrouwerFPT)
       exact hβE (-t) (by rw [mem_Icc]; exact ⟨by linarith [ht.2], by linarith [ht.1]⟩)
     have hv1 : v (-1) 1 = -2 := by
       change β (-(-1)) 1 = -2
-      rw [neg_neg, hβb, segP_one, hs1]
+      rw [neg_neg, hβb, segmentParam_one, hs1]
     have hv2 : v 1 1 = 2 := by
       change β (-1) 1 = 2
-      rw [hβa, segP_neg1, hn1]
+      rw [hβa, segmentParam_neg1, hn1]
     obtain ⟨s, hs, t, ht, heq⟩ :=
-      crossing hbr (by norm_num : (-1 : ℝ) ≤ 1) (by norm_num : (-2 : ℝ) ≤ 2)
+      transversal_paths_meet_in_rectangle hbr
+        (by norm_num : (-1 : ℝ) ≤ 1) (by norm_num : (-2 : ℝ) ≤ 2)
       H v hHcont hvcont hHE hvE hHa0 hHb0 hv1 hv2
     apply hHmiss s hs
     rw [heq]
@@ -505,9 +516,9 @@ theorem step_B_normalized (hbr : BrouwerFPT)
   rw [KEY x hx hxb, KEY y hy hyb]
 
 /-- **Math.** **Maehara Step B (geometric core).** Bounded components of `ℝ²∖J` are unique.
-Reduced to the normalized version `step_B_normalized` via the farthest-pair
+Reduced to the normalized version `bounded_component_unique_of_normalized` via the farthest-pair
 similarity `T`. -/
-theorem step_B_bounded_unique (hbr : BrouwerFPT)
+theorem bounded_component_unique (hbr : BrouwerFPT)
     {r : sphere (0 : Plane) 1 → Plane} (hcont : Continuous r) (hinj : Injective r) :
     ∀ x ∈ (range r)ᶜ, ∀ y ∈ (range r)ᶜ,
       IsBounded (connectedComponentIn (range r)ᶜ x) →
@@ -515,7 +526,7 @@ theorem step_B_bounded_unique (hbr : BrouwerFPT)
       connectedComponentIn (range r)ᶜ x = connectedComponentIn (range r)ᶜ y := by
   intro x hx y hy hxb hyb
   obtain ⟨a, ha, b, hb, hfar0, hab⟩ := exists_farthest_pair hcont hinj
-  obtain ⟨T, hscale, hTa, hTb⟩ := exists_similarity hab
+  obtain ⟨T, hscale, hTa, hTb⟩ := exists_similarity_normalizing_farthest_pair hab
   have hdpos : 0 < dist a b := dist_pos.mpr hab
   have hcpos : (0 : ℝ) < 2 / dist a b := by positivity
   set r' : sphere (0 : Plane) 1 → Plane := fun p => T (r p) with hr'
@@ -551,7 +562,7 @@ theorem step_B_bounded_unique (hbr : BrouwerFPT)
     rw [hccx]; exact (isBounded_image_scaling hcpos hscale _).mpr hxb
   have hTyb : IsBounded (connectedComponentIn (range r')ᶜ (T y)) := by
     rw [hccy]; exact (isBounded_image_scaling hcpos hscale _).mpr hyb
-  have hEq := step_B_normalized hbr hr'cont hr'inj hm' hp' hfar'
+  have hEq := bounded_component_unique_of_normalized hbr hr'cont hr'inj hm' hp' hfar'
     (T x) hTx (T y) hTy hTxb hTyb
   rw [hccx, hccy] at hEq
   exact Set.image_injective.mpr T.injective hEq

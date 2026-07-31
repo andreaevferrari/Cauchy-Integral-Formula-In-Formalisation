@@ -21,7 +21,7 @@ open Metric Set Function Bornology
 
 /-- **Math.** The Jordan curve theorem reduced to Brouwer (Maehara). The eval `jordan_curve`
 follows by discharging `BrouwerFPT`. Given the two geometric core facts — existence
-(`step_A_exists_bounded`) and uniqueness (`step_B_bounded_unique`) of a bounded
+(`exists_bounded_component`) and uniqueness (`bounded_component_unique`) of a bounded
 component — together with the unique unbounded component (`exists_unbounded_component`,
 `unbounded_component_unique`), the complement has exactly two components. -/
 theorem jordan_curve_of_brouwer (hbr : BrouwerFPT)
@@ -30,7 +30,7 @@ theorem jordan_curve_of_brouwer (hbr : BrouwerFPT)
     Nat.card (ConnectedComponents ((range r)ᶜ : Set Plane)) = 2 := by
   -- The unbounded component `x₀` and a bounded component `x₁`.
   obtain ⟨x₀, hx₀S, hx₀u⟩ := exists_unbounded_component r hcont
-  obtain ⟨x₁, hx₁S, hx₁b⟩ := step_A_exists_bounded hbr hcont hinj
+  obtain ⟨x₁, hx₁S, hx₁b⟩ := exists_bounded_component hbr hcont hinj
   set a : ↥((range r)ᶜ) := ⟨x₀, hx₀S⟩ with ha
   set b : ↥((range r)ᶜ) := ⟨x₁, hx₁S⟩ with hb
   -- The two components are distinct: one unbounded, one bounded.
@@ -47,7 +47,7 @@ theorem jordan_curve_of_brouwer (hbr : BrouwerFPT)
     by_cases hzb : IsBounded (connectedComponentIn (range r)ᶜ z.val)
     · right
       exact (Counting.connectedComponents_subtype_eq_iff z.2 hx₁S).mpr
-        (step_B_bounded_unique hbr hcont hinj z.val z.2 x₁ hx₁S hzb hx₁b)
+        (bounded_component_unique hbr hcont hinj z.val z.2 x₁ hx₁S hzb hx₁b)
     · left
       exact (Counting.connectedComponents_subtype_eq_iff z.2 hx₀S).mpr
         (unbounded_component_unique r hcont hzb hx₀u)

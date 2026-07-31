@@ -24,9 +24,9 @@ curve theorem.
 Main deliverables:
 * `circleHomeoSphere` / `spherePlaneHomeoCircle` — the bridge between Mathlib's
   `Circle` (unit circle in `ℂ`) and `sphere (0:Plane) 1`.
-* `param` — the angle parametrization `ℝ → sphere (0:Plane) 1`, continuous,
+* `circleParam` — the angle parametrization `ℝ → sphere (0:Plane) 1`, continuous,
   `2π`-periodic, with explicit fibers and surjective.
-* `arcHomeoUnitInterval` — a closed arc `param '' Icc a b` (with `a < b`,
+* `arcHomeoUnitInterval` — a closed arc `circleParam '' Icc a b` (with `a < b`,
   `b - a < 2π`) is homeomorphic to `unitInterval`.
 * `sphere_split` — two distinct points cut the circle into two closed arcs, each
   `≃ₜ unitInterval`, with union the whole circle and intersection the two points.
@@ -49,65 +49,66 @@ abbrev Plane := EuclideanSpace ℝ (Fin 2)
 
 /-- **Eng.** A linear isometry equivalence `ℂ ≃ₗᵢ[ℝ] Plane`, from the standard orthonormal
 basis of `EuclideanSpace ℝ (Fin 2)`. -/
-noncomputable def complexLIE : ℂ ≃ₗᵢ[ℝ] Plane :=
+noncomputable def complexToPlaneIsometry : ℂ ≃ₗᵢ[ℝ] Plane :=
   Complex.isometryOfOrthonormal (EuclideanSpace.basisFun (Fin 2) ℝ)
 
 /-- **Eng.** The underlying `Equiv` between Mathlib's `Circle` and the unit sphere of the
-plane, induced by `complexLIE`. -/
+plane, induced by `complexToPlaneIsometry`. -/
 noncomputable def circleEquivSphere : Circle ≃ sphere (0 : Plane) 1 where
-  toFun z := ⟨complexLIE z, by
-    rw [mem_sphere_zero_iff_norm, complexLIE.norm_map]; exact z.norm_coe⟩
-  invFun w := ⟨complexLIE.symm w, by
-    change complexLIE.symm w ∈ sphere (0 : ℂ) 1
-    rw [mem_sphere_zero_iff_norm, complexLIE.symm.norm_map, ← mem_sphere_zero_iff_norm]
+  toFun z := ⟨complexToPlaneIsometry z, by
+    rw [mem_sphere_zero_iff_norm, complexToPlaneIsometry.norm_map]; exact z.norm_coe⟩
+  invFun w := ⟨complexToPlaneIsometry.symm w, by
+    change complexToPlaneIsometry.symm w ∈ sphere (0 : ℂ) 1
+    rw [mem_sphere_zero_iff_norm, complexToPlaneIsometry.symm.norm_map, ← mem_sphere_zero_iff_norm]
     exact w.2⟩
-  left_inv z := by ext; simp [complexLIE.symm_apply_apply]
-  right_inv w := by ext; simp [complexLIE.apply_symm_apply]
+  left_inv z := by ext; simp [complexToPlaneIsometry.symm_apply_apply]
+  right_inv w := by ext; simp [complexToPlaneIsometry.apply_symm_apply]
 
 /-- **Eng.** **Circle model bridge.** `Circle ≃ₜ sphere (0:Plane) 1`. -/
 noncomputable def circleHomeoSphere : Circle ≃ₜ sphere (0 : Plane) 1 :=
   Continuous.homeoOfEquivCompactToT2 (f := circleEquivSphere) <| by
     apply Continuous.subtype_mk
-    exact complexLIE.continuous.comp continuous_subtype_val
+    exact complexToPlaneIsometry.continuous.comp continuous_subtype_val
 
 /-- **Eng.** **Circle model bridge** (as requested): `sphere (0:Plane) 1 ≃ₜ Circle`. -/
 noncomputable def spherePlaneHomeoCircle : sphere (0 : Plane) 1 ≃ₜ Circle :=
   circleHomeoSphere.symm
 
 @[simp] lemma circleHomeoSphere_coe (z : Circle) :
-    (circleHomeoSphere z : Plane) = complexLIE z := rfl
+    (circleHomeoSphere z : Plane) = complexToPlaneIsometry z := rfl
 
 /-! ## 2. The angle parametrization -/
 
 /-- **Math.** The angle parametrization `ℝ → sphere (0:Plane) 1`, `θ ↦` the plane point at
 angle `θ` on the unit circle. -/
-noncomputable def param (θ : ℝ) : sphere (0 : Plane) 1 := circleHomeoSphere (Circle.exp θ)
+noncomputable def circleParam (θ : ℝ) : sphere (0 : Plane) 1 := circleHomeoSphere (Circle.exp θ)
 
 @[continuity, fun_prop]
-lemma continuous_param : Continuous param :=
+lemma continuous_circleParam : Continuous circleParam :=
   circleHomeoSphere.continuous.comp Circle.exp.continuous
 
 /-- **Math.** Two angles give the same point iff they differ by an integer multiple of `2π`. -/
-lemma param_eq_iff {s t : ℝ} : param s = param t ↔ ∃ m : ℤ, s = t + m * (2 * π) := by
-  unfold param
+lemma circleParam_eq_iff {s t : ℝ} : circleParam s = circleParam t ↔ ∃ m : ℤ, s = t + m * (2 * π) :=
+  by
+  unfold circleParam
   rw [circleHomeoSphere.injective.eq_iff, Circle.exp_eq_exp]
 
 /-- **Math.** The parametrization is surjective. -/
-lemma param_surjective : Surjective param :=
+lemma circleParam_surjective : Surjective circleParam :=
   circleHomeoSphere.surjective.comp Circle.exp_surjective
 
 /-- **Math.** The parametrization is `2π`-periodic. -/
-lemma param_periodic : Function.Periodic param (2 * π) := by
+lemma circleParam_periodic : Function.Periodic circleParam (2 * π) := by
   intro θ
-  rw [param_eq_iff]
+  rw [circleParam_eq_iff]
   exact ⟨1, by push_cast; ring⟩
 
 /-! ## 2. Closed arc ≃ₜ unitInterval -/
 
-/-- **Math.** On a closed interval shorter than a full turn, `param` is injective. -/
-lemma param_injOn {a b : ℝ} (h : b - a < 2 * π) : InjOn param (Icc a b) := by
+/-- **Math.** On a closed interval shorter than a full turn, `circleParam` is injective. -/
+lemma circleParam_injOn {a b : ℝ} (h : b - a < 2 * π) : InjOn circleParam (Icc a b) := by
   intro s hs t ht hst
-  obtain ⟨m, hm⟩ := param_eq_iff.1 hst
+  obtain ⟨m, hm⟩ := circleParam_eq_iff.1 hst
   have hp : (0 : ℝ) < 2 * π := by positivity
   obtain ⟨hαs, hsβ⟩ := hs
   obtain ⟨hat, htb⟩ := ht
@@ -122,49 +123,51 @@ lemma param_injOn {a b : ℝ} (h : b - a < 2 * π) : InjOn param (Icc a b) := by
     omega
   rw [hm0] at hm; push_cast at hm; linarith
 
-/-- **Math.** Image of a closed interval of angles under `param` (a "closed arc"). -/
-lemma isClosed_arc (a b : ℝ) : IsClosed (param '' Icc a b) :=
-  (isCompact_Icc.image continuous_param).isClosed
+/-- **Math.** Image of a closed interval of angles under `circleParam` (a "closed arc"). -/
+lemma isClosed_arc (a b : ℝ) : IsClosed (circleParam '' Icc a b) :=
+  (isCompact_Icc.image continuous_circleParam).isClosed
 
-/-- **Mixed.** On a short closed interval `param` restricts to a homeomorphism onto its
+/-- **Mixed.** On a short closed interval `circleParam` restricts to a homeomorphism onto its
 image (the arc). -/
 noncomputable def arcHomeoIcc {a b : ℝ} (h : b - a < 2 * π) :
-    (Icc a b) ≃ₜ (param '' Icc a b) :=
+    (Icc a b) ≃ₜ (circleParam '' Icc a b) :=
   Continuous.homeoOfEquivCompactToT2
-    (f := Equiv.Set.imageOfInjOn param (Icc a b) (param_injOn h))
-    (continuous_induced_rng.2 (continuous_param.comp continuous_subtype_val))
+    (f := Equiv.Set.imageOfInjOn circleParam (Icc a b) (circleParam_injOn h))
+    (continuous_induced_rng.2 (continuous_circleParam.comp continuous_subtype_val))
 
-/-- **Math.** **Closed arc ≃ₜ unitInterval.** A closed arc `param '' Icc a b` with
+/-- **Math.** **Closed arc ≃ₜ unitInterval.** A closed arc `circleParam '' Icc a b` with
 `a < b` and `b - a < 2π` is homeomorphic to the unit interval. -/
 noncomputable def arcHomeoUnitInterval {a b : ℝ} (hab : a < b) (h : b - a < 2 * π) :
-    (param '' Icc a b) ≃ₜ unitInterval :=
+    (circleParam '' Icc a b) ≃ₜ unitInterval :=
   (arcHomeoIcc h).symm.trans (iccHomeoI a b hab)
 
-/-- **Eng.** The left endpoint `param a` of the arc maps to `0` under `arcHomeoUnitInterval`. -/
+/-- **Eng.** The left endpoint `circleParam a` of the arc maps to `0` under
+`arcHomeoUnitInterval`. -/
 lemma arcHomeoUnitInterval_apply_left {a b : ℝ} (hab : a < b) (h : b - a < 2 * π)
-    (hmem : param a ∈ param '' Icc a b) :
-    arcHomeoUnitInterval hab h ⟨param a, hmem⟩ = 0 := by
+    (hmem : circleParam a ∈ circleParam '' Icc a b) :
+    arcHomeoUnitInterval hab h ⟨circleParam a, hmem⟩ = 0 := by
   have ha : a ∈ Icc a b := left_mem_Icc.2 hab.le
-  have key : (arcHomeoIcc h) ⟨a, ha⟩ = ⟨param a, hmem⟩ := Subtype.ext rfl
-  have hsymm : (arcHomeoIcc h).symm ⟨param a, hmem⟩ = ⟨a, ha⟩ := by
+  have key : (arcHomeoIcc h) ⟨a, ha⟩ = ⟨circleParam a, hmem⟩ := Subtype.ext rfl
+  have hsymm : (arcHomeoIcc h).symm ⟨circleParam a, hmem⟩ = ⟨a, ha⟩ := by
     rw [← key, Homeomorph.symm_apply_apply]
   apply Subtype.ext
-  change ((arcHomeoIcc h).symm.trans (iccHomeoI a b hab) ⟨param a, hmem⟩ : ℝ)
+  change ((arcHomeoIcc h).symm.trans (iccHomeoI a b hab) ⟨circleParam a, hmem⟩ : ℝ)
       = ((0 : unitInterval) : ℝ)
   rw [Homeomorph.trans_apply, hsymm, iccHomeoI_apply_coe, Set.Icc.coe_zero]
   change (a - a) / (b - a) = 0
   rw [sub_self, zero_div]
 
-/-- **Eng.** The right endpoint `param b` of the arc maps to `1` under `arcHomeoUnitInterval`. -/
+/-- **Eng.** The right endpoint `circleParam b` of the arc maps to `1` under
+`arcHomeoUnitInterval`. -/
 lemma arcHomeoUnitInterval_apply_right {a b : ℝ} (hab : a < b) (h : b - a < 2 * π)
-    (hmem : param b ∈ param '' Icc a b) :
-    arcHomeoUnitInterval hab h ⟨param b, hmem⟩ = 1 := by
+    (hmem : circleParam b ∈ circleParam '' Icc a b) :
+    arcHomeoUnitInterval hab h ⟨circleParam b, hmem⟩ = 1 := by
   have hb : b ∈ Icc a b := right_mem_Icc.2 hab.le
-  have key : (arcHomeoIcc h) ⟨b, hb⟩ = ⟨param b, hmem⟩ := Subtype.ext rfl
-  have hsymm : (arcHomeoIcc h).symm ⟨param b, hmem⟩ = ⟨b, hb⟩ := by
+  have key : (arcHomeoIcc h) ⟨b, hb⟩ = ⟨circleParam b, hmem⟩ := Subtype.ext rfl
+  have hsymm : (arcHomeoIcc h).symm ⟨circleParam b, hmem⟩ = ⟨b, hb⟩ := by
     rw [← key, Homeomorph.symm_apply_apply]
   apply Subtype.ext
-  change ((arcHomeoIcc h).symm.trans (iccHomeoI a b hab) ⟨param b, hmem⟩ : ℝ)
+  change ((arcHomeoIcc h).symm.trans (iccHomeoI a b hab) ⟨circleParam b, hmem⟩ : ℝ)
       = ((1 : unitInterval) : ℝ)
   rw [Homeomorph.trans_apply, hsymm, iccHomeoI_apply_coe, Set.Icc.coe_one]
   change (b - a) / (b - a) = 1
@@ -280,36 +283,36 @@ theorem sphere_split {x y : sphere (0 : Plane) 1} (hxy : x ≠ y) :
       Nonempty (A₁ ≃ₜ unitInterval) ∧ Nonempty (A₂ ≃ₜ unitInterval) ∧
       IsPathConnected (A₁ \ {x, y}) ∧ IsPathConnected (A₂ \ {x, y}) := by
   have hp : (0 : ℝ) < 2 * π := by positivity
-  obtain ⟨α, hα⟩ := param_surjective x
-  obtain ⟨β₀, hβ₀⟩ := param_surjective y
+  obtain ⟨α, hα⟩ := circleParam_surjective x
+  obtain ⟨β₀, hβ₀⟩ := circleParam_surjective y
   set β := toIocMod hp α β₀ with hβdef
   have hmemβ : β ∈ Ioc α (α + 2 * π) := toIocMod_mem_Ioc hp α β₀
-  -- `param β = y`
-  have hpar_β : param β = y := by
+  -- `circleParam β = y`
+  have hpar_β : circleParam β = y := by
     have hz : β₀ - β = (toIocDiv hp α β₀ : ℤ) • (2 * π) := self_sub_toIocMod hp α β₀
     rw [zsmul_eq_mul] at hz
-    have hpp : param β = param β₀ := by
-      rw [param_eq_iff]; exact ⟨-(toIocDiv hp α β₀), by push_cast; linarith⟩
+    have hpp : circleParam β = circleParam β₀ := by
+      rw [circleParam_eq_iff]; exact ⟨-(toIocDiv hp α β₀), by push_cast; linarith⟩
     rw [hpp, hβ₀]
   -- `β < α + 2π` (else `y = x`)
   have hβlt : β < α + 2 * π := by
     rcases lt_or_eq_of_le hmemβ.2 with h | h
     · exact h
-    · exact absurd (by rw [← hpar_β, h, param_periodic, hα] : y = x).symm hxy
+    · exact absurd (by rw [← hpar_β, h, circleParam_periodic, hα] : y = x).symm hxy
   have hlen1 : β - α < 2 * π := by linarith [hβlt]
   have hlen2 : (α + 2 * π) - β < 2 * π := by linarith [hmemβ.1]
   -- union is everything
-  have hunion : (param '' Icc α β) ∪ (param '' Icc β (α + 2 * π)) = univ := by
+  have hunion : (circleParam '' Icc α β) ∪ (circleParam '' Icc β (α + 2 * π)) = univ := by
     rw [← image_union, Icc_union_Icc_eq_Icc hmemβ.1.le hβlt.le,
-      param_periodic.image_Icc hp α, param_surjective.range_eq]
+      circleParam_periodic.image_Icc hp α, circleParam_surjective.range_eq]
   -- intersection is `{x, y}`
-  have hinter : (param '' Icc α β) ∩ (param '' Icc β (α + 2 * π)) = {x, y} := by
+  have hinter : (circleParam '' Icc α β) ∩ (circleParam '' Icc β (α + 2 * π)) = {x, y} := by
     ext z
     simp only [mem_inter_iff, mem_image, mem_insert_iff, mem_singleton_iff]
     constructor
     · rintro ⟨⟨s, hs, hsz⟩, ⟨t, ht, htz⟩⟩
-      have hst : param s = param t := hsz.trans htz.symm
-      obtain ⟨m, hm⟩ := param_eq_iff.1 hst
+      have hst : circleParam s = circleParam t := hsz.trans htz.symm
+      obtain ⟨m, hm⟩ := circleParam_eq_iff.1 hst
       obtain ⟨hαs, hsβ⟩ := hs
       obtain ⟨hβt, htα⟩ := ht
       have e : s - t = (m : ℝ) * (2 * π) := by linarith
@@ -335,44 +338,45 @@ theorem sphere_split {x y : sphere (0 : Plane) 1} (hxy : x ≠ y) :
         rw [← hsz, hsαeq]; exact hα
     · rintro (rfl | rfl)
       · exact ⟨⟨α, ⟨le_refl α, hmemβ.1.le⟩, hα⟩,
-          ⟨α + 2 * π, ⟨hβlt.le, le_refl _⟩, by rw [param_periodic]; exact hα⟩⟩
+          ⟨α + 2 * π, ⟨hβlt.le, le_refl _⟩, by rw [circleParam_periodic]; exact hα⟩⟩
       · exact ⟨⟨β, ⟨hmemβ.1.le, le_refl β⟩, hpar_β⟩,
           ⟨β, ⟨le_refl β, hβlt.le⟩, hpar_β⟩⟩
   -- path-connectedness of the two arcs with their shared endpoints removed
-  have hmem_α₁ : param α ∈ param '' Icc α β := ⟨α, left_mem_Icc.2 hmemβ.1.le, rfl⟩
-  have hmem_β₁ : param β ∈ param '' Icc α β := ⟨β, right_mem_Icc.2 hmemβ.1.le, rfl⟩
-  have hxA1 : x ∈ param '' Icc α β := hα ▸ hmem_α₁
-  have hyA1 : y ∈ param '' Icc α β := hpar_β ▸ hmem_β₁
-  have hpc1 : IsPathConnected (param '' Icc α β \ {x, y}) := by
+  have hmem_α₁ : circleParam α ∈ circleParam '' Icc α β := ⟨α, left_mem_Icc.2 hmemβ.1.le, rfl⟩
+  have hmem_β₁ : circleParam β ∈ circleParam '' Icc α β := ⟨β, right_mem_Icc.2 hmemβ.1.le, rfl⟩
+  have hxA1 : x ∈ circleParam '' Icc α β := hα ▸ hmem_α₁
+  have hyA1 : y ∈ circleParam '' Icc α β := hpar_β ▸ hmem_β₁
+  have hpc1 : IsPathConnected (circleParam '' Icc α β \ {x, y}) := by
     refine arc_interior_isPathConnected (arcHomeoUnitInterval hmemβ.1 hlen1) hxA1 hyA1 ?_
     have hex : arcHomeoUnitInterval hmemβ.1 hlen1 ⟨x, hxA1⟩ = 0 := by
-      rw [show (⟨x, hxA1⟩ : ↥(param '' Icc α β)) = ⟨param α, hmem_α₁⟩ from
+      rw [show (⟨x, hxA1⟩ : ↥(circleParam '' Icc α β)) = ⟨circleParam α, hmem_α₁⟩ from
         Subtype.ext hα.symm]
       exact arcHomeoUnitInterval_apply_left hmemβ.1 hlen1 hmem_α₁
     have hey : arcHomeoUnitInterval hmemβ.1 hlen1 ⟨y, hyA1⟩ = 1 := by
-      rw [show (⟨y, hyA1⟩ : ↥(param '' Icc α β)) = ⟨param β, hmem_β₁⟩ from
+      rw [show (⟨y, hyA1⟩ : ↥(circleParam '' Icc α β)) = ⟨circleParam β, hmem_β₁⟩ from
         Subtype.ext hpar_β.symm]
       exact arcHomeoUnitInterval_apply_right hmemβ.1 hlen1 hmem_β₁
     rw [hex, hey]
-  have hmem_β₂ : param β ∈ param '' Icc β (α + 2 * π) :=
+  have hmem_β₂ : circleParam β ∈ circleParam '' Icc β (α + 2 * π) :=
     ⟨β, left_mem_Icc.2 hβlt.le, rfl⟩
-  have hmem_α₂ : param (α + 2 * π) ∈ param '' Icc β (α + 2 * π) :=
+  have hmem_α₂ : circleParam (α + 2 * π) ∈ circleParam '' Icc β (α + 2 * π) :=
     ⟨α + 2 * π, right_mem_Icc.2 hβlt.le, rfl⟩
-  have hxeq : param (α + 2 * π) = x := by rw [param_periodic]; exact hα
-  have hxA2 : x ∈ param '' Icc β (α + 2 * π) := hxeq ▸ hmem_α₂
-  have hyA2 : y ∈ param '' Icc β (α + 2 * π) := hpar_β ▸ hmem_β₂
-  have hpc2 : IsPathConnected (param '' Icc β (α + 2 * π) \ {x, y}) := by
+  have hxeq : circleParam (α + 2 * π) = x := by rw [circleParam_periodic]; exact hα
+  have hxA2 : x ∈ circleParam '' Icc β (α + 2 * π) := hxeq ▸ hmem_α₂
+  have hyA2 : y ∈ circleParam '' Icc β (α + 2 * π) := hpar_β ▸ hmem_β₂
+  have hpc2 : IsPathConnected (circleParam '' Icc β (α + 2 * π) \ {x, y}) := by
     refine arc_interior_isPathConnected (arcHomeoUnitInterval hβlt hlen2) hxA2 hyA2 ?_
     have hex : arcHomeoUnitInterval hβlt hlen2 ⟨x, hxA2⟩ = 1 := by
-      rw [show (⟨x, hxA2⟩ : ↥(param '' Icc β (α + 2 * π))) = ⟨param (α + 2 * π), hmem_α₂⟩
+      rw [show
+        (⟨x, hxA2⟩ : ↥(circleParam '' Icc β (α + 2 * π))) = ⟨circleParam (α + 2 * π), hmem_α₂⟩
         from Subtype.ext hxeq.symm]
       exact arcHomeoUnitInterval_apply_right hβlt hlen2 hmem_α₂
     have hey : arcHomeoUnitInterval hβlt hlen2 ⟨y, hyA2⟩ = 0 := by
-      rw [show (⟨y, hyA2⟩ : ↥(param '' Icc β (α + 2 * π))) = ⟨param β, hmem_β₂⟩ from
+      rw [show (⟨y, hyA2⟩ : ↥(circleParam '' Icc β (α + 2 * π))) = ⟨circleParam β, hmem_β₂⟩ from
         Subtype.ext hpar_β.symm]
       exact arcHomeoUnitInterval_apply_left hβlt hlen2 hmem_β₂
     rw [hex, hey]; exact Set.pair_comm 1 0
-  exact ⟨param '' Icc α β, param '' Icc β (α + 2 * π),
+  exact ⟨circleParam '' Icc α β, circleParam '' Icc β (α + 2 * π),
     isClosed_arc α β, isClosed_arc β (α + 2 * π), hunion, hinter,
     ⟨arcHomeoUnitInterval hmemβ.1 hlen1⟩, ⟨arcHomeoUnitInterval hβlt hlen2⟩, hpc1, hpc2⟩
 
@@ -408,25 +412,25 @@ theorem exists_proper_arc {C : Set (sphere (0 : Plane) 1)}
       C ⊆ A ∧ A ≠ univ ∧ IsClosed A ∧ Nonempty (A ≃ₜ unitInterval) := by
   have hp : (0 : ℝ) < 2 * π := by positivity
   obtain ⟨z, hz⟩ := (Set.ne_univ_iff_exists_notMem C).1 hCne
-  obtain ⟨γ, hγ⟩ := param_surjective z
-  have hopen : IsOpen (param ⁻¹' Cᶜ) := hC.isOpen_compl.preimage continuous_param
-  have hmemγ : γ ∈ param ⁻¹' Cᶜ := by rw [mem_preimage, hγ]; exact hz
+  obtain ⟨γ, hγ⟩ := circleParam_surjective z
+  have hopen : IsOpen (circleParam ⁻¹' Cᶜ) := hC.isOpen_compl.preimage continuous_circleParam
+  have hmemγ : γ ∈ circleParam ⁻¹' Cᶜ := by rw [mem_preimage, hγ]; exact hz
   obtain ⟨ε, hεpos, hball⟩ := Metric.isOpen_iff.1 hopen γ hmemγ
   set δ := min (ε / 2) (π / 2) with hδdef
   have hδpos : 0 < δ := lt_min (by linarith) (by positivity)
   have hδπ : δ < π := lt_of_le_of_lt (min_le_right _ _) (by linarith [pi_pos])
   have hδε : δ ≤ ε := le_trans (min_le_left _ _) (by linarith)
-  have hsub : Ioo (γ - δ) (γ + δ) ⊆ param ⁻¹' Cᶜ := by
+  have hsub : Ioo (γ - δ) (γ + δ) ⊆ circleParam ⁻¹' Cᶜ := by
     intro w hw
     apply hball
     rw [Metric.mem_ball, Real.dist_eq, abs_lt]
     obtain ⟨hw1, hw2⟩ := hw
     constructor <;> linarith
   -- `z ∉ A`, so `A ≠ univ`
-  have hzA : z ∉ param '' Icc (γ + δ) (γ + 2 * π - δ) := by
+  have hzA : z ∉ circleParam '' Icc (γ + δ) (γ + 2 * π - δ) := by
     rintro ⟨θ, hθ, hθz⟩
-    have hpe : param θ = param γ := by rw [hθz, hγ]
-    obtain ⟨m, hm⟩ := param_eq_iff.1 hpe
+    have hpe : circleParam θ = circleParam γ := by rw [hθz, hγ]
+    obtain ⟨m, hm⟩ := circleParam_eq_iff.1 hpe
     obtain ⟨hθ1, hθ2⟩ := hθ
     have e : (m : ℝ) * (2 * π) = θ - γ := by linarith
     have hpos : (0 : ℝ) < (m : ℝ) * (2 * π) := by rw [e]; linarith
@@ -438,20 +442,20 @@ theorem exists_proper_arc {C : Set (sphere (0 : Plane) 1)}
     have a0 : (0 : ℤ) < m := by exact_mod_cast m1
     have a1 : m < (1 : ℤ) := by exact_mod_cast m2
     omega
-  refine ⟨param '' Icc (γ + δ) (γ + 2 * π - δ), ?_,
+  refine ⟨circleParam '' Icc (γ + δ) (γ + 2 * π - δ), ?_,
     (Set.ne_univ_iff_exists_notMem _).2 ⟨z, hzA⟩, isClosed_arc _ _,
     ⟨arcHomeoUnitInterval (by linarith) (by linarith)⟩⟩
   -- `C ⊆ A`
   intro c hc
-  obtain ⟨θc, hθc⟩ := param_surjective c
+  obtain ⟨θc, hθc⟩ := circleParam_surjective c
   set θ' := toIcoMod hp (γ + δ) θc with hθ'def
   have hmem' : θ' ∈ Ico (γ + δ) (γ + δ + 2 * π) := toIcoMod_mem_Ico hp (γ + δ) θc
-  have hpar' : param θ' = c := by
+  have hpar' : circleParam θ' = c := by
     have hz2 : θc - θ' = (toIcoDiv hp (γ + δ) θc : ℤ) • (2 * π) :=
       self_sub_toIcoMod hp (γ + δ) θc
     rw [zsmul_eq_mul] at hz2
-    have : param θ' = param θc := by
-      rw [param_eq_iff]; exact ⟨-(toIcoDiv hp (γ + δ) θc), by push_cast; linarith⟩
+    have : circleParam θ' = circleParam θc := by
+      rw [circleParam_eq_iff]; exact ⟨-(toIcoDiv hp (γ + δ) θc), by push_cast; linarith⟩
     rw [this, hθc]
   have hθ'ub : θ' ≤ γ + 2 * π - δ := by
     by_contra h
@@ -460,10 +464,10 @@ theorem exists_proper_arc {C : Set (sphere (0 : Plane) 1)}
       constructor
       · linarith
       · linarith [hmem'.2]
-    have hpre : (θ' - 2 * π) ∈ param ⁻¹' Cᶜ := hsub hmem2
+    have hpre : (θ' - 2 * π) ∈ circleParam ⁻¹' Cᶜ := hsub hmem2
     rw [mem_preimage] at hpre
-    have hpc : param (θ' - 2 * π) = c := by
-      rw [show θ' = (θ' - 2 * π) + 2 * π by ring, param_periodic] at hpar'
+    have hpc : circleParam (θ' - 2 * π) = c := by
+      rw [show θ' = (θ' - 2 * π) + 2 * π by ring, circleParam_periodic] at hpar'
       exact hpar'
     rw [hpc] at hpre
     exact hpre hc

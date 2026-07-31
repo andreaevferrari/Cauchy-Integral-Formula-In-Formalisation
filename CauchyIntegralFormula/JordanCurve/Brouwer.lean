@@ -49,100 +49,104 @@ abbrev Plane := EuclideanSpace ℝ (Fin 2)
 /-! ## Phase 1 — the once-around loop on `AddCircle 1` is not nullhomotopic -/
 
 /-- **Math.** The covering map `ℝ → AddCircle 1`. -/
-theorem cover : IsCoveringMap ((↑) : ℝ → AddCircle (1 : ℝ)) :=
+theorem realCoveringAddCircle : IsCoveringMap ((↑) : ℝ → AddCircle (1 : ℝ)) :=
   AddCircle.isCoveringMap_coe 1
 
 /-- **Math.** The once-around loop `t ↦ ↑t` in `AddCircle 1`. -/
-noncomputable def acLoop : C(I, AddCircle (1 : ℝ)) :=
-  ⟨fun t => ((t : ℝ) : AddCircle (1 : ℝ)), cover.continuous.comp continuous_subtype_val⟩
+noncomputable def addCircleLoop : C(I, AddCircle (1 : ℝ)) :=
+  ⟨fun t => ((t : ℝ) : AddCircle (1 : ℝ)),
+    realCoveringAddCircle.continuous.comp continuous_subtype_val⟩
 
-/-- **Math.** The lift of `acLoop` to `ℝ` starting at `0`: the identity `t ↦ ↑t`. -/
-noncomputable def idLift : C(I, ℝ) := ⟨fun t => (t : ℝ), continuous_subtype_val⟩
+/-- **Math.** The lift of `addCircleLoop` to `ℝ` starting at `0`: the identity `t ↦ ↑t`. -/
+noncomputable def identityPathLift : C(I, ℝ) := ⟨fun t => (t : ℝ), continuous_subtype_val⟩
 
-@[simp] lemma acLoop_apply (t : I) : acLoop t = ((t : ℝ) : AddCircle (1 : ℝ)) := rfl
-@[simp] lemma idLift_apply (t : I) : idLift t = (t : ℝ) := rfl
+@[simp] lemma acLoop_apply (t : I) : addCircleLoop t = ((t : ℝ) : AddCircle (1 : ℝ)) := rfl
+@[simp] lemma idLift_apply (t : I) : identityPathLift t = (t : ℝ) := rfl
 
 /-- **Math.** **Phase 1.** The once-around loop is not homotopic rel endpoints to the
 constant loop. -/
-theorem acLoop_not_homotopic :
-    ¬ acLoop.HomotopicRel (ContinuousMap.const I (0 : AddCircle (1 : ℝ))) {0, 1} := by
+theorem addCircleLoop_not_homotopic :
+    ¬ addCircleLoop.HomotopicRel (ContinuousMap.const I (0 : AddCircle (1 : ℝ))) {0, 1} := by
   intro h
-  have h0 : acLoop 0 = ((0 : ℝ) : AddCircle (1 : ℝ)) := by simp
+  have h0 : addCircleLoop 0 = ((0 : ℝ) : AddCircle (1 : ℝ)) := by simp
   have h1 : (ContinuousMap.const I (0 : AddCircle (1 : ℝ))) 0 = ((0 : ℝ) : AddCircle (1 : ℝ)) := by
     simp
-  have key := cover.liftPath_apply_one_eq_of_homotopicRel h (0 : ℝ) h0 h1
+  have key := realCoveringAddCircle.liftPath_apply_one_eq_of_homotopicRel h (0 : ℝ) h0 h1
   -- Identify the two lifts.
-  have e1 : cover.liftPath acLoop (0 : ℝ) h0 = idLift := by
-    refine ((cover.eq_liftPath_iff' h0).mpr ⟨?_, ?_⟩).symm
+  have e1 : realCoveringAddCircle.liftPath addCircleLoop (0 : ℝ) h0 = identityPathLift := by
+    refine ((realCoveringAddCircle.eq_liftPath_iff' h0).mpr ⟨?_, ?_⟩).symm
     · ext t; simp
     · simp
-  have e2 : cover.liftPath (ContinuousMap.const I (0 : AddCircle (1 : ℝ))) (0 : ℝ) h1
-      = ContinuousMap.const I (0 : ℝ) := cover.liftPath_const h1
+  have e2 : realCoveringAddCircle.liftPath
+      (ContinuousMap.const I (0 : AddCircle (1 : ℝ))) (0 : ℝ) h1
+      = ContinuousMap.const I (0 : ℝ) := realCoveringAddCircle.liftPath_const h1
   rw [e1, e2] at key
   simp at key
 
 /-! ## Phase 1.5 — transport to the geometric circle `sphere (0:ℝ²) 1` -/
 
 /-- **Math.** The homeomorphism `AddCircle 1 ≃ₜ sphere (0:ℝ²) 1`, via `Circle`. -/
-noncomputable def acToSphere : AddCircle (1 : ℝ) ≃ₜ sphere (0 : Plane) 1 :=
+noncomputable def addCircleHomeoSphere : AddCircle (1 : ℝ) ≃ₜ sphere (0 : Plane) 1 :=
   (AddCircle.homeomorphCircle (one_ne_zero)).trans Arcs.circleHomeoSphere
 
 /-- **Math.** The base point of the sphere loop. -/
-noncomputable def sBase : sphere (0 : Plane) 1 := acToSphere 0
+noncomputable def sphereBasePoint : sphere (0 : Plane) 1 := addCircleHomeoSphere 0
 
 /-- **Math.** The once-around loop on the geometric circle `sphere (0:ℝ²) 1`. -/
-noncomputable def sLoop : C(I, sphere (0 : Plane) 1) :=
-  (⟨acToSphere, acToSphere.continuous⟩ : C(AddCircle (1 : ℝ), sphere (0 : Plane) 1)).comp acLoop
+noncomputable def sphereLoop : C(I, sphere (0 : Plane) 1) :=
+  (⟨addCircleHomeoSphere, addCircleHomeoSphere.continuous⟩ : C(AddCircle (1 : ℝ),
+    sphere (0 : Plane) 1)).comp addCircleLoop
 
-@[simp] lemma sLoop_apply (t : I) : sLoop t = acToSphere (acLoop t) := rfl
+@[simp] lemma sLoop_apply (t : I) : sphereLoop t = addCircleHomeoSphere (addCircleLoop t) := rfl
 
-lemma sLoop_zero : sLoop 0 = sBase := by simp [sBase]
+lemma sphereLoop_zero : sphereLoop 0 = sphereBasePoint := by simp [sphereBasePoint]
 
 /-- **Math.** **Phase 1.5.** The once-around loop on the geometric circle is not homotopic
 rel endpoints to the constant loop. -/
-theorem sLoop_not_homotopic :
-    ¬ sLoop.HomotopicRel (ContinuousMap.const I sBase) {0, 1} := by
+theorem sphereLoop_not_homotopic :
+    ¬ sphereLoop.HomotopicRel (ContinuousMap.const I sphereBasePoint) {0, 1} := by
   intro h
-  apply acLoop_not_homotopic
+  apply addCircleLoop_not_homotopic
   have hh := h.comp_continuousMap
-    (⟨acToSphere.symm, acToSphere.symm.continuous⟩ : C(sphere (0 : Plane) 1, AddCircle (1 : ℝ)))
-  have e1 : (⟨acToSphere.symm, acToSphere.symm.continuous⟩ :
-      C(sphere (0 : Plane) 1, AddCircle (1 : ℝ))).comp sLoop = acLoop := by
-    ext t; simp [sLoop, acToSphere.symm_apply_apply]
-  have e2 : (⟨acToSphere.symm, acToSphere.symm.continuous⟩ :
-      C(sphere (0 : Plane) 1, AddCircle (1 : ℝ))).comp (ContinuousMap.const I sBase)
+    (⟨addCircleHomeoSphere.symm, addCircleHomeoSphere.symm.continuous⟩ : C(sphere (0 : Plane) 1,
+      AddCircle (1 : ℝ)))
+  have e1 : (⟨addCircleHomeoSphere.symm, addCircleHomeoSphere.symm.continuous⟩ :
+      C(sphere (0 : Plane) 1, AddCircle (1 : ℝ))).comp sphereLoop = addCircleLoop := by
+    ext t; simp [sphereLoop, addCircleHomeoSphere.symm_apply_apply]
+  have e2 : (⟨addCircleHomeoSphere.symm, addCircleHomeoSphere.symm.continuous⟩ :
+      C(sphere (0 : Plane) 1, AddCircle (1 : ℝ))).comp (ContinuousMap.const I sphereBasePoint)
       = ContinuousMap.const I (0 : AddCircle (1 : ℝ)) := by
-    ext t; simp [sBase, acToSphere.symm_apply_apply]
+    ext t; simp [sphereBasePoint, addCircleHomeoSphere.symm_apply_apply]
   rwa [e1, e2] at hh
 
-lemma sLoop_one : sLoop 1 = sBase := by
-  have : acLoop 1 = (0 : AddCircle (1 : ℝ)) := by
+lemma sphereLoop_one : sphereLoop 1 = sphereBasePoint := by
+  have : addCircleLoop 1 = (0 : AddCircle (1 : ℝ)) := by
     simp only [acLoop_apply]
     have : ((1 : I) : ℝ) = (1 : ℝ) := rfl
     rw [this]; exact AddCircle.coe_period 1
-  simp [sBase, this]
+  simp [sphereBasePoint, this]
 
 /-! ## Phase 2 — no retraction of the disk onto its boundary circle -/
 
 /-- **Math.** The straight-line contraction point `(1-t)·(loop s) + t·base` in the disk. -/
-noncomputable def diskPt (t s : I) : Plane :=
-  (1 - (t : ℝ)) • (sLoop s : Plane) + (t : ℝ) • (sBase : Plane)
+noncomputable def diskBoundaryPoint (t s : I) : Plane :=
+  (1 - (t : ℝ)) • (sphereLoop s : Plane) + (t : ℝ) • (sphereBasePoint : Plane)
 
-lemma diskPt_mem (t s : I) : diskPt t s ∈ closedBall (0 : Plane) 1 := by
-  have hv : (sLoop s : Plane) ∈ closedBall (0 : Plane) 1 :=
-    sphere_subset_closedBall (sLoop s).2
-  have hw : (sBase : Plane) ∈ closedBall (0 : Plane) 1 :=
-    sphere_subset_closedBall sBase.2
+lemma diskBoundaryPoint_mem (t s : I) : diskBoundaryPoint t s ∈ closedBall (0 : Plane) 1 := by
+  have hv : (sphereLoop s : Plane) ∈ closedBall (0 : Plane) 1 :=
+    sphere_subset_closedBall (sphereLoop s).2
+  have hw : (sphereBasePoint : Plane) ∈ closedBall (0 : Plane) 1 :=
+    sphere_subset_closedBall sphereBasePoint.2
   exact convex_closedBall 0 1 hv hw (by unit_interval) (by unit_interval) (by ring)
 
-lemma continuous_diskPt : Continuous (fun p : I × I => diskPt p.1 p.2) := by
-  unfold diskPt
+lemma continuous_diskBoundaryPoint : Continuous (fun p : I × I => diskBoundaryPoint p.1 p.2) := by
+  unfold diskBoundaryPoint
   fun_prop
 
 /-- **Math.** The contraction as a continuous map into the disk. -/
-noncomputable def diskMap : C(I × I, closedBall (0 : Plane) 1) :=
-  ⟨fun p => ⟨diskPt p.1 p.2, diskPt_mem p.1 p.2⟩,
-    (continuous_diskPt).subtype_mk _⟩
+noncomputable def diskNullhomotopy : C(I × I, closedBall (0 : Plane) 1) :=
+  ⟨fun p => ⟨diskBoundaryPoint p.1 p.2, diskBoundaryPoint_mem p.1 p.2⟩,
+    (continuous_diskBoundaryPoint).subtype_mk _⟩
 
 /-- **Math.** **Phase 2.** There is no retraction of the closed disk onto its boundary
 circle. -/
@@ -151,56 +155,56 @@ theorem no_retraction (ρ : C(closedBall (0 : Plane) 1, closedBall (0 : Plane) 1
     (hid : ∀ x : closedBall (0 : Plane) 1,
       (x : Plane) ∈ sphere (0 : Plane) 1 → (ρ x : Plane) = (x : Plane)) :
     False := by
-  apply sLoop_not_homotopic
+  apply sphereLoop_not_homotopic
   -- The homotopy `H t s = ρ ((1-t)·loop s + t·base)`, valued in the sphere.
   set H : C(I × I, sphere (0 : Plane) 1) :=
-    ⟨fun p => ⟨(ρ (diskMap p) : Plane), hrange _⟩,
-      (map_continuous ρ |>.comp (map_continuous diskMap)).subtype_val.subtype_mk _⟩ with hH
+    ⟨fun p => ⟨(ρ (diskNullhomotopy p) : Plane), hrange _⟩,
+      (map_continuous ρ |>.comp (map_continuous diskNullhomotopy)).subtype_val.subtype_mk _⟩ with hH
   refine ⟨{
     toContinuousMap := H
     map_zero_left := ?_
     map_one_left := ?_
     prop' := ?_ }⟩
-  · -- H (0, s) = sLoop s
+  · -- H (0, s) = sphereLoop s
     intro s
-    have hmem : (diskMap (0, s) : Plane) ∈ sphere (0 : Plane) 1 := by
-      change diskPt 0 s ∈ _
-      simp only [diskPt, Set.Icc.coe_zero, sub_zero, one_smul, zero_smul, add_zero]
-      exact (sLoop s).2
+    have hmem : (diskNullhomotopy (0, s) : Plane) ∈ sphere (0 : Plane) 1 := by
+      change diskBoundaryPoint 0 s ∈ _
+      simp only [diskBoundaryPoint, Set.Icc.coe_zero, sub_zero, one_smul, zero_smul, add_zero]
+      exact (sphereLoop s).2
     apply Subtype.ext
-    change (ρ (diskMap (0, s)) : Plane) = (sLoop s : Plane)
+    change (ρ (diskNullhomotopy (0, s)) : Plane) = (sphereLoop s : Plane)
     rw [hid _ hmem]
-    show (diskMap (0, s) : Plane) = (sLoop s : Plane)
-    change diskPt 0 s = (sLoop s : Plane)
-    simp [diskPt]
+    show (diskNullhomotopy (0, s) : Plane) = (sphereLoop s : Plane)
+    change diskBoundaryPoint 0 s = (sphereLoop s : Plane)
+    simp [diskBoundaryPoint]
   · -- H (1, s) = base
     intro s
-    have hmem : (diskMap (1, s) : Plane) ∈ sphere (0 : Plane) 1 := by
-      change diskPt 1 s ∈ _
-      simp only [diskPt, Set.Icc.coe_one, sub_self, zero_smul, one_smul, zero_add]
-      exact sBase.2
+    have hmem : (diskNullhomotopy (1, s) : Plane) ∈ sphere (0 : Plane) 1 := by
+      change diskBoundaryPoint 1 s ∈ _
+      simp only [diskBoundaryPoint, Set.Icc.coe_one, sub_self, zero_smul, one_smul, zero_add]
+      exact sphereBasePoint.2
     apply Subtype.ext
-    change (ρ (diskMap (1, s)) : Plane) = (sBase : Plane)
+    change (ρ (diskNullhomotopy (1, s)) : Plane) = (sphereBasePoint : Plane)
     rw [hid _ hmem]
-    show (diskMap (1, s) : Plane) = (sBase : Plane)
-    change diskPt 1 s = (sBase : Plane)
-    simp [diskPt]
-  · -- rel endpoints: for s ∈ {0,1}, H t s = sLoop s = base
+    show (diskNullhomotopy (1, s) : Plane) = (sphereBasePoint : Plane)
+    change diskBoundaryPoint 1 s = (sphereBasePoint : Plane)
+    simp [diskBoundaryPoint]
+  · -- rel endpoints: for s ∈ {0,1}, H t s = sphereLoop s = base
     intro t s hs
-    have hs' : (sLoop s : Plane) = (sBase : Plane) := by
+    have hs' : (sphereLoop s : Plane) = (sphereBasePoint : Plane) := by
       rcases hs with h | h
-      · rw [show s = (0 : I) from h, sLoop_zero]
-      · rw [show s = (1 : I) from h, sLoop_one]
-    have hmem : (diskMap (t, s) : Plane) ∈ sphere (0 : Plane) 1 := by
-      change diskPt t s ∈ _
-      simp only [diskPt, hs', ← add_smul, sub_add_cancel, one_smul]
-      exact sBase.2
+      · rw [show s = (0 : I) from h, sphereLoop_zero]
+      · rw [show s = (1 : I) from h, sphereLoop_one]
+    have hmem : (diskNullhomotopy (t, s) : Plane) ∈ sphere (0 : Plane) 1 := by
+      change diskBoundaryPoint t s ∈ _
+      simp only [diskBoundaryPoint, hs', ← add_smul, sub_add_cancel, one_smul]
+      exact sphereBasePoint.2
     apply Subtype.ext
-    change (ρ (diskMap (t, s)) : Plane) = (sLoop s : Plane)
+    change (ρ (diskNullhomotopy (t, s)) : Plane) = (sphereLoop s : Plane)
     rw [hid _ hmem, hs']
-    show (diskMap (t, s) : Plane) = (sBase : Plane)
-    change diskPt t s = (sBase : Plane)
-    simp only [diskPt, hs', ← add_smul, sub_add_cancel, one_smul]
+    show (diskNullhomotopy (t, s) : Plane) = (sphereBasePoint : Plane)
+    change diskBoundaryPoint t s = (sphereBasePoint : Plane)
+    simp only [diskBoundaryPoint, hs', ← add_smul, sub_add_cancel, one_smul]
 
 /-! ## Phase 3 — Brouwer for the closed unit disk
 
@@ -213,26 +217,28 @@ section Disk
 variable (f : C(closedBall (0 : Plane) 1, closedBall (0 : Plane) 1))
 
 /-- **Math.** The direction vector `x - f x` of the ray. -/
-noncomputable def dvec (x : closedBall (0 : Plane) 1) : Plane := (x : Plane) - (f x : Plane)
+noncomputable def displacement (x : closedBall (0 : Plane) 1) : Plane := (x : Plane) - (f x : Plane)
 
 /-- **Math.** Quadratic coefficient `A = ‖x - f x‖²`. -/
-noncomputable def Acoef (x : closedBall (0 : Plane) 1) : ℝ := ⟪dvec f x, dvec f x⟫
+noncomputable def raySphereQuadA (x : closedBall (0 : Plane) 1) : ℝ :=
+  ⟪displacement f x, displacement f x⟫
 /-- **Math.** Coefficient `B = ⟪f x, x - f x⟫`. -/
-noncomputable def Bcoef (x : closedBall (0 : Plane) 1) : ℝ := ⟪(f x : Plane), dvec f x⟫
+noncomputable def raySphereQuadB (x : closedBall (0 : Plane) 1) : ℝ :=
+  ⟪(f x : Plane), displacement f x⟫
 /-- **Math.** Coefficient `C = ‖f x‖² - 1 ≤ 0`. -/
-noncomputable def Ccoef (x : closedBall (0 : Plane) 1) : ℝ := ‖(f x : Plane)‖ ^ 2 - 1
+noncomputable def raySphereQuadC (x : closedBall (0 : Plane) 1) : ℝ := ‖(f x : Plane)‖ ^ 2 - 1
 /-- **Math.** Discriminant `B² - A·C ≥ 0`. -/
-noncomputable def discr (x : closedBall (0 : Plane) 1) : ℝ :=
-  (Bcoef f x) ^ 2 - Acoef f x * Ccoef f x
+noncomputable def raySphereDiscriminant (x : closedBall (0 : Plane) 1) : ℝ :=
+  (raySphereQuadB f x) ^ 2 - raySphereQuadA f x * raySphereQuadC f x
 /-- **Math.** The (larger) root parameter `t = (-B + √disc)/A`. -/
-noncomputable def tparam (x : closedBall (0 : Plane) 1) : ℝ :=
-  (- Bcoef f x + Real.sqrt (discr f x)) / Acoef f x
+noncomputable def raySphereRoot (x : closedBall (0 : Plane) 1) : ℝ :=
+  (- raySphereQuadB f x + Real.sqrt (raySphereDiscriminant f x)) / raySphereQuadA f x
 /-- **Math.** The exit point `ρ x = f x + t·(x - f x)` on the boundary circle. -/
-noncomputable def rhoPt (x : closedBall (0 : Plane) 1) : Plane :=
-  (f x : Plane) + tparam f x • dvec f x
+noncomputable def retractionPoint (x : closedBall (0 : Plane) 1) : Plane :=
+  (f x : Plane) + raySphereRoot f x • displacement f x
 
-lemma Ccoef_nonpos (x) : Ccoef f x ≤ 0 := by
-  rw [Ccoef, sub_nonpos]
+lemma raySphereQuadC_nonpos (x) : raySphereQuadC f x ≤ 0 := by
+  rw [raySphereQuadC, sub_nonpos]
   have : ‖(f x : Plane)‖ ≤ 1 := by
     have := (f x).2; rw [mem_closedBall, dist_zero_right] at this; exact this
   nlinarith [norm_nonneg (f x : Plane)]
@@ -242,117 +248,122 @@ lemma continuous_fval : Continuous fun x : closedBall (0 : Plane) 1 => (f x : Pl
   continuous_subtype_val.comp (map_continuous f)
 
 
-lemma continuous_dvec : Continuous (dvec f) :=
+lemma continuous_displacement : Continuous (displacement f) :=
   continuous_subtype_val.sub (continuous_fval f)
 
 
-lemma continuous_Acoef : Continuous (Acoef f) :=
-  (continuous_dvec f).inner (continuous_dvec f)
+lemma continuous_raySphereQuadA : Continuous (raySphereQuadA f) :=
+  (continuous_displacement f).inner (continuous_displacement f)
 
 
-lemma continuous_Bcoef : Continuous (Bcoef f) :=
-  (continuous_fval f).inner (continuous_dvec f)
+lemma continuous_raySphereQuadB : Continuous (raySphereQuadB f) :=
+  (continuous_fval f).inner (continuous_displacement f)
 
 
-lemma continuous_Ccoef : Continuous (Ccoef f) :=
+lemma continuous_raySphereQuadC : Continuous (raySphereQuadC f) :=
   ((continuous_fval f).norm.pow 2).sub continuous_const
 
 
-lemma continuous_discr : Continuous (discr f) :=
-  ((continuous_Bcoef f).pow 2).sub ((continuous_Acoef f).mul (continuous_Ccoef f))
+lemma continuous_raySphereDiscriminant : Continuous (raySphereDiscriminant f) :=
+  ((continuous_raySphereQuadB f).pow 2).sub
+    ((continuous_raySphereQuadA f).mul (continuous_raySphereQuadC f))
 
 
 variable (hf : ∀ x, (f x : Plane) ≠ (x : Plane))
 include hf
 
-lemma dvec_ne (x) : dvec f x ≠ 0 := by
-  simp only [dvec, sub_ne_zero]; exact fun h => hf x h.symm
+lemma displacement_ne (x) : displacement f x ≠ 0 := by
+  simp only [displacement, sub_ne_zero]; exact fun h => hf x h.symm
 
 
-lemma Acoef_pos (x) : 0 < Acoef f x := by
-  rw [Acoef, real_inner_self_eq_norm_sq]
-  exact pow_pos (norm_pos_iff.mpr (dvec_ne f hf x)) 2
+lemma raySphereQuadA_pos (x) : 0 < raySphereQuadA f x := by
+  rw [raySphereQuadA, real_inner_self_eq_norm_sq]
+  exact pow_pos (norm_pos_iff.mpr (displacement_ne f hf x)) 2
 
 
-lemma discr_nonneg (x) : 0 ≤ discr f x := by
-  have hA := (Acoef_pos f hf x).le
-  have hC := Ccoef_nonpos f x
-  have : 0 ≤ Acoef f x * (- Ccoef f x) := mul_nonneg hA (by linarith)
-  rw [discr]; nlinarith [sq_nonneg (Bcoef f x)]
+lemma raySphereDiscriminant_nonneg (x) : 0 ≤ raySphereDiscriminant f x := by
+  have hA := (raySphereQuadA_pos f hf x).le
+  have hC := raySphereQuadC_nonpos f x
+  have : 0 ≤ raySphereQuadA f x * (- raySphereQuadC f x) := mul_nonneg hA (by linarith)
+  rw [raySphereDiscriminant]; nlinarith [sq_nonneg (raySphereQuadB f x)]
 
 
 /-- **Math.** The exit point lies on the unit circle. -/
-lemma norm_rhoPt (x) : ‖rhoPt f x‖ = 1 := by
-  have hA := Acoef_pos f hf x
-  have hsq : (Real.sqrt (discr f x)) ^ 2 = discr f x :=
-    Real.sq_sqrt (discr_nonneg f hf x)
-  have hnormsq : ‖rhoPt f x‖ ^ 2 = 1 := by
-    rw [rhoPt, norm_add_sq_real, norm_smul, real_inner_smul_right]
-    have hAe : ⟪dvec f x, dvec f x⟫ = Acoef f x := rfl
-    have hBe : ⟪(f x : Plane), dvec f x⟫ = Bcoef f x := rfl
-    have hCe : ‖(f x : Plane)‖ ^ 2 = Ccoef f x + 1 := by rw [Ccoef]; ring
+lemma norm_retractionPoint (x) : ‖retractionPoint f x‖ = 1 := by
+  have hA := raySphereQuadA_pos f hf x
+  have hsq : (Real.sqrt (raySphereDiscriminant f x)) ^ 2 = raySphereDiscriminant f x :=
+    Real.sq_sqrt (raySphereDiscriminant_nonneg f hf x)
+  have hnormsq : ‖retractionPoint f x‖ ^ 2 = 1 := by
+    rw [retractionPoint, norm_add_sq_real, norm_smul, real_inner_smul_right]
+    have hAe : ⟪displacement f x, displacement f x⟫ = raySphereQuadA f x := rfl
+    have hBe : ⟪(f x : Plane), displacement f x⟫ = raySphereQuadB f x := rfl
+    have hCe : ‖(f x : Plane)‖ ^ 2 = raySphereQuadC f x + 1 := by rw [raySphereQuadC]; ring
     rw [hBe, hCe]
-    have hnd : ‖dvec f x‖ ^ 2 = Acoef f x := by
+    have hnd : ‖displacement f x‖ ^ 2 = raySphereQuadA f x := by
       rw [← real_inner_self_eq_norm_sq]; rfl
     rw [Real.norm_eq_abs, mul_pow, sq_abs, hnd]
     -- Now: (C+1) + 2*(t*B) + t^2 * A = 1, with t = (-B+√disc)/A
-    rw [tparam]
+    rw [raySphereRoot]
     field_simp
-    rw [discr] at hsq ⊢
+    rw [raySphereDiscriminant] at hsq ⊢
     nlinarith [hsq, hA]
-  have := norm_nonneg (rhoPt f x)
+  have := norm_nonneg (retractionPoint f x)
   nlinarith [hnormsq, this]
 
 
 /-- **Math.** On the boundary circle, `ρ` is the identity. -/
-lemma rhoPt_of_mem_sphere (x : closedBall (0 : Plane) 1)
+lemma retractionPoint_of_mem_sphere (x : closedBall (0 : Plane) 1)
     (hx : (x : Plane) ∈ sphere (0 : Plane) 1) :
-    rhoPt f x = (x : Plane) := by
+    retractionPoint f x = (x : Plane) := by
   have hxn : ‖(x : Plane)‖ = 1 := by rwa [mem_sphere_zero_iff_norm] at hx
-  have hA := Acoef_pos f hf x
-  have eA : Acoef f x = ‖dvec f x‖ ^ 2 := real_inner_self_eq_norm_sq _
-  have eC : Ccoef f x = ‖(f x : Plane)‖ ^ 2 - 1 := rfl
-  have hAdd : dvec f x + (f x : Plane) = (x : Plane) := by rw [dvec]; abel
-  have hcomm : ⟪dvec f x, (f x : Plane)⟫ = Bcoef f x := by rw [Bcoef, real_inner_comm]
+  have hA := raySphereQuadA_pos f hf x
+  have eA : raySphereQuadA f x = ‖displacement f x‖ ^ 2 := real_inner_self_eq_norm_sq _
+  have eC : raySphereQuadC f x = ‖(f x : Plane)‖ ^ 2 - 1 := rfl
+  have hAdd : displacement f x + (f x : Plane) = (x : Plane) := by rw [displacement]; abel
+  have hcomm : ⟪displacement f x, (f x : Plane)⟫ = raySphereQuadB f x :=
+    by rw [raySphereQuadB, real_inner_comm]
   have hexp : ‖(x : Plane)‖ ^ 2
-      = ‖dvec f x‖ ^ 2 + 2 * ⟪dvec f x, (f x : Plane)⟫ + ‖(f x : Plane)‖ ^ 2 := by
+      = ‖displacement f x‖ ^ 2 + 2 * ⟪displacement f x, (f x : Plane)⟫ + ‖(f x : Plane)‖ ^ 2 := by
     rw [← hAdd, norm_add_sq_real]
   rw [hxn, hcomm] at hexp
   -- A + 2B + C = 0
-  have hkey : Acoef f x + 2 * Bcoef f x + Ccoef f x = 0 := by
+  have hkey : raySphereQuadA f x + 2 * raySphereQuadB f x + raySphereQuadC f x = 0 := by
     rw [eA, eC]; linear_combination -hexp
   -- A + B = ⟪x, x - f x⟫ = 1 - ⟪x, f x⟫ ≥ 0
-  have hApB : Acoef f x + Bcoef f x = ⟪(x : Plane), dvec f x⟫ := by
-    rw [Acoef, Bcoef, ← inner_add_left, hAdd]
-  have hxd : ⟪(x : Plane), dvec f x⟫ = 1 - ⟪(x : Plane), (f x : Plane)⟫ := by
-    rw [dvec, inner_sub_right, real_inner_self_eq_norm_sq, hxn]; norm_num
+  have hApB : raySphereQuadA f x + raySphereQuadB f x = ⟪(x : Plane), displacement f x⟫ := by
+    rw [raySphereQuadA, raySphereQuadB, ← inner_add_left, hAdd]
+  have hxd : ⟪(x : Plane), displacement f x⟫ = 1 - ⟪(x : Plane), (f x : Plane)⟫ := by
+    rw [displacement, inner_sub_right, real_inner_self_eq_norm_sq, hxn]; norm_num
   have hcs : ⟪(x : Plane), (f x : Plane)⟫ ≤ 1 := by
     have hfn : ‖(f x : Plane)‖ ≤ 1 := by
       have := (f x).2; rwa [mem_closedBall, dist_zero_right] at this
     calc ⟪(x : Plane), (f x : Plane)⟫ ≤ ‖(x : Plane)‖ * ‖(f x : Plane)‖ := real_inner_le_norm _ _
       _ ≤ 1 * 1 := by rw [hxn]; exact mul_le_mul le_rfl hfn (norm_nonneg _) (by norm_num)
       _ = 1 := by norm_num
-  have hAB : 0 ≤ Acoef f x + Bcoef f x := by rw [hApB, hxd]; linarith
+  have hAB : 0 ≤ raySphereQuadA f x + raySphereQuadB f x := by rw [hApB, hxd]; linarith
   -- disc = (A+B)², so √disc = A+B, t = 1
-  have hdisc : discr f x = (Acoef f x + Bcoef f x) ^ 2 := by
-    rw [discr]; linear_combination (-Acoef f x) * hkey
-  have hsqrt : Real.sqrt (discr f x) = Acoef f x + Bcoef f x := by
+  have hdisc : raySphereDiscriminant f x = (raySphereQuadA f x + raySphereQuadB f x) ^ 2 := by
+    rw [raySphereDiscriminant]; linear_combination (-raySphereQuadA f x) * hkey
+  have hsqrt : Real.sqrt (raySphereDiscriminant f x) = raySphereQuadA f x + raySphereQuadB f x := by
     rw [hdisc, Real.sqrt_sq hAB]
-  have ht1 : tparam f x = 1 := by
-    have hnum : -Bcoef f x + (Acoef f x + Bcoef f x) = Acoef f x := by ring
-    rw [tparam, hsqrt, hnum, div_self hA.ne']
-  rw [rhoPt, ht1, one_smul, dvec]; abel
+  have ht1 : raySphereRoot f x = 1 := by
+    have hnum :
+        -raySphereQuadB f x + (raySphereQuadA f x + raySphereQuadB f x)
+          = raySphereQuadA f x :=
+      by ring
+    rw [raySphereRoot, hsqrt, hnum, div_self hA.ne']
+  rw [retractionPoint, ht1, one_smul, displacement]; abel
 
 /-! ### Continuity of the retraction -/
 
 
-lemma continuous_tparam : Continuous (tparam f) :=
-  Continuous.div (((continuous_Bcoef f).neg).add (continuous_discr f).sqrt)
-    (continuous_Acoef f) (fun x => (Acoef_pos f hf x).ne')
+lemma continuous_raySphereRoot : Continuous (raySphereRoot f) :=
+  Continuous.div (((continuous_raySphereQuadB f).neg).add (continuous_raySphereDiscriminant f).sqrt)
+    (continuous_raySphereQuadA f) (fun x => (raySphereQuadA_pos f hf x).ne')
 
 
-lemma continuous_rhoPt : Continuous (rhoPt f) :=
-  (continuous_fval f).add ((continuous_tparam f hf).smul (continuous_dvec f))
+lemma continuous_retractionPoint : Continuous (retractionPoint f) :=
+  (continuous_fval f).add ((continuous_raySphereRoot f hf).smul (continuous_displacement f))
 
 end Disk
 
@@ -362,19 +373,20 @@ theorem brouwer_disk (f : C(closedBall (0 : Plane) 1, closedBall (0 : Plane) 1))
   by_contra hcon
   push Not at hcon
   have hf : ∀ x, (f x : Plane) ≠ (x : Plane) := fun x h => hcon x (Subtype.ext h)
-  have hρmem : ∀ x, rhoPt f x ∈ closedBall (0 : Plane) 1 := fun x => by
-    rw [mem_closedBall, dist_zero_right, norm_rhoPt f hf x]
-  refine no_retraction ⟨fun x => ⟨rhoPt f x, hρmem x⟩, (continuous_rhoPt f hf).subtype_mk _⟩
+  have hρmem : ∀ x, retractionPoint f x ∈ closedBall (0 : Plane) 1 := fun x => by
+    rw [mem_closedBall, dist_zero_right, norm_retractionPoint f hf x]
+  refine no_retraction ⟨fun x => ⟨retractionPoint f x, hρmem x⟩,
+    (continuous_retractionPoint f hf).subtype_mk _⟩
     (fun x => ?_) (fun x hx => ?_)
-  · change rhoPt f x ∈ sphere (0 : Plane) 1
-    rw [mem_sphere_zero_iff_norm]; exact norm_rhoPt f hf x
-  · change rhoPt f x = (x : Plane)
-    exact rhoPt_of_mem_sphere f hf x hx
+  · change retractionPoint f x ∈ sphere (0 : Plane) 1
+    rw [mem_sphere_zero_iff_norm]; exact norm_retractionPoint f hf x
+  · change retractionPoint f x = (x : Plane)
+    exact retractionPoint_of_mem_sphere f hf x hx
 
 /-! ## Phase 4 — general nonempty compact convex sets -/
 
 /-- **Eng.** Transfer of the fixed-point property along a homeomorphism. -/
-theorem fixedPoint_transfer {X Y : Type*} [TopologicalSpace X] [TopologicalSpace Y]
+theorem fixedPoint_of_homeo {X Y : Type*} [TopologicalSpace X] [TopologicalSpace Y]
     (φ : X ≃ₜ Y) (hY : ∀ g : C(Y, Y), ∃ y, g y = y) (f : C(X, X)) : ∃ x, f x = x := by
   obtain ⟨y, hy⟩ := hY ((⟨φ, φ.continuous⟩ : C(X, Y)).comp
       (f.comp (⟨φ.symm, φ.symm.continuous⟩ : C(Y, X))))
@@ -386,7 +398,7 @@ theorem fixedPoint_transfer {X Y : Type*} [TopologicalSpace X] [TopologicalSpace
 /-! ### Brouwer on an arbitrary closed ball (by rescaling) -/
 
 /-- **Eng.** Rescaling homeomorphism `closedBall 0 R ≃ₜ closedBall 0 1` (`x ↦ R⁻¹ • x`). -/
-noncomputable def ballScale (R : ℝ) (hR : 0 < R) :
+noncomputable def ballRescale (R : ℝ) (hR : 0 < R) :
     closedBall (0 : Plane) R ≃ₜ closedBall (0 : Plane) 1 where
   toFun x := ⟨R⁻¹ • (x : Plane), by
     rw [mem_closedBall, dist_zero_right, norm_smul, Real.norm_eq_abs, abs_of_pos (inv_pos.mpr hR)]
@@ -404,7 +416,7 @@ noncomputable def ballScale (R : ℝ) (hR : 0 < R) :
 /-- **Eng.** **Brouwer for a closed ball of arbitrary positive radius.** -/
 theorem brouwer_ball (R : ℝ) (hR : 0 < R)
     (f : C(closedBall (0 : Plane) R, closedBall (0 : Plane) R)) : ∃ x, f x = x :=
-  fixedPoint_transfer (ballScale R hR) (fun g => brouwer_disk g) f
+  fixedPoint_of_homeo (ballRescale R hR) (fun g => brouwer_disk g) f
 
 /-! ### Nearest-point projection onto a nonempty compact convex set
 
@@ -418,39 +430,47 @@ section Projection
 variable {s : Set Plane} (hconv : Convex ℝ s) (hcomp : IsCompact s) (hne : s.Nonempty)
 
 /-- **Eng.** Nearest-point projection of `u` onto the nonempty compact convex set `s`. -/
-noncomputable def projFun (u : Plane) : Plane :=
+noncomputable def nearestPointProjection (u : Plane) : Plane :=
   (exists_norm_eq_iInf_of_complete_convex hne hcomp.isComplete hconv u).choose
 
-lemma projFun_mem (u : Plane) : projFun hconv hcomp hne u ∈ s :=
+lemma nearestPointProjection_mem (u : Plane) : nearestPointProjection hconv hcomp hne u ∈ s :=
   (exists_norm_eq_iInf_of_complete_convex hne hcomp.isComplete hconv u).choose_spec.1
 
 /-- **Eng.** The variational characterization of the projection. -/
-lemma projFun_inner_le (u : Plane) {w : Plane} (hw : w ∈ s) :
-    ⟪u - projFun hconv hcomp hne u, w - projFun hconv hcomp hne u⟫ ≤ 0 :=
-  (norm_eq_iInf_iff_real_inner_le_zero hconv (projFun_mem hconv hcomp hne u)).mp
+lemma nearestPointProjection_inner_le (u : Plane) {w : Plane} (hw : w ∈ s) :
+    ⟪u - nearestPointProjection hconv hcomp hne u,
+      w - nearestPointProjection hconv hcomp hne u⟫ ≤ 0 :=
+  (norm_eq_iInf_iff_real_inner_le_zero hconv (nearestPointProjection_mem hconv hcomp hne u)).mp
     (exists_norm_eq_iInf_of_complete_convex hne hcomp.isComplete hconv u).choose_spec.2 w hw
 
 /-- **Eng.** The projection fixes the points of `s`. -/
-lemma projFun_eq_self {u : Plane} (hu : u ∈ s) : projFun hconv hcomp hne u = u := by
-  have h := projFun_inner_le hconv hcomp hne u hu
+lemma nearestPointProjection_eq_self {u : Plane} (hu : u ∈ s) :
+    nearestPointProjection hconv hcomp hne u = u :=
+  by
+  have h := nearestPointProjection_inner_le hconv hcomp hne u hu
   rw [real_inner_self_eq_norm_sq] at h
-  have hz : u - projFun hconv hcomp hne u = 0 := by
-    have hn := norm_nonneg (u - projFun hconv hcomp hne u)
-    have : ‖u - projFun hconv hcomp hne u‖ = 0 := by nlinarith
+  have hz : u - nearestPointProjection hconv hcomp hne u = 0 := by
+    have hn := norm_nonneg (u - nearestPointProjection hconv hcomp hne u)
+    have : ‖u - nearestPointProjection hconv hcomp hne u‖ = 0 := by nlinarith
     rwa [norm_eq_zero] at this
   rw [sub_eq_zero] at hz; exact hz.symm
 
 /-- **Eng.** The projection is nonexpansive. -/
-lemma projFun_dist_le (u₁ u₂ : Plane) :
-    ‖projFun hconv hcomp hne u₁ - projFun hconv hcomp hne u₂‖ ≤ ‖u₁ - u₂‖ := by
-  set v₁ := projFun hconv hcomp hne u₁
-  set v₂ := projFun hconv hcomp hne u₂
+lemma nearestPointProjection_dist_le (u₁ u₂ : Plane) :
+    ‖nearestPointProjection hconv hcomp hne u₁
+        - nearestPointProjection hconv hcomp hne u₂‖ ≤ ‖u₁ - u₂‖ :=
+      by
+  set v₁ := nearestPointProjection hconv hcomp hne u₁
+  set v₂ := nearestPointProjection hconv hcomp hne u₂
   have hb1 : 0 ≤ ⟪u₁ - v₁, v₁ - v₂⟫ := by
-    have h := projFun_inner_le hconv hcomp hne u₁ (projFun_mem hconv hcomp hne u₂)
+    have h :=
+      nearestPointProjection_inner_le hconv hcomp hne u₁
+        (nearestPointProjection_mem hconv hcomp hne u₂)
     rw [show v₂ - v₁ = -(v₁ - v₂) by abel, inner_neg_right] at h
     linarith
   have hb2 : ⟪u₂ - v₂, v₁ - v₂⟫ ≤ 0 :=
-    projFun_inner_le hconv hcomp hne u₂ (projFun_mem hconv hcomp hne u₁)
+    nearestPointProjection_inner_le hconv hcomp hne u₂
+      (nearestPointProjection_mem hconv hcomp hne u₁)
   have decomp : ⟪u₁ - u₂, v₁ - v₂⟫
       = ⟪u₁ - v₁, v₁ - v₂⟫ - ⟪u₂ - v₂, v₁ - v₂⟫ + ⟪v₁ - v₂, v₁ - v₂⟫ := by
     have hsum : u₁ - u₂ = (u₁ - v₁ - (u₂ - v₂)) + (v₁ - v₂) := by abel
@@ -464,9 +484,10 @@ lemma projFun_dist_le (u₁ u₂ : Plane) :
       rw [← pow_two]; exact le_trans key hcs
     exact le_of_mul_le_mul_right hsq hpos
 
-lemma continuous_projFun : Continuous (projFun hconv hcomp hne) :=
+lemma continuous_nearestPointProjection : Continuous (nearestPointProjection hconv hcomp hne) :=
   (LipschitzWith.mk_one (fun u₁ u₂ => by
-    rw [dist_eq_norm, dist_eq_norm]; exact projFun_dist_le hconv hcomp hne u₁ u₂)).continuous
+    rw [dist_eq_norm,
+      dist_eq_norm]; exact nearestPointProjection_dist_le hconv hcomp hne u₁ u₂)).continuous
 
 end Projection
 
@@ -485,14 +506,16 @@ theorem brouwerFPT : ∀ s : Set Plane, Convex ℝ s → IsCompact s → s.Nonem
   let incl : C(s, closedBall (0 : Plane) R) :=
     ⟨fun y => ⟨(y : Plane), hsub y.2⟩, continuous_subtype_val.subtype_mk _⟩
   let r : C(closedBall (0 : Plane) R, s) :=
-    ⟨fun x => ⟨projFun hconv hcomp hne (x : Plane), projFun_mem hconv hcomp hne (x : Plane)⟩,
-      ((continuous_projFun hconv hcomp hne).comp continuous_subtype_val).subtype_mk _⟩
+    ⟨fun x => ⟨nearestPointProjection hconv hcomp hne (x : Plane),
+      nearestPointProjection_mem hconv hcomp hne (x : Plane)⟩,
+      ((continuous_nearestPointProjection hconv hcomp hne).comp
+        continuous_subtype_val).subtype_mk _⟩
   obtain ⟨x, hx⟩ := brouwer_ball R hR (incl.comp (f.comp r))
   refine ⟨r x, ?_⟩
   apply Subtype.ext
   have hval : (f (r x) : Plane) = (x : Plane) := congrArg Subtype.val hx
   have hxs : (x : Plane) ∈ s := by rw [← hval]; exact (f (r x)).2
-  have hrx : ((r x : s) : Plane) = (x : Plane) := projFun_eq_self hconv hcomp hne hxs
+  have hrx : ((r x : s) : Plane) = (x : Plane) := nearestPointProjection_eq_self hconv hcomp hne hxs
   change (f (r x) : Plane) = ((r x : s) : Plane)
   rw [hval, hrx]
 

@@ -26,7 +26,7 @@ rectangle's bottom edge), the axis segment from the interior point `m ∈ J_n` d
 `l → n` (axis, `n = !₂[0,2]`) would give a bottom-to-top path in the rectangle
 avoiding `J_s`, contradicting `vertical_meets_arc` (`J_s` joins `a` to `b`).  The
 crossing point lies on the segment, so it sits on the axis at height `≤ m 1`. -/
-theorem ms_meets_Js (hbr : BrouwerFPT)
+theorem segment_m_to_s_meets_southern_arc (hbr : BrouwerFPT)
     {r : sphere (0 : Plane) 1 → Plane} (_hcont : Continuous r) (_hinj : Injective r)
     (hmr : (!₂[(-1 : ℝ), 0] : Plane) ∈ range r) (hpr : (!₂[(1 : ℝ), 0] : Plane) ∈ range r)
     (hfar : ∀ z ∈ range r, ∀ w ∈ range r, dist z w ≤ 2)
@@ -86,7 +86,7 @@ theorem ms_meets_Js (hbr : BrouwerFPT)
   set f1 : ℝ → Plane := fun t => s + ((t + 1) / 2) • (m - s) with hf1def
   set f3 : ℝ → Plane := fun t => l + ((t + 1) / 2) • (nn - l) with hf3def
   obtain ⟨f2, hf2cont, hf2m, hf2l, hf2mem⟩ :=
-    arc_path (hpcJn.joinedIn m ⟨hmJn, hmab⟩ l ⟨hlJn, hlab⟩)
+    path_reparametrized_on_neg_one_one (hpcJn.joinedIn m ⟨hmJn, hmab⟩ l ⟨hlJn, hlab⟩)
   have hf1cont : ContinuousOn f1 (Icc (-1 : ℝ) 1) := (by fun_prop : Continuous f1).continuousOn
   have hf3cont : ContinuousOn f3 (Icc (-1 : ℝ) 1) := (by fun_prop : Continuous f3).continuousOn
   have hf1_1 : f1 1 = m := by simp [hf1def]
@@ -159,14 +159,14 @@ on the vertical axis `x = 0`:
 * `l` — the topmost intersection of the axis with the curve (in `J_n`);
 * `m` — the lowest point of `J_n` on the axis;
 * `p` — the highest point of `J_s` on the axis lying at or below `m` (the top of the
-  southern arc on the segment `m → s`, via `ms_meets_Js`);
+  southern arc on the segment `m → s`, via `segment_m_to_s_meets_southern_arc`);
 * `q` — the lowest point of `J_s` on the axis;
 * `z₀` — the midpoint `!₂[0,(m 1 + p 1)/2]` of `m` and `p`.
 
 The established `y`-ordering is `q 1 ≤ p 1 ≤ z₀ 1 ≤ m 1 ≤ l 1`.  (Note `p` is the
 `J_s`-max **restricted to heights `≤ m 1`**; this is what makes `p 1 ≤ m 1` — hence
 the placement of `z₀` between `p` and `m` — provable at this stage.) -/
-theorem exists_construction_points (hbr : BrouwerFPT)
+theorem exists_maehara_points_on_axis (hbr : BrouwerFPT)
     {r : sphere (0 : Plane) 1 → Plane} (hcont : Continuous r) (hinj : Injective r)
     (hm : (!₂[(-1 : ℝ), 0] : Plane) ∈ range r) (hp : (!₂[(1 : ℝ), 0] : Plane) ∈ range r)
     (hfar : ∀ z ∈ range r, ∀ w ∈ range r, dist z w ≤ 2) :
@@ -184,17 +184,18 @@ theorem exists_construction_points (hbr : BrouwerFPT)
       JoinedIn J_n (!₂[(-1 : ℝ), 0]) (!₂[(1 : ℝ), 0]) ∧
       JoinedIn J_s (!₂[(-1 : ℝ), 0]) (!₂[(1 : ℝ), 0]) := by
   obtain ⟨J_n, J_s, hJncl, hJscl, hUnion, hInter, ⟨eJn⟩, ⟨eJs⟩, hpcJn, hpcJs,
-    l, hlr, hl0, hlmax, hlJn⟩ := jordan_arcs hbr hcont hinj hm hp hfar
+    l, hlr, hl0, hlmax, hlJn⟩ := exists_arc_decomposition_of_curve hbr hcont hinj hm hp hfar
   have hcptr : IsCompact (range r) := jordanCurve_isCompact r hcont
   have hJnr : J_n ⊆ range r := by rw [← hUnion]; exact subset_union_left
   have hJsr : J_s ⊆ range r := by rw [← hUnion]; exact subset_union_right
   have hJncpt : IsCompact J_n := hcptr.of_isClosed_subset hJncl hJnr
   have hJscpt : IsCompact J_s := hcptr.of_isClosed_subset hJscl hJsr
   -- `m` : lowest point of `J_n` on the axis
-  obtain ⟨m, hmJn, hm0, hmmin⟩ := exists_ymin_Jn_axis hJncl hJncpt hlJn hl0
+  obtain ⟨m, hmJn, hm0, hmmin⟩ := exists_lowest_point_of_northern_arc_on_axis hJncl hJncpt hlJn hl0
   -- `J_s` meets the axis below `m`
   obtain ⟨w₀, hw₀Js, hw₀0, hw₀m⟩ :=
-    ms_meets_Js hbr hcont hinj hm hp hfar hUnion hInter eJs hpcJn hlJn hl0 hlmax hmJn hm0
+    segment_m_to_s_meets_southern_arc hbr hcont hinj hm hp hfar hUnion hInter eJs
+      hpcJn hlJn hl0 hlmax hmJn hm0
   -- `p` : highest point of `J_s` on the axis at or below `m`
   set Sp : Set Plane := {w ∈ J_s | w 0 = 0 ∧ w 1 ≤ m 1} with hSpdef
   have hSpcl : IsClosed Sp := by
@@ -247,7 +248,7 @@ theorem exists_construction_points (hbr : BrouwerFPT)
 /-- **Math.** **First-exit lemma (A.1).** A path `α` on `[0,1]` starting inside an open set `O`
 and ending outside a closed superset `C ⊇ O` has a *first exit time* `tw ∈ (0,1]`:
 `α tw` lies in the frontier layer `C \ O`, and `α u ∈ O` for all `u < tw`. -/
-theorem exists_first_exit {α : ℝ → Plane} {O C : Set Plane}
+theorem exists_first_exit_from_rectangle {α : ℝ → Plane} {O C : Set Plane}
     (hO : IsOpen O) (hC : IsClosed C) (hOC : O ⊆ C)
     (hcont : ContinuousOn α (Icc (0 : ℝ) 1))
     (h0 : α 0 ∈ O) (h1 : α 1 ∉ C) :
@@ -290,7 +291,7 @@ theorem exists_first_exit {α : ℝ → Plane} {O C : Set Plane}
 
 /-- **Math.** A vertical segment `{p | p 0 = c ∧ p 1 ∈ T}` (with `T` path-connected) is
 path-connected: it is the image of `T` under `y ↦ !₂[c, y]`. -/
-theorem isPathConnected_vertSeg (c : ℝ) {T : Set ℝ} (hT : IsPathConnected T) :
+theorem isPathConnected_verticalSegment (c : ℝ) {T : Set ℝ} (hT : IsPathConnected T) :
     IsPathConnected {p : Plane | p 0 = c ∧ p 1 ∈ T} := by
   have hfcont : Continuous (fun y : ℝ => (!₂[c, y] : Plane)) := by
     apply (PiLp.continuous_toLp 2 (fun _ : Fin 2 => ℝ)).comp
@@ -307,7 +308,7 @@ theorem isPathConnected_vertSeg (c : ℝ) {T : Set ℝ} (hT : IsPathConnected T)
   rwa [hEq] at himg
 
 /-- **Math.** A horizontal segment `{p | p 1 = c ∧ p 0 ∈ T}` is path-connected. -/
-theorem isPathConnected_horizSeg (c : ℝ) {T : Set ℝ} (hT : IsPathConnected T) :
+theorem isPathConnected_horizontalSegment (c : ℝ) {T : Set ℝ} (hT : IsPathConnected T) :
     IsPathConnected {p : Plane | p 1 = c ∧ p 0 ∈ T} := by
   have hfcont : Continuous (fun x : ℝ => (!₂[x, c] : Plane)) := by
     apply (PiLp.continuous_toLp 2 (fun _ : Fin 2 => ℝ)).comp
@@ -327,7 +328,7 @@ theorem isPathConnected_horizSeg (c : ℝ) {T : Set ℝ} (hT : IsPathConnected T
 the frontier of the normalized rectangle `[-1,1]×[-2,2]` has `y = 0` (so it is `a` or
 `b`).  The "lens" bound `(p 0±1)²+(p 1)² ≤ 4` rules out the top/bottom edges outright
 and pins the left/right edges to `y = 0`. -/
-theorem curve_boundary_axis
+theorem curve_meets_axis_within_rectangle
     {r : sphere (0 : Plane) 1 → Plane}
     (hm : (!₂[(-1 : ℝ), 0] : Plane) ∈ range r) (hp : (!₂[(1 : ℝ), 0] : Plane) ∈ range r)
     (hfar : ∀ z ∈ range r, ∀ w ∈ range r, dist z w ≤ 2) :
@@ -337,7 +338,7 @@ theorem curve_boundary_axis
     have := hfar p hp' _ hm; nlinarith [dist_nonneg (x := p) (y := (!₂[(-1 : ℝ),0] : Plane))]
   have hzb : dist p (!₂[(1 : ℝ), 0]) ^ 2 ≤ 4 := by
     have := hfar p hp' _ hp; nlinarith [dist_nonneg (x := p) (y := (!₂[(1 : ℝ),0] : Plane))]
-  rw [dist_sq_coord] at hza hzb
+  rw [dist_sq_eq_sum_coord_sq] at hza hzb
   simp only [Matrix.cons_val_zero, Matrix.cons_val_one] at hza hzb
   rcases hbdry with h | h | h | h
   · have h2 : (p 1)^2 = 0 := le_antisymm (by nlinarith [hzb]) (sq_nonneg _)
@@ -365,11 +366,13 @@ theorem exists_lower_boundary_path
   set Rt : Set Plane := {p : Plane | p 0 = 1 ∧ p 1 ∈ Ico (-2 : ℝ) 0} with hRdef
   set Bot : Set Plane := {p : Plane | p 1 = -2 ∧ p 0 ∈ Icc (-1 : ℝ) 1} with hBdef
   have hLpc : IsPathConnected L :=
-    isPathConnected_vertSeg (-1) ((convex_Ico _ _).isPathConnected (nonempty_Ico.mpr (by norm_num)))
+    isPathConnected_verticalSegment (-1)
+      ((convex_Ico _ _).isPathConnected (nonempty_Ico.mpr (by norm_num)))
   have hRpc : IsPathConnected Rt :=
-    isPathConnected_vertSeg 1 ((convex_Ico _ _).isPathConnected (nonempty_Ico.mpr (by norm_num)))
+    isPathConnected_verticalSegment 1
+      ((convex_Ico _ _).isPathConnected (nonempty_Ico.mpr (by norm_num)))
   have hBpc : IsPathConnected Bot :=
-    isPathConnected_horizSeg (-2)
+    isPathConnected_horizontalSegment (-2)
       ((convex_Icc _ _).isPathConnected (nonempty_Icc.mpr (by norm_num)))
   have memL : (!₂[(-1 : ℝ), -2] : Plane) ∈ L :=
     ⟨by simp, by rw [mem_Ico]; exact ⟨by simp, by norm_num⟩⟩
@@ -391,10 +394,11 @@ theorem exists_lower_boundary_path
     · obtain ⟨h0, h1⟩ := hpp; rw [mem_Ico] at h1
       exact ⟨by rw [mem_Icc, h0]; norm_num, by rw [mem_Icc]; exact ⟨h1.1, by linarith [h1.2]⟩⟩
   · rintro p ((hpp | hpp) | hpp) hpr
-    · have := curve_boundary_axis hm hp hfar p hpr (Or.inl hpp.1); linarith [hpp.2.2]
-    · have := curve_boundary_axis hm hp hfar p hpr (Or.inr (Or.inr (Or.inl hpp.1)))
+    · have := curve_meets_axis_within_rectangle hm hp hfar p hpr (Or.inl hpp.1); linarith [hpp.2.2]
+    · have := curve_meets_axis_within_rectangle hm hp hfar p hpr (Or.inr (Or.inr (Or.inl hpp.1)))
       linarith [hpp.1]
-    · have := curve_boundary_axis hm hp hfar p hpr (Or.inr (Or.inl hpp.1)); linarith [hpp.2.2]
+    · have :=
+      curve_meets_axis_within_rectangle hm hp hfar p hpr (Or.inr (Or.inl hpp.1)); linarith [hpp.2.2]
   · intro p hp0 hp1 hnint hpneg
     rcases not_and_or.mp hnint with hn0 | hn1
     · rw [mem_Ioo, not_and_or] at hn0
@@ -424,11 +428,14 @@ theorem exists_upper_boundary_path
   set Rt : Set Plane := {p : Plane | p 0 = 1 ∧ p 1 ∈ Ioc (0 : ℝ) 2} with hRdef
   set Top : Set Plane := {p : Plane | p 1 = 2 ∧ p 0 ∈ Icc (-1 : ℝ) 1} with hTdef
   have hLpc : IsPathConnected L :=
-    isPathConnected_vertSeg (-1) ((convex_Ioc _ _).isPathConnected (nonempty_Ioc.mpr (by norm_num)))
+    isPathConnected_verticalSegment (-1)
+      ((convex_Ioc _ _).isPathConnected (nonempty_Ioc.mpr (by norm_num)))
   have hRpc : IsPathConnected Rt :=
-    isPathConnected_vertSeg 1 ((convex_Ioc _ _).isPathConnected (nonempty_Ioc.mpr (by norm_num)))
+    isPathConnected_verticalSegment 1
+      ((convex_Ioc _ _).isPathConnected (nonempty_Ioc.mpr (by norm_num)))
   have hTpc : IsPathConnected Top :=
-    isPathConnected_horizSeg 2 ((convex_Icc _ _).isPathConnected (nonempty_Icc.mpr (by norm_num)))
+    isPathConnected_horizontalSegment 2
+      ((convex_Icc _ _).isPathConnected (nonempty_Icc.mpr (by norm_num)))
   have memL : (!₂[(-1 : ℝ), 2] : Plane) ∈ L :=
     ⟨by simp, by rw [mem_Ioc]; exact ⟨by norm_num, by simp⟩⟩
   have memTopL : (!₂[(-1 : ℝ), 2] : Plane) ∈ Top :=
@@ -449,10 +456,11 @@ theorem exists_upper_boundary_path
     · obtain ⟨h0, h1⟩ := hpp; rw [mem_Ioc] at h1
       exact ⟨by rw [mem_Icc, h0]; norm_num, by rw [mem_Icc]; exact ⟨by linarith [h1.1], h1.2⟩⟩
   · rintro p ((hpp | hpp) | hpp) hpr
-    · have := curve_boundary_axis hm hp hfar p hpr (Or.inl hpp.1); linarith [hpp.2.1]
-    · have := curve_boundary_axis hm hp hfar p hpr (Or.inr (Or.inr (Or.inr hpp.1)))
+    · have := curve_meets_axis_within_rectangle hm hp hfar p hpr (Or.inl hpp.1); linarith [hpp.2.1]
+    · have := curve_meets_axis_within_rectangle hm hp hfar p hpr (Or.inr (Or.inr (Or.inr hpp.1)))
       linarith [hpp.1]
-    · have := curve_boundary_axis hm hp hfar p hpr (Or.inr (Or.inl hpp.1)); linarith [hpp.2.1]
+    · have :=
+      curve_meets_axis_within_rectangle hm hp hfar p hpr (Or.inr (Or.inl hpp.1)); linarith [hpp.2.1]
   · intro p hp0 hp1 hnint hppos
     rcases not_and_or.mp hnint with hn0 | hn1
     · rw [mem_Ioo, not_and_or] at hn0

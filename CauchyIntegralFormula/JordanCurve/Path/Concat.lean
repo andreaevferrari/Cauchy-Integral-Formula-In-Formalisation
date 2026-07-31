@@ -21,7 +21,8 @@ open Metric Set Function Bornology
 
 /-! ### Path-concatenation infrastructure and Maehara's interior points
 
-The tools below package repeated use of the `crossing` lemma: any bottom-to-top
+The tools below package repeated use of the
+`transversal_paths_meet_in_rectangle` lemma: any bottom-to-top
 path in the normalized rectangle meets each arc (`vertical_meets_arc`), together with
 the plumbing (`concatPath2`, `concatPath3`) that glues path pieces into one
 continuous path on `[-1,1]` whose image is the union of the pieces. -/
@@ -53,7 +54,8 @@ theorem arc_joinedIn {J : Set Plane} (e : ↥J ≃ₜ unitInterval)
 /-- **Math.** **Key reusable tool.** Any path `v` running from the bottom edge (`v (-1) 1 = -2`)
 to the top edge (`v 1 1 = 2`) of the normalized rectangle `[-1,1]×[-2,2]` must meet an
 arc `J` that joins the left point `a = !₂[-1,0]` to the right point `b = !₂[1,0]` inside
-the rectangle.  Immediate from `crossing`, using `arc_path` for the horizontal path. -/
+the rectangle.  Immediate from `transversal_paths_meet_in_rectangle`,
+  using `path_reparametrized_on_neg_one_one` for the horizontal path. -/
 theorem vertical_meets_arc (hbr : BrouwerFPT) {J : Set Plane}
     (hJsub : J ⊆ {p : Plane | p 0 ∈ Icc (-1 : ℝ) 1 ∧ p 1 ∈ Icc (-2 : ℝ) 2})
     (hJoin : JoinedIn J (!₂[(-1 : ℝ), 0]) (!₂[(1 : ℝ), 0]))
@@ -61,18 +63,18 @@ theorem vertical_meets_arc (hbr : BrouwerFPT) {J : Set Plane}
     (hvE : ∀ t ∈ Icc (-1 : ℝ) 1, v t 0 ∈ Icc (-1 : ℝ) 1 ∧ v t 1 ∈ Icc (-2 : ℝ) 2)
     (hv1 : v (-1) 1 = -2) (hv2 : v 1 1 = 2) :
     ∃ t ∈ Icc (-1 : ℝ) 1, v t ∈ J := by
-  obtain ⟨h, hcontOn, hh1, hh2, hhmem⟩ := arc_path hJoin
+  obtain ⟨h, hcontOn, hh1, hh2, hhmem⟩ := path_reparametrized_on_neg_one_one hJoin
   have hhE : ∀ t ∈ Icc (-1 : ℝ) 1, h t 0 ∈ Icc (-1 : ℝ) 1 ∧ h t 1 ∈ Icc (-2 : ℝ) 2 :=
     fun t ht => hJsub (hhmem t ht)
   have hh1' : h (-1) 0 = -1 := by rw [hh1]; simp
   have hh2' : h 1 0 = 1 := by rw [hh2]; simp
-  obtain ⟨s, hs, t, ht, heq⟩ := crossing hbr (by norm_num : (-1 : ℝ) ≤ 1)
+  obtain ⟨s, hs, t, ht, heq⟩ := transversal_paths_meet_in_rectangle hbr (by norm_num : (-1 : ℝ) ≤ 1)
     (by norm_num : (-2 : ℝ) ≤ 2) h v hcontOn hvcont hhE hvE hh1' hh2' hv1 hv2
   exact ⟨t, ht, heq ▸ hhmem s hs⟩
 
 /-- **Math.** A path piece `f : ℝ → Plane`, continuous on `[-1,1]`, as a `Path (f (-1)) (f 1)`
 over `unitInterval` (reparametrized by `s ↦ 2s-1`). -/
-private noncomputable def pathOfPiece {f : ℝ → Plane}
+private noncomputable def pathOfRestriction {f : ℝ → Plane}
     (hf : ContinuousOn f (Icc (-1 : ℝ) 1)) : Path (f (-1)) (f 1) :=
   Path.mk ⟨fun s : unitInterval => f (2 * (s : ℝ) - 1), by
       refine hf.comp_continuous (by fun_prop) (fun s => ?_)
@@ -80,9 +82,9 @@ private noncomputable def pathOfPiece {f : ℝ → Plane}
       constructor <;> [linarith [hs.1]; linarith [hs.2]]⟩
     (by norm_num [Set.Icc.coe_zero]) (by norm_num [Set.Icc.coe_one])
 
-private lemma pathOfPiece_range {f : ℝ → Plane}
+private lemma pathOfRestriction_range {f : ℝ → Plane}
     (hf : ContinuousOn f (Icc (-1 : ℝ) 1)) :
-    Set.range (pathOfPiece hf) = f '' Icc (-1 : ℝ) 1 := by
+    Set.range (pathOfRestriction hf) = f '' Icc (-1 : ℝ) 1 := by
   ext p
   simp only [Set.mem_range, Set.mem_image, Set.mem_Icc]
   constructor
@@ -103,7 +105,7 @@ theorem concatPath2 {f g : ℝ → Plane}
     ∃ c : ℝ → Plane, ContinuousOn c (Icc (-1 : ℝ) 1) ∧ c (-1) = f (-1) ∧ c 1 = g 1 ∧
       ∀ t ∈ Icc (-1 : ℝ) 1, c t ∈ f '' Icc (-1 : ℝ) 1 ∪ g '' Icc (-1 : ℝ) 1 := by
   set P : Path (f (-1)) (g 1) :=
-    (pathOfPiece hf).trans ((pathOfPiece hg).cast hchain rfl) with hP
+    (pathOfRestriction hf).trans ((pathOfRestriction hg).cast hchain rfl) with hP
   refine ⟨fun t => P (Set.projIcc 0 1 (by norm_num) ((t + 1) / 2)), ?_, ?_, ?_, ?_⟩
   · exact (P.continuous.comp (continuous_projIcc.comp (by fun_prop))).continuousOn
   · change P _ = f (-1)
@@ -117,9 +119,9 @@ theorem concatPath2 {f g : ℝ → Plane}
   · intro t _
     have hmem : P (Set.projIcc 0 1 (by norm_num) ((t + 1) / 2)) ∈ Set.range P := ⟨_, rfl⟩
     rw [hP, Path.trans_range] at hmem
-    have hr1 : Set.range (pathOfPiece hf) = f '' Icc (-1 : ℝ) 1 := pathOfPiece_range hf
-    have hr2 : Set.range ((pathOfPiece hg).cast hchain rfl) = g '' Icc (-1 : ℝ) 1 := by
-      simp only [Path.cast_coe]; exact pathOfPiece_range hg
+    have hr1 : Set.range (pathOfRestriction hf) = f '' Icc (-1 : ℝ) 1 := pathOfRestriction_range hf
+    have hr2 : Set.range ((pathOfRestriction hg).cast hchain rfl) = g '' Icc (-1 : ℝ) 1 := by
+      simp only [Path.cast_coe]; exact pathOfRestriction_range hg
     rw [hr1, hr2] at hmem
     exact hmem
 
@@ -174,7 +176,7 @@ theorem concatPath5 {f1 f2 f3 f4 f5 : ℝ → Plane}
 
 /-- **Math.** **Interior point `m`.** The intersection `J_n ∩ axis` (`axis = {p | p 0 = 0}`) is
 compact and nonempty (it contains `l`), hence attains its `y`-minimum at a point `m`. -/
-theorem exists_ymin_Jn_axis {J_n : Set Plane} (hJncl : IsClosed J_n)
+theorem exists_lowest_point_of_northern_arc_on_axis {J_n : Set Plane} (hJncl : IsClosed J_n)
     (hcpt : IsCompact J_n) {l : Plane} (hlJn : l ∈ J_n) (hl0 : l 0 = 0) :
     ∃ m ∈ J_n, m 0 = 0 ∧ ∀ p ∈ J_n, p 0 = 0 → m 1 ≤ p 1 := by
   set Jm : Set Plane := {p ∈ J_n | p 0 = 0} with hJm

@@ -27,20 +27,22 @@ by a farthest pair `a, b`, and a similarity homeomorphism `T` moves `a ↦ !₂[
 reduces the geometric core (`step_A`, `step_B`) to *normalized* statements in which
 the farthest pair sits at `(±1, 0)`. -/
 
-/-- **Math.** `complexLIE 1 = !₂[1,0]`. -/
-private lemma complexLIE_one : Arcs.complexLIE (1 : ℂ) = !₂[(1:ℝ), 0] := by
+/-- **Math.** `complexToPlaneIsometry 1 = !₂[1,0]`. -/
+private lemma complexToPlaneIsometry_one : Arcs.complexToPlaneIsometry (1 : ℂ) = !₂[(1:ℝ), 0] := by
   have h := Complex.isometryOfOrthonormal_apply (EuclideanSpace.basisFun (Fin 2) ℝ) (1 : ℂ)
-  rw [show Arcs.complexLIE
+  rw [show Arcs.complexToPlaneIsometry
         = Complex.isometryOfOrthonormal (EuclideanSpace.basisFun (Fin 2) ℝ) from rfl, h]
   simp only [Complex.one_re, Complex.one_im, one_smul, zero_smul, add_zero,
     EuclideanSpace.basisFun_apply]
   ext i; fin_cases i <;>
     simp
 
-/-- **Math.** `complexLIE (-1) = !₂[-1,0]`. -/
-private lemma complexLIE_negOne : Arcs.complexLIE (-1 : ℂ) = !₂[(-1:ℝ), 0] := by
+/-- **Math.** `complexToPlaneIsometry (-1) = !₂[-1,0]`. -/
+private lemma complexToPlaneIsometry_negOne :
+    Arcs.complexToPlaneIsometry (-1 : ℂ) = !₂[(-1 : ℝ), 0] :=
+  by
   have h := Complex.isometryOfOrthonormal_apply (EuclideanSpace.basisFun (Fin 2) ℝ) (-1 : ℂ)
-  rw [show Arcs.complexLIE
+  rw [show Arcs.complexToPlaneIsometry
         = Complex.isometryOfOrthonormal (EuclideanSpace.basisFun (Fin 2) ℝ) from rfl, h]
   simp only [Complex.neg_re, Complex.one_re, Complex.neg_im, Complex.one_im, neg_zero,
     zero_smul, add_zero, EuclideanSpace.basisFun_apply]
@@ -89,11 +91,11 @@ theorem exists_farthest_pair {r : sphere (0 : Plane) 1 → Plane}
 /-- **Math.** **Task 2 (similarity normalization).** Given `a ≠ b` on the plane there is a
 similarity homeomorphism `T : Plane ≃ₜ Plane` scaling every distance by the fixed
 positive factor `2 / dist a b`, with `T a = !₂[-1,0]` and `T b = !₂[1,0]`. -/
-theorem exists_similarity {a b : Plane} (hab : a ≠ b) :
+theorem exists_similarity_normalizing_farthest_pair {a b : Plane} (hab : a ≠ b) :
     ∃ T : Plane ≃ₜ Plane,
       (∀ z w, dist (T z) (T w) = (2 / dist a b) * dist z w) ∧
         T a = !₂[(-1:ℝ), 0] ∧ T b = !₂[(1:ℝ), 0] := by
-  set L := Arcs.complexLIE with hL
+  set L := Arcs.complexToPlaneIsometry with hL
   set A : ℂ := L.symm a with hA
   set B : ℂ := L.symm b with hB
   have hBAne : B ≠ A := by
@@ -126,10 +128,10 @@ theorem exists_similarity {a b : Plane} (hab : a ≠ b) :
     rw [hαnorm]
   · -- T a = !₂[-1,0]
     have hval : α * A + β = -1 := by rw [hα, hβ]; field_simp; ring
-    rw [hT_apply, ← hA, hval, hL]; exact complexLIE_negOne
+    rw [hT_apply, ← hA, hval, hL]; exact complexToPlaneIsometry_negOne
   · -- T b = !₂[1,0]
     have hval : α * B + β = 1 := by rw [hα, hβ]; field_simp; ring
-    rw [hT_apply, ← hB, hval, hL]; exact complexLIE_one
+    rw [hT_apply, ← hB, hval, hL]; exact complexToPlaneIsometry_one
 
 /-- **Math.** Boundedness is preserved and reflected by a map scaling all distances by a fixed
 positive factor. -/
