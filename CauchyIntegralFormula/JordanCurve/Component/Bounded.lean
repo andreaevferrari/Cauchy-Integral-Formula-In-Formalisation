@@ -19,10 +19,6 @@ namespace JordanCurve
 
 open Metric Set Function Bornology
 
-set_option maxHeartbeats 1600000 in
--- A 325-line proof: the elaborator needs more than the default budget to get
--- through it. Inherited from the original development, and a standing reason
--- to break the proof up rather than to keep the option.
 /-- **Math.** **Maehara Step A (normalized).** The geometric core in normalized coordinates:
 the farthest pair sits at `!₂[-1,0]`, `!₂[1,0]` (so the diameter is `2`). -/
 theorem exists_bounded_component_of_normalized (hbr : BrouwerFPT)
@@ -92,31 +88,12 @@ theorem exists_bounded_component_of_normalized (hbr : BrouwerFPT)
     · exact absurd (hpmax z₀ hJs hz₀0 hz₀m_lt.le) (not_le.2 hpz₀_lt)
   refine ⟨z₀, hz₀c, ?_⟩
   -- the rectangle `E`, its open interior `O`
-  set E : Set Plane := {p : Plane | p 0 ∈ Icc (-1 : ℝ) 1 ∧ p 1 ∈ Icc (-2 : ℝ) 2} with hEdef
-  set O : Set Plane := {p : Plane | p 0 ∈ Ioo (-1 : ℝ) 1 ∧ p 1 ∈ Ioo (-2 : ℝ) 2} with hOdef
-  have hEbdd : IsBounded E := by
-    apply (Metric.isBounded_closedBall (x := (0:Plane)) (r := 3)).subset
-    intro z hz
-    rw [Metric.mem_closedBall]
-    have hz1 := hz.1; have hz2 := hz.2; rw [mem_Icc] at hz1 hz2
-    have hsq : dist z (0:Plane) ^ 2 ≤ 9 := by
-      rw [dist_sq_eq_sum_coord_sq, show (0:Plane) 0 = 0 from by simp,
-        show (0:Plane) 1 = 0 from by simp]
-      nlinarith [hz1.1, hz1.2, hz2.1, hz2.2]
-    nlinarith [dist_nonneg (x := z) (y := (0:Plane)), hsq]
-  have hproj0 : Continuous (fun w : Plane => w 0) := by fun_prop
-  have hproj1 : Continuous (fun w : Plane => w 1) := by fun_prop
-  have hOopen : IsOpen O := by
-    have hEq : O = (fun w : Plane => w 0) ⁻¹' Ioo (-1 : ℝ) 1
-        ∩ (fun w : Plane => w 1) ⁻¹' Ioo (-2 : ℝ) 2 := by
-      ext w; simp only [hOdef, mem_setOf_eq, mem_inter_iff, mem_preimage]
-    rw [hEq]; exact (isOpen_Ioo.preimage hproj0).inter (isOpen_Ioo.preimage hproj1)
-  have hEclosed : IsClosed E := by
-    have hEq : E = (fun w : Plane => w 0) ⁻¹' Icc (-1 : ℝ) 1
-        ∩ (fun w : Plane => w 1) ⁻¹' Icc (-2 : ℝ) 2 := by
-      ext w; simp only [hEdef, mem_setOf_eq, mem_inter_iff, mem_preimage]
-    rw [hEq]; exact (isClosed_Icc.preimage hproj0).inter (isClosed_Icc.preimage hproj1)
-  have hOE : O ⊆ E := fun w hw => ⟨Ioo_subset_Icc_self hw.1, Ioo_subset_Icc_self hw.2⟩
+  set E : Set Plane := normalizedRectangle with hEdef
+  set O : Set Plane := openNormalizedRectangle with hOdef
+  have hEbdd : IsBounded E := isBounded_normalizedRectangle
+  have hOopen : IsOpen O := isOpen_openNormalizedRectangle
+  have hEclosed : IsClosed E := isClosed_normalizedRectangle
+  have hOE : O ⊆ E := openNormalizedRectangle_subset
   have hz₀O : z₀ ∈ O := by
     refine ⟨?_, ?_⟩
     · rw [mem_Ioo, hz₀0]; constructor <;> norm_num
@@ -188,15 +165,16 @@ theorem exists_bounded_component_of_normalized (hbr : BrouwerFPT)
       intro t ht; rw [mem_Icc] at ht ⊢
       exact ⟨by nlinarith [htw.1, ht.2], by nlinarith [htw.1, ht.1]⟩
     -- piece 3 : `z₀ → m` along the axis
-    set g3 : ℝ → Plane := fun t => z₀ + ((t + 1) / 2) • (m - z₀) with hg3def
-    have hg3cont : ContinuousOn g3 (Icc (-1 : ℝ) 1) := (by fun_prop : Continuous g3).continuousOn
-    have hg3a : g3 (-1) = z₀ := by simp [hg3def]
-    have hg3b : g3 1 = m := by simp [hg3def]
-    have hg3x : ∀ t, g3 t 0 = 0 := fun t => by simp [hg3def, hz₀0, hm0]
-    have hg3y : ∀ t ∈ Icc (-1 : ℝ) 1, g3 t 1 ∈ Icc (z₀ 1) (m 1) := by
-      intro t ht; rw [mem_Icc] at ht ⊢
-      simp only [hg3def, PiLp.add_apply, PiLp.smul_apply, PiLp.sub_apply, smul_eq_mul]
-      constructor <;> nlinarith [ht.1, ht.2, hz₀m_lt.le]
+    set g3 : ℝ → Plane := segmentParam z₀ m with hg3def
+    have hg3cont : ContinuousOn g3 (Icc (-1 : ℝ) 1) :=
+      (segmentParam_cont _ _).continuousOn
+    have hg3a : g3 (-1) = z₀ := segmentParam_neg1 _ _
+    have hg3b : g3 1 = m := segmentParam_one _ _
+    have hg3x : ∀ t, g3 t 0 = 0 := fun t => by
+      rw [hg3def, segmentParam_coord, hz₀0, hm0]; ring
+    have hg3y : ∀ t ∈ Icc (-1 : ℝ) 1, g3 t 1 ∈ Icc (z₀ 1) (m 1) := fun t ht => by
+      rw [hg3def]
+      exact segmentParam_coord_mem_Icc 1 ⟨le_refl _, hz₀m_lt.le⟩ ⟨hz₀m_lt.le, le_refl _⟩ ht
     have hg3missJs : ∀ t ∈ Icc (-1 : ℝ) 1, g3 t ∉ J_s := by
       intro t ht hJs
       have hy := hg3y t ht; rw [mem_Icc] at hy
@@ -211,15 +189,17 @@ theorem exists_bounded_component_of_normalized (hbr : BrouwerFPT)
       have hmem : g4 t ∈ J_n ∩ J_s := ⟨hg4.1, hJs⟩
       rw [hInter] at hmem; exact hg4.2 hmem
     -- piece 5 : `l → n` along the axis
-    set g5 : ℝ → Plane := fun t => l + ((t + 1) / 2) • ((!₂[(0 : ℝ), 2] : Plane) - l) with hg5def
-    have hg5cont : ContinuousOn g5 (Icc (-1 : ℝ) 1) := (by fun_prop : Continuous g5).continuousOn
-    have hg5a : g5 (-1) = l := by simp [hg5def]
-    have hg5b : g5 1 = !₂[(0 : ℝ), 2] := by simp [hg5def]
-    have hg5x : ∀ t, g5 t 0 = 0 := fun t => by simp [hg5def, hl0]
-    have hg5y : ∀ t ∈ Icc (-1 : ℝ) 1, g5 t 1 ∈ Icc (l 1) 2 := by
-      intro t ht; rw [mem_Icc] at ht ⊢
-      simp only [hg5def, PiLp.add_apply, PiLp.smul_apply, PiLp.sub_apply, smul_eq_mul]
-      constructor <;> nlinarith [ht.1, ht.2, hlE1.2]
+    set g5 : ℝ → Plane := segmentParam l (!₂[(0 : ℝ), 2] : Plane) with hg5def
+    have hg5cont : ContinuousOn g5 (Icc (-1 : ℝ) 1) :=
+      (segmentParam_cont _ _).continuousOn
+    have hg5a : g5 (-1) = l := segmentParam_neg1 _ _
+    have hg5b : g5 1 = (!₂[(0 : ℝ), 2] : Plane) := segmentParam_one _ _
+    have hg5x : ∀ t, g5 t 0 = 0 := fun t => by
+      rw [hg5def, segmentParam_coord, hl0]; simp
+    have hg5y : ∀ t ∈ Icc (-1 : ℝ) 1, g5 t 1 ∈ Icc (l 1) 2 := fun t ht => by
+      rw [hg5def]
+      exact segmentParam_coord_mem_Icc 1 ⟨le_refl _, hlE1.2⟩
+        ⟨by rw [hn1]; exact hlE1.2, by rw [hn1]⟩ ht
     have hg5missJs : ∀ t ∈ Icc (-1 : ℝ) 1, g5 t ∉ J_s := by
       intro t ht hJs
       have hy := hg5y t ht; rw [mem_Icc] at hy
@@ -268,17 +248,17 @@ theorem exists_bounded_component_of_normalized (hbr : BrouwerFPT)
       exists_upper_boundary_path hm hp hfar
     have hwGup : α tw ∈ Gup := hGupFrom (α tw) hwC.1 hwC.2 hwO hwpos
     -- piece 1 : `s → q` along the axis
-    set g1 : ℝ → Plane :=
-      fun t => (!₂[(0 : ℝ), -2] : Plane) + ((t + 1) / 2) • (q - (!₂[(0 : ℝ), -2] : Plane))
-      with hg1def
-    have hg1cont : ContinuousOn g1 (Icc (-1 : ℝ) 1) := (by fun_prop : Continuous g1).continuousOn
-    have hg1a : g1 (-1) = !₂[(0 : ℝ), -2] := by simp [hg1def]
-    have hg1b : g1 1 = q := by simp [hg1def]
-    have hg1x : ∀ t, g1 t 0 = 0 := fun t => by simp [hg1def, hq0]
-    have hg1y : ∀ t ∈ Icc (-1 : ℝ) 1, g1 t 1 ∈ Icc (-2 : ℝ) (q 1) := by
-      intro t ht; rw [mem_Icc] at ht ⊢
-      simp only [hg1def, PiLp.add_apply, PiLp.smul_apply, PiLp.sub_apply, smul_eq_mul]
-      constructor <;> nlinarith [ht.1, ht.2, hqE1.1]
+    set g1 : ℝ → Plane := segmentParam (!₂[(0 : ℝ), -2] : Plane) q with hg1def
+    have hg1cont : ContinuousOn g1 (Icc (-1 : ℝ) 1) :=
+      (segmentParam_cont _ _).continuousOn
+    have hg1a : g1 (-1) = (!₂[(0 : ℝ), -2] : Plane) := segmentParam_neg1 _ _
+    have hg1b : g1 1 = q := segmentParam_one _ _
+    have hg1x : ∀ t, g1 t 0 = 0 := fun t => by
+      rw [hg1def, segmentParam_coord, hs0, hq0]; ring
+    have hg1y : ∀ t ∈ Icc (-1 : ℝ) 1, g1 t 1 ∈ Icc (-2 : ℝ) (q 1) := fun t ht => by
+      rw [hg1def]
+      exact segmentParam_coord_mem_Icc 1 ⟨by rw [hs1], by rw [hs1]; exact hqE1.1⟩
+        ⟨hqE1.1, le_refl _⟩ ht
     have hg1missJn : ∀ t ∈ Icc (-1 : ℝ) 1, g1 t ∉ J_n := by
       intro t ht hJn
       have hy := hg1y t ht; rw [mem_Icc] at hy
@@ -293,15 +273,16 @@ theorem exists_bounded_component_of_normalized (hbr : BrouwerFPT)
       have hmem : g2 t ∈ J_n ∩ J_s := ⟨hJn, hg2'.1⟩
       rw [hInter] at hmem; exact hg2'.2 hmem
     -- piece 3 : `p → z₀` along the axis
-    set g3 : ℝ → Plane := fun t => p + ((t + 1) / 2) • (z₀ - p) with hg3def
-    have hg3cont : ContinuousOn g3 (Icc (-1 : ℝ) 1) := (by fun_prop : Continuous g3).continuousOn
-    have hg3a : g3 (-1) = p := by simp [hg3def]
-    have hg3b : g3 1 = z₀ := by simp [hg3def]
-    have hg3x : ∀ t, g3 t 0 = 0 := fun t => by simp [hg3def, hp0, hz₀0]
-    have hg3y : ∀ t ∈ Icc (-1 : ℝ) 1, g3 t 1 ∈ Icc (p 1) (z₀ 1) := by
-      intro t ht; rw [mem_Icc] at ht ⊢
-      simp only [hg3def, PiLp.add_apply, PiLp.smul_apply, PiLp.sub_apply, smul_eq_mul]
-      constructor <;> nlinarith [ht.1, ht.2, hpz₀_lt.le]
+    set g3 : ℝ → Plane := segmentParam p z₀ with hg3def
+    have hg3cont : ContinuousOn g3 (Icc (-1 : ℝ) 1) :=
+      (segmentParam_cont _ _).continuousOn
+    have hg3a : g3 (-1) = p := segmentParam_neg1 _ _
+    have hg3b : g3 1 = z₀ := segmentParam_one _ _
+    have hg3x : ∀ t, g3 t 0 = 0 := fun t => by
+      rw [hg3def, segmentParam_coord, hp0, hz₀0]; ring
+    have hg3y : ∀ t ∈ Icc (-1 : ℝ) 1, g3 t 1 ∈ Icc (p 1) (z₀ 1) := fun t ht => by
+      rw [hg3def]
+      exact segmentParam_coord_mem_Icc 1 ⟨le_refl _, hpz₀_lt.le⟩ ⟨hpz₀_lt.le, le_refl _⟩ ht
     have hg3missJn : ∀ t ∈ Icc (-1 : ℝ) 1, g3 t ∉ J_n := by
       intro t ht hJn
       have hy := hg3y t ht; rw [mem_Icc] at hy

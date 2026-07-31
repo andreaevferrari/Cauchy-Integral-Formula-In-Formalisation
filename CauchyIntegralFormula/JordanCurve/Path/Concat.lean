@@ -5,7 +5,7 @@ Authors: rkirov, Xinze Li
 -/
 module
 
-public import CauchyIntegralFormula.JordanCurve.Normalization.Setup
+public import CauchyIntegralFormula.JordanCurve.Path.Segment
 
 /-!
 # Concatenating paths

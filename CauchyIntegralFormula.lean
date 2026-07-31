@@ -12,7 +12,9 @@ public import CauchyIntegralFormula.JordanCurve.Curve.Separation
 public import CauchyIntegralFormula.JordanCurve.Defs
 public import CauchyIntegralFormula.JordanCurve.Main
 public import CauchyIntegralFormula.JordanCurve.Normalization.Frame
+public import CauchyIntegralFormula.JordanCurve.Normalization.Rectangle
 public import CauchyIntegralFormula.JordanCurve.Normalization.Setup
 public import CauchyIntegralFormula.JordanCurve.Path.Concat
 public import CauchyIntegralFormula.JordanCurve.Path.Construction
+public import CauchyIntegralFormula.JordanCurve.Path.Segment
 public import CauchyIntegralFormula.Topology.Anchor
