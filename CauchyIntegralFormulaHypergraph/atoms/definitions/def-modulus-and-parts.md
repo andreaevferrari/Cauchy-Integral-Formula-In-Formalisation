@@ -1,6 +1,12 @@
 ---
 id: 0baf0e4b6d60
 type: definition
+lean:
+  - decl: Complex.normSq
+    module: Mathlib.Data.Complex.Basic
+    line: 509
+    state: proven
+    rev: fabf563a7c95
 references:
   - "[[ref-beck|Beck et al., §1.2]]"
 ---

@@ -1,6 +1,12 @@
 ---
 id: 8d4e527ff597
 type: definition
+lean:
+  - decl: circleIntegral
+    module: Mathlib.MeasureTheory.Integral.CircleIntegral
+    line: 385
+    state: proven
+    rev: fabf563a7c95
 references:
   - "[[ref-beck|Beck et al., §4.1]]"
 ---

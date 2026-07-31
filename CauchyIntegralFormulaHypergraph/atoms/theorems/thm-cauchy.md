@@ -25,3 +25,10 @@ a full proof beyond its scope.
 > [!note]- Notes (click to expand)
 > - Also called the Cauchy–Goursat theorem: the original hypothesis included continuity of $f'$, and removing it is Goursat's contribution.
 > - The debt here is the single largest one in this network. Everything downstream is conditional on it.
+> - No Mathlib counterpart, which is why this card names no declaration. The
+>   nearest is `ContinuousMap.Homotopy.curveIntegral_add_curveIntegral_eq_of_diffContOnCl`,
+>   for closed $1$-forms: it demands a $C^2$ homotopy where this statement asks
+>   only for a continuous one, and its conclusion carries two endpoint-curve
+>   terms. A different statement, not a formalisation of this one. Mathlib
+>   reaches the integral formula by another route entirely — the divergence
+>   theorem on rectangles — so it never needs this theorem in this form.

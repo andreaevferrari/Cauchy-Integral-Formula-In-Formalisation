@@ -1,6 +1,12 @@
 ---
 id: 23a431eb2a6c
 type: definition
+lean:
+  - decl: intervalIntegral
+    module: Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
+    line: 657
+    state: proven
+    rev: fabf563a7c95
 references:
   - "[[ref-beck|Beck et al., §4.1]]"
 ---

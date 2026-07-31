@@ -22,3 +22,7 @@ anything.
 > [!note]- Notes (click to expand)
 > - Carried as a debt on purpose: the source assumes it, and a card that pretended otherwise would misrepresent what the network rests on.
 > - It is one of the earliest substantial theorems of topology, and every known proof is long out of proportion to how obvious the statement looks.
+> - Not in Mathlib. Every declaration whose name contains `Jordan` belongs to
+>   Jordan–Hölder, Jordan algebras or the Jordan decomposition of a measure.
+>   Formalising this statement is a project in itself and not one this
+>   repository should start.

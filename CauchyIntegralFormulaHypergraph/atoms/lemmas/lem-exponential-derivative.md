@@ -2,6 +2,12 @@
 id: 1e3fd4005e16
 status: proved
 type: lemma
+lean:
+  - decl: Complex.hasDerivAt_exp
+    module: Mathlib.Analysis.SpecialFunctions.ExpDeriv
+    line: 88
+    state: proven
+    rev: fabf563a7c95
 references:
   - "[[ref-beck|Beck et al., §3.4]]"
 ---

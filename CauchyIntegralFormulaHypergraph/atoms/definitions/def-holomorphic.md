@@ -1,6 +1,12 @@
 ---
 id: c680ed9d2016
 type: definition
+lean:
+  - decl: DifferentiableOn
+    module: Mathlib.Analysis.Calculus.FDeriv.Defs
+    line: 163
+    state: proven
+    rev: fabf563a7c95
 references:
   - "[[ref-beck|Beck et al., §2.2]]"
 ---

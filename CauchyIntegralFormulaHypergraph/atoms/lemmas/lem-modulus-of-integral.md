@@ -2,6 +2,12 @@
 id: 6c23268772e2
 status: proved
 type: lemma
+lean:
+  - decl: intervalIntegral.norm_integral_le_integral_norm
+    module: Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
+    line: 747
+    state: proven
+    rev: fabf563a7c95
 references:
   - "Standard real analysis"
 ---

@@ -1,6 +1,12 @@
 ---
 id: c0102040b7fd
 type: definition
+lean:
+  - decl: Path.Homotopic
+    module: Mathlib.Topology.Homotopy.Path
+    line: 241
+    state: proven
+    rev: fabf563a7c95
 references:
   - "[[ref-beck|Beck et al., §4.3]]"
 ---

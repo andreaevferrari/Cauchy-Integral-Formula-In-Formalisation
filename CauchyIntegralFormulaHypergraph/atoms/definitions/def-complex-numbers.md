@@ -1,6 +1,12 @@
 ---
 id: 161ced703698
 type: definition
+lean:
+  - decl: Complex
+    module: Mathlib.Data.Complex.Basic
+    line: 34
+    state: proven
+    rev: fabf563a7c95
 references:
   - "[[ref-beck|Beck et al., §1.1]]"
 ---

@@ -1,6 +1,12 @@
 ---
 id: 13c722ac7f98
 type: definition
+lean:
+  - decl: IsCompact
+    module: Mathlib.Topology.Defs.Filter
+    line: 276
+    state: proven
+    rev: fabf563a7c95
 references:
   - "[[ref-beck|Beck et al., §1.4]]"
 ---

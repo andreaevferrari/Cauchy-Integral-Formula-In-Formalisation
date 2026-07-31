@@ -1,6 +1,22 @@
 ---
 id: 3d7e5b3fb720
 type: definition
+lean:
+  - decl: Metric.sphere
+    module: Mathlib.Topology.MetricSpace.Pseudo.Defs
+    line: 429
+    state: proven
+    rev: fabf563a7c95
+  - decl: Metric.ball
+    module: Mathlib.Topology.MetricSpace.Pseudo.Defs
+    line: 367
+    state: proven
+    rev: fabf563a7c95
+  - decl: Metric.closedBall
+    module: Mathlib.Topology.MetricSpace.Pseudo.Defs
+    line: 418
+    state: proven
+    rev: fabf563a7c95
 references:
   - "[[ref-beck|Beck et al., §4.4]]"
 ---

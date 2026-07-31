@@ -1,6 +1,17 @@
 ---
 id: 5c2d3daeaca0
 type: definition
+lean:
+  - decl: Complex.exp
+    module: Mathlib.Analysis.Complex.Exponential
+    line: 62
+    state: proven
+    rev: fabf563a7c95
+  - decl: Real.pi
+    module: Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
+    line: 127
+    state: proven
+    rev: fabf563a7c95
 references:
   - "[[ref-beck|Beck et al., §3.4]]"
 ---

@@ -2,6 +2,12 @@
 id: cd59e975f01c
 status: proved
 type: lemma
+lean:
+  - decl: circleIntegral.integral_sub_inv_of_mem_ball
+    module: Mathlib.MeasureTheory.Integral.CircleIntegral
+    line: 699
+    state: proven
+    rev: fabf563a7c95
 references:
   - "[[ref-beck|Beck et al., Exercise 4.5.4]]"
 ---

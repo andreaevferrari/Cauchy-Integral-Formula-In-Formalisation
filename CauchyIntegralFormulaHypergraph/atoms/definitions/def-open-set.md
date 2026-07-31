@@ -1,6 +1,12 @@
 ---
 id: dd2b28efcf02
 type: definition
+lean:
+  - decl: IsOpen
+    module: Mathlib.Topology.Defs.Basic
+    line: 92
+    state: proven
+    rev: fabf563a7c95
 references:
   - "[[ref-beck|Beck et al., §1.4]]"
 ---

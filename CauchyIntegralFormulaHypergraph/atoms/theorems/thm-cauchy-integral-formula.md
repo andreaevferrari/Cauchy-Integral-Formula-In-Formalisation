@@ -2,6 +2,12 @@
 id: 71fa1b1bb941
 status: proved
 type: theorem
+lean:
+  - decl: Complex.circleIntegral_sub_inv_smul_of_differentiable_on_off_countable
+    module: Mathlib.Analysis.Complex.CauchyIntegral
+    line: 532
+    state: proven
+    rev: fabf563a7c95
 references:
   - "[[ref-beck|Beck et al., §4.4, Theorem 4.4.7]]"
 ---

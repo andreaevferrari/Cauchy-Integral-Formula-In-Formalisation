@@ -144,3 +144,44 @@ python3 tools/render_lint.py    tex→Obsidian rendering
 python3 tools/noise_lint.py     no bibliographic noise in the mathematics
 python3 tools/edge_lint.py      edges ⇔ text
 ```
+
+## 7 · The formal counterpart
+
+A card may name the Lean declaration that realises it. The rule is that a
+card names a **declaration**, never a line:
+
+```yaml
+lean:
+  - decl: Complex.circleIntegral_sub_inv_smul_of_differentiable_on_off_countable
+```
+
+Everything else is resolved by `tools/lean_lint.py` against the checkout in
+`.lake/packages/` and written back:
+
+```yaml
+lean:
+  - decl: Complex.circleIntegral_sub_inv_smul_of_differentiable_on_off_countable
+    module: Mathlib.Analysis.Complex.CauchyIntegral
+    line: 532
+    state: proven
+    rev: fabf563a7c95
+```
+
+- **`decl` is the only field written by hand.** It is stable; a line number
+  is not. Mathlib moves every day, and a line typed into a card is a claim
+  that goes false silently.
+- **`rev` is what makes staleness detectable.** It records the package
+  revision the line was resolved against, so a card whose `rev` differs from
+  `lake-manifest.json` is announcing that its line is a guess.
+- **A declaration that cannot be found fails the check.** A card claiming a
+  counterpart that no longer exists is worse than a card claiming none — this
+  is the job `checkdecls` does for a blueprint, done here for cards.
+- **`state` is read from the declaration**, `sorry` or `proven`, rather than
+  asserted by the author.
+- Naming a counterpart is not a claim that the two say the same thing. Where
+  the formal statement is stronger, more general, or differently shaped, the
+  card's Notes say so.
+
+The four resolved fields are exactly what Astrolabe's `source: lean` record
+reads: `module` gives it the file path it fetches, `line` and `state` it
+takes as they are.

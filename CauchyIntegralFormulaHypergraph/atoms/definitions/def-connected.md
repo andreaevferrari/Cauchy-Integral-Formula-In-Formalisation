@@ -1,6 +1,12 @@
 ---
 id: d83e89332774
 type: definition
+lean:
+  - decl: IsConnected
+    module: Mathlib.Topology.Connected.Basic
+    line: 55
+    state: proven
+    rev: fabf563a7c95
 references:
   - "[[ref-beck|Beck et al., §1.4]]"
 ---
