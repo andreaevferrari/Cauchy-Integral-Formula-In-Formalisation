@@ -87,7 +87,7 @@ theorem openNormalizedRectangle_subset :
 comprehension it unfolds to. -/
 theorem range_subset_normalizedRectangle
     {r : sphere (0 : Plane) 1 → Plane}
-    (hm : (!₂[(-1 : ℝ), 0] : Plane) ∈ range r) (hp : (!₂[(1 : ℝ), 0] : Plane) ∈ range r)
+    (hm : normalizedLeftEnd ∈ range r) (hp : normalizedRightEnd ∈ range r)
     (hfar : ∀ z ∈ range r, ∀ w ∈ range r, dist z w ≤ 2) :
     range r ⊆ normalizedRectangle :=
   normalized_subset_rectangle hm hp hfar

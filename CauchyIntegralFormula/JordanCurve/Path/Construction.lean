@@ -28,24 +28,24 @@ avoiding `J_s`, contradicting `vertical_meets_arc` (`J_s` joins `a` to `b`).  Th
 crossing point lies on the segment, so it sits on the axis at height `≤ m 1`. -/
 theorem segment_m_to_s_meets_southern_arc (hbr : BrouwerFPT)
     {r : sphere (0 : Plane) 1 → Plane} (_hcont : Continuous r) (_hinj : Injective r)
-    (hmr : (!₂[(-1 : ℝ), 0] : Plane) ∈ range r) (hpr : (!₂[(1 : ℝ), 0] : Plane) ∈ range r)
+    (hmr : normalizedLeftEnd ∈ range r) (hpr : normalizedRightEnd ∈ range r)
     (hfar : ∀ z ∈ range r, ∀ w ∈ range r, dist z w ≤ 2)
     {J_n J_s : Set Plane}
     (hUnion : J_n ∪ J_s = range r)
-    (hInter : J_n ∩ J_s = {!₂[(-1 : ℝ), 0], !₂[(1 : ℝ), 0]})
+    (hInter : J_n ∩ J_s = {normalizedLeftEnd, normalizedRightEnd})
     (eJs : ↥J_s ≃ₜ unitInterval)
-    (hpcJn : IsPathConnected (J_n \ {!₂[(-1 : ℝ), 0], !₂[(1 : ℝ), 0]}))
+    (hpcJn : IsPathConnected (J_n \ {normalizedLeftEnd, normalizedRightEnd}))
     {l : Plane} (hlJn : l ∈ J_n) (hl0 : l 0 = 0)
     (hlmax : ∀ q ∈ range r, q 0 = 0 → q 1 ≤ l 1)
     {m : Plane} (hmJn : m ∈ J_n) (hm0 : m 0 = 0) :
     ∃ w ∈ J_s, w 0 = 0 ∧ w 1 ≤ m 1 := by
-  set a : Plane := !₂[(-1 : ℝ), 0] with ha_def
-  set b : Plane := !₂[(1 : ℝ), 0] with hb_def
+  set a : Plane := normalizedLeftEnd with ha_def
+  set b : Plane := normalizedRightEnd with hb_def
   -- opaque bottom / top axis points (avoid unfolding `!₂` in later arithmetic)
   obtain ⟨s, hs0, hs1⟩ : ∃ s : Plane, s 0 = 0 ∧ s 1 = -2 :=
-    ⟨!₂[(0 : ℝ), -2], by simp, by simp⟩
+    ⟨axisBottom, by simp, by simp⟩
   obtain ⟨nn, hn0, hn1⟩ : ∃ nn : Plane, nn 0 = 0 ∧ nn 1 = 2 :=
-    ⟨!₂[(0 : ℝ), 2], by simp, by simp⟩
+    ⟨axisTop, by simp, by simp⟩
   have ha0 : a 0 = -1 := by simp [ha_def]
   have hb0 : b 0 = 1 := by simp [hb_def]
   -- basic containments and the rectangle bound
@@ -168,21 +168,21 @@ The established `y`-ordering is `q 1 ≤ p 1 ≤ z₀ 1 ≤ m 1 ≤ l 1`.  (Note
 the placement of `z₀` between `p` and `m` — provable at this stage.) -/
 theorem exists_maehara_points_on_axis (hbr : BrouwerFPT)
     {r : sphere (0 : Plane) 1 → Plane} (hcont : Continuous r) (hinj : Injective r)
-    (hm : (!₂[(-1 : ℝ), 0] : Plane) ∈ range r) (hp : (!₂[(1 : ℝ), 0] : Plane) ∈ range r)
+    (hm : normalizedLeftEnd ∈ range r) (hp : normalizedRightEnd ∈ range r)
     (hfar : ∀ z ∈ range r, ∀ w ∈ range r, dist z w ≤ 2) :
     ∃ (J_n J_s : Set Plane) (l m p q z₀ : Plane),
       J_n ∪ J_s = range r ∧
-      J_n ∩ J_s = {!₂[(-1 : ℝ), 0], !₂[(1 : ℝ), 0]} ∧
-      IsPathConnected (J_n \ {!₂[(-1 : ℝ), 0], !₂[(1 : ℝ), 0]}) ∧
+      J_n ∩ J_s = {normalizedLeftEnd, normalizedRightEnd} ∧
+      IsPathConnected (J_n \ {normalizedLeftEnd, normalizedRightEnd}) ∧
       (l ∈ J_n ∧ l 0 = 0 ∧ ∀ w ∈ range r, w 0 = 0 → w 1 ≤ l 1) ∧
       (m ∈ J_n ∧ m 0 = 0 ∧ ∀ w ∈ J_n, w 0 = 0 → m 1 ≤ w 1) ∧
       (p ∈ J_s ∧ p 0 = 0 ∧ p 1 ≤ m 1 ∧ ∀ w ∈ J_s, w 0 = 0 → w 1 ≤ m 1 → w 1 ≤ p 1) ∧
       (q ∈ J_s ∧ q 0 = 0 ∧ ∀ w ∈ J_s, w 0 = 0 → q 1 ≤ w 1) ∧
       z₀ = !₂[(0 : ℝ), (m 1 + p 1) / 2] ∧
       m 1 ≤ l 1 ∧ q 1 ≤ p 1 ∧ p 1 ≤ z₀ 1 ∧ z₀ 1 ≤ m 1 ∧
-      IsPathConnected (J_s \ {!₂[(-1 : ℝ), 0], !₂[(1 : ℝ), 0]}) ∧
-      JoinedIn J_n (!₂[(-1 : ℝ), 0]) (!₂[(1 : ℝ), 0]) ∧
-      JoinedIn J_s (!₂[(-1 : ℝ), 0]) (!₂[(1 : ℝ), 0]) := by
+      IsPathConnected (J_s \ {normalizedLeftEnd, normalizedRightEnd}) ∧
+      JoinedIn J_n (normalizedLeftEnd) (normalizedRightEnd) ∧
+      JoinedIn J_s (normalizedLeftEnd) (normalizedRightEnd) := by
   obtain ⟨J_n, J_s, hJncl, hJscl, hUnion, hInter, ⟨eJn⟩, ⟨eJs⟩, hpcJn, hpcJs,
     l, hlr, hl0, hlmax, hlJn⟩ := exists_arc_decomposition_of_curve hbr hcont hinj hm hp hfar
   have hcptr : IsCompact (range r) := jordanCurve_isCompact r hcont
@@ -221,20 +221,20 @@ theorem exists_maehara_points_on_axis (hbr : BrouwerFPT)
   have hpm : p 1 ≤ m 1 := hpSp.2.2
   have hml : m 1 ≤ l 1 := hlmax m (hJnr hmJn) hm0
   have hqp : q 1 ≤ p 1 := hqmin ⟨hpSp.1, hpSp.2.1⟩
-  have haJn : (!₂[(-1 : ℝ), 0] : Plane) ∈ J_n := by
-    have : (!₂[(-1 : ℝ), 0] : Plane) ∈ J_n ∩ J_s := by rw [hInter]; exact mem_insert _ _
+  have haJn : normalizedLeftEnd ∈ J_n := by
+    have : normalizedLeftEnd ∈ J_n ∩ J_s := by rw [hInter]; exact mem_insert _ _
     exact this.1
-  have hbJn : (!₂[(1 : ℝ), 0] : Plane) ∈ J_n := by
-    have : (!₂[(1 : ℝ), 0] : Plane) ∈ J_n ∩ J_s := by rw [hInter]; exact mem_insert_of_mem _ rfl
+  have hbJn : normalizedRightEnd ∈ J_n := by
+    have : normalizedRightEnd ∈ J_n ∩ J_s := by rw [hInter]; exact mem_insert_of_mem _ rfl
     exact this.1
-  have haJs : (!₂[(-1 : ℝ), 0] : Plane) ∈ J_s := by
-    have : (!₂[(-1 : ℝ), 0] : Plane) ∈ J_n ∩ J_s := by rw [hInter]; exact mem_insert _ _
+  have haJs : normalizedLeftEnd ∈ J_s := by
+    have : normalizedLeftEnd ∈ J_n ∩ J_s := by rw [hInter]; exact mem_insert _ _
     exact this.2
-  have hbJs : (!₂[(1 : ℝ), 0] : Plane) ∈ J_s := by
-    have : (!₂[(1 : ℝ), 0] : Plane) ∈ J_n ∩ J_s := by rw [hInter]; exact mem_insert_of_mem _ rfl
+  have hbJs : normalizedRightEnd ∈ J_s := by
+    have : normalizedRightEnd ∈ J_n ∩ J_s := by rw [hInter]; exact mem_insert_of_mem _ rfl
     exact this.2
-  have hJoinJn : JoinedIn J_n (!₂[(-1 : ℝ), 0]) (!₂[(1 : ℝ), 0]) := arc_joinedIn eJn haJn hbJn
-  have hJoinJs : JoinedIn J_s (!₂[(-1 : ℝ), 0]) (!₂[(1 : ℝ), 0]) := arc_joinedIn eJs haJs hbJs
+  have hJoinJn : JoinedIn J_n (normalizedLeftEnd) (normalizedRightEnd) := arc_joinedIn eJn haJn hbJn
+  have hJoinJs : JoinedIn J_s (normalizedLeftEnd) (normalizedRightEnd) := arc_joinedIn eJs haJs hbJs
   refine ⟨J_n, J_s, l, m, p, q, !₂[(0 : ℝ), (m 1 + p 1) / 2], hUnion, hInter, hpcJn,
     ⟨hlJn, hl0, hlmax⟩, ⟨hmJn, hm0, hmmin⟩,
     ⟨hpSp.1, hpSp.2.1, hpm, fun w hwJs hw0 hwm => hpmax ⟨hwJs, hw0, hwm⟩⟩,
@@ -330,16 +330,17 @@ the frontier of the normalized rectangle `[-1,1]×[-2,2]` has `y = 0` (so it is 
 and pins the left/right edges to `y = 0`. -/
 theorem curve_meets_axis_within_rectangle
     {r : sphere (0 : Plane) 1 → Plane}
-    (hm : (!₂[(-1 : ℝ), 0] : Plane) ∈ range r) (hp : (!₂[(1 : ℝ), 0] : Plane) ∈ range r)
+    (hm : normalizedLeftEnd ∈ range r) (hp : normalizedRightEnd ∈ range r)
     (hfar : ∀ z ∈ range r, ∀ w ∈ range r, dist z w ≤ 2) :
     ∀ p ∈ range r, (p 0 = -1 ∨ p 0 = 1 ∨ p 1 = -2 ∨ p 1 = 2) → p 1 = 0 := by
   intro p hp' hbdry
-  have hza : dist p (!₂[(-1 : ℝ), 0]) ^ 2 ≤ 4 := by
-    have := hfar p hp' _ hm; nlinarith [dist_nonneg (x := p) (y := (!₂[(-1 : ℝ),0] : Plane))]
-  have hzb : dist p (!₂[(1 : ℝ), 0]) ^ 2 ≤ 4 := by
-    have := hfar p hp' _ hp; nlinarith [dist_nonneg (x := p) (y := (!₂[(1 : ℝ),0] : Plane))]
+  have hza : dist p (normalizedLeftEnd) ^ 2 ≤ 4 := by
+    have := hfar p hp' _ hm; nlinarith [dist_nonneg (x := p) (y := normalizedLeftEnd)]
+  have hzb : dist p (normalizedRightEnd) ^ 2 ≤ 4 := by
+    have := hfar p hp' _ hp; nlinarith [dist_nonneg (x := p) (y := normalizedRightEnd)]
   rw [dist_sq_eq_sum_coord_sq] at hza hzb
-  simp only [Matrix.cons_val_zero, Matrix.cons_val_one] at hza hzb
+  simp only [normalizedLeftEnd_coord_zero, normalizedLeftEnd_coord_one,
+    normalizedRightEnd_coord_zero, normalizedRightEnd_coord_one] at hza hzb
   rcases hbdry with h | h | h | h
   · have h2 : (p 1)^2 = 0 := le_antisymm (by nlinarith [hzb]) (sq_nonneg _)
     exact pow_eq_zero_iff (by norm_num) |>.mp h2
@@ -353,11 +354,11 @@ path-connected, contains the bottom axis point `!₂[0,-2]`, lies in the rectang
 avoids the curve; moreover any frontier point with `y < 0` lies in it. -/
 theorem exists_lower_boundary_path
     {r : sphere (0 : Plane) 1 → Plane}
-    (hm : (!₂[(-1 : ℝ), 0] : Plane) ∈ range r) (hp : (!₂[(1 : ℝ), 0] : Plane) ∈ range r)
+    (hm : normalizedLeftEnd ∈ range r) (hp : normalizedRightEnd ∈ range r)
     (hfar : ∀ z ∈ range r, ∀ w ∈ range r, dist z w ≤ 2) :
     ∃ G : Set Plane,
       IsPathConnected G ∧
-      (!₂[(0 : ℝ), -2] : Plane) ∈ G ∧
+      axisBottom ∈ G ∧
       G ⊆ {p : Plane | p 0 ∈ Icc (-1 : ℝ) 1 ∧ p 1 ∈ Icc (-2 : ℝ) 2} ∧
       (∀ p ∈ G, p ∉ range r) ∧
       (∀ p : Plane, p 0 ∈ Icc (-1 : ℝ) 1 → p 1 ∈ Icc (-2 : ℝ) 2 →
@@ -415,11 +416,11 @@ path-connected, contains the top axis point `!₂[0,2]`, lies in the rectangle, 
 avoids the curve; moreover any frontier point with `y > 0` lies in it. -/
 theorem exists_upper_boundary_path
     {r : sphere (0 : Plane) 1 → Plane}
-    (hm : (!₂[(-1 : ℝ), 0] : Plane) ∈ range r) (hp : (!₂[(1 : ℝ), 0] : Plane) ∈ range r)
+    (hm : normalizedLeftEnd ∈ range r) (hp : normalizedRightEnd ∈ range r)
     (hfar : ∀ z ∈ range r, ∀ w ∈ range r, dist z w ≤ 2) :
     ∃ G : Set Plane,
       IsPathConnected G ∧
-      (!₂[(0 : ℝ), 2] : Plane) ∈ G ∧
+      axisTop ∈ G ∧
       G ⊆ {p : Plane | p 0 ∈ Icc (-1 : ℝ) 1 ∧ p 1 ∈ Icc (-2 : ℝ) 2} ∧
       (∀ p ∈ G, p ∉ range r) ∧
       (∀ p : Plane, p 0 ∈ Icc (-1 : ℝ) 1 → p 1 ∈ Icc (-2 : ℝ) 2 →

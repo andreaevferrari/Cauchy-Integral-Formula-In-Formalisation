@@ -34,21 +34,21 @@ the rectangle `[-1,1] × [-2,2]`.  For `z ∈ range r`, both `dist z a ≤ 2` an
 `z 0 ∈ [-1,1]` and (adding them) `(z 0)²+(z 1)² ≤ 3`, hence `z 1 ∈ [-2,2]`. -/
 theorem normalized_subset_rectangle
     {r : sphere (0 : Plane) 1 → Plane}
-    (hm : (!₂[(-1 : ℝ), 0] : Plane) ∈ range r) (hp : (!₂[(1 : ℝ), 0] : Plane) ∈ range r)
+    (hm : normalizedLeftEnd ∈ range r) (hp : normalizedRightEnd ∈ range r)
     (hfar : ∀ z ∈ range r, ∀ w ∈ range r, dist z w ≤ 2) :
     range r ⊆ {p : Plane | p 0 ∈ Icc (-1:ℝ) 1 ∧ p 1 ∈ Icc (-2:ℝ) 2} := by
   intro z hz
-  have hza : dist z (!₂[(-1:ℝ), 0]) ≤ 2 := hfar z hz _ hm
-  have hzb : dist z (!₂[(1:ℝ), 0]) ≤ 2 := hfar z hz _ hp
-  have hza2 : dist z (!₂[(-1:ℝ), 0]) ^ 2 ≤ 4 := by
-    nlinarith [dist_nonneg (x := z) (y := (!₂[(-1:ℝ), 0] : Plane))]
-  have hzb2 : dist z (!₂[(1:ℝ), 0]) ^ 2 ≤ 4 := by
-    nlinarith [dist_nonneg (x := z) (y := (!₂[(1:ℝ), 0] : Plane))]
+  have hza : dist z (normalizedLeftEnd) ≤ 2 := hfar z hz _ hm
+  have hzb : dist z (normalizedRightEnd) ≤ 2 := hfar z hz _ hp
+  have hza2 : dist z (normalizedLeftEnd) ^ 2 ≤ 4 := by
+    nlinarith [dist_nonneg (x := z) (y := normalizedLeftEnd)]
+  have hzb2 : dist z (normalizedRightEnd) ^ 2 ≤ 4 := by
+    nlinarith [dist_nonneg (x := z) (y := normalizedRightEnd)]
   rw [dist_sq_eq_sum_coord_sq] at hza2 hzb2
-  have ea0 : (!₂[(-1:ℝ), 0] : Plane) 0 = -1 := by simp
-  have ea1 : (!₂[(-1:ℝ), 0] : Plane) 1 = 0 := by simp
-  have eb0 : (!₂[(1:ℝ), 0] : Plane) 0 = 1 := by simp
-  have eb1 : (!₂[(1:ℝ), 0] : Plane) 1 = 0 := by simp
+  have ea0 : normalizedLeftEnd 0 = -1 := by simp
+  have ea1 : normalizedLeftEnd 1 = 0 := by simp
+  have eb0 : normalizedRightEnd 0 = 1 := by simp
+  have eb1 : normalizedRightEnd 1 = 0 := by simp
   rw [ea0, ea1] at hza2
   rw [eb0, eb1] at hzb2
   simp only [mem_setOf_eq, mem_Icc]
@@ -92,7 +92,7 @@ bottom edge `y=-2` to the top edge `y=2`.  Delivers a curve point on the vertica
 axis. -/
 theorem segment_meets_curve (hbr : BrouwerFPT)
     {r : sphere (0 : Plane) 1 → Plane} (hcont : Continuous r) (_hinj : Injective r)
-    (hm : (!₂[(-1 : ℝ), 0] : Plane) ∈ range r) (hp : (!₂[(1 : ℝ), 0] : Plane) ∈ range r)
+    (hm : normalizedLeftEnd ∈ range r) (hp : normalizedRightEnd ∈ range r)
     (hfar : ∀ z ∈ range r, ∀ w ∈ range r, dist z w ≤ 2) :
     ∃ p ∈ range r, p 0 = 0 ∧ p 1 ∈ Icc (-2:ℝ) 2 := by
   -- the curve is path-connected (continuous image of the path-connected circle)
@@ -104,7 +104,7 @@ theorem segment_meets_curve (hbr : BrouwerFPT)
     pathConnectedSpace_iff_univ.mp ‹_›
   have hpc : IsPathConnected (range r) := by
     have := h1.image hcont; rwa [image_univ] at this
-  have hjoin : JoinedIn (range r) (!₂[(-1:ℝ), 0]) (!₂[(1:ℝ), 0]) :=
+  have hjoin : JoinedIn (range r) (normalizedLeftEnd) (normalizedRightEnd) :=
     hpc.joinedIn _ hm _ hp
   obtain ⟨h, hcontOn, hh1, hh2, hhmem⟩ := path_reparametrized_on_neg_one_one hjoin
   have hrect := normalized_subset_rectangle hm hp hfar
@@ -142,7 +142,7 @@ curve) and nonempty (`segment_meets_curve`), hence attains its `y`-maximum at so
 point `l ∈ range r` with `l 0 = 0`. -/
 theorem exists_highest_point_of_curve_on_axis (hbr : BrouwerFPT)
     {r : sphere (0 : Plane) 1 → Plane} (hcont : Continuous r) (hinj : Injective r)
-    (hm : (!₂[(-1 : ℝ), 0] : Plane) ∈ range r) (hp : (!₂[(1 : ℝ), 0] : Plane) ∈ range r)
+    (hm : normalizedLeftEnd ∈ range r) (hp : normalizedRightEnd ∈ range r)
     (hfar : ∀ z ∈ range r, ∀ w ∈ range r, dist z w ≤ 2) :
     ∃ l ∈ range r, l 0 = 0 ∧ ∀ p ∈ range r, p 0 = 0 → p 1 ≤ l 1 := by
   set Jax : Set Plane := {p ∈ range r | p 0 = 0} with hJax
@@ -186,23 +186,23 @@ pair `a = !₂[-1,0]`, `b = !₂[1,0]` into two closed arcs `J_n`, `J_s ⊆ Plan
 that the `y`-topmost axis point `l` lies in `J_n`. -/
 theorem exists_arc_decomposition_of_curve (hbr : BrouwerFPT)
     {r : sphere (0 : Plane) 1 → Plane} (hcont : Continuous r) (hinj : Injective r)
-    (hm : (!₂[(-1 : ℝ), 0] : Plane) ∈ range r) (hp : (!₂[(1 : ℝ), 0] : Plane) ∈ range r)
+    (hm : normalizedLeftEnd ∈ range r) (hp : normalizedRightEnd ∈ range r)
     (hfar : ∀ z ∈ range r, ∀ w ∈ range r, dist z w ≤ 2) :
     ∃ J_n J_s : Set Plane,
       IsClosed J_n ∧ IsClosed J_s ∧
       J_n ∪ J_s = range r ∧
-      J_n ∩ J_s = {!₂[(-1:ℝ), 0], !₂[(1:ℝ), 0]} ∧
+      J_n ∩ J_s = {normalizedLeftEnd, normalizedRightEnd} ∧
       Nonempty (J_n ≃ₜ unitInterval) ∧ Nonempty (J_s ≃ₜ unitInterval) ∧
-      IsPathConnected (J_n \ {!₂[(-1:ℝ), 0], !₂[(1:ℝ), 0]}) ∧
-      IsPathConnected (J_s \ {!₂[(-1:ℝ), 0], !₂[(1:ℝ), 0]}) ∧
+      IsPathConnected (J_n \ {normalizedLeftEnd, normalizedRightEnd}) ∧
+      IsPathConnected (J_s \ {normalizedLeftEnd, normalizedRightEnd}) ∧
       ∃ l ∈ range r, l 0 = 0 ∧ (∀ p ∈ range r, p 0 = 0 → p 1 ≤ l 1) ∧ l ∈ J_n := by
   obtain ⟨l, hlr, hl0, hlmax⟩ := exists_highest_point_of_curve_on_axis hbr hcont hinj hm hp hfar
   set J := jordanCurveHomeo r hcont hinj with hJdef
-  have hab : (!₂[(-1:ℝ), 0] : Plane) ≠ !₂[(1:ℝ), 0] := by
+  have hab : normalizedLeftEnd ≠ normalizedRightEnd := by
     intro h
-    have h0 : (!₂[(-1:ℝ), 0] : Plane) 0 = (!₂[(1:ℝ), 0] : Plane) 0 := by rw [h]
-    rw [show (!₂[(-1:ℝ), 0] : Plane) 0 = -1 from by simp,
-        show (!₂[(1:ℝ), 0] : Plane) 0 = 1 from by simp] at h0
+    have h0 : normalizedLeftEnd 0 = normalizedRightEnd 0 := by rw [h]
+    rw [show normalizedLeftEnd 0 = -1 from by simp,
+        show normalizedRightEnd 0 = 1 from by simp] at h0
     norm_num at h0
   set x : sphere (0 : Plane) 1 := J.symm ⟨_, hm⟩ with hxdef
   set y : sphere (0 : Plane) 1 := J.symm ⟨_, hp⟩ with hydef
@@ -218,7 +218,7 @@ theorem exists_arc_decomposition_of_curve (hbr : BrouwerFPT)
   set B₂ : Set Plane := (↑) '' A₂ with hB2
   have hBu : B₁ ∪ B₂ = range r := by
     rw [hB1, hB2, ← Set.image_union, hu, Set.image_univ, Subtype.range_coe]
-  have hBi : B₁ ∩ B₂ = {!₂[(-1:ℝ), 0], !₂[(1:ℝ), 0]} := by
+  have hBi : B₁ ∩ B₂ = {normalizedLeftEnd, normalizedRightEnd} := by
     rw [hB1, hB2, ← Set.image_inter Subtype.coe_injective, hi, hJx, hJy,
       Set.image_pair]
   have hn1 : Nonempty (B₁ ≃ₜ unitInterval) := arc_in_plane_homeo_unitInterval e1
@@ -228,11 +228,11 @@ theorem exists_arc_decomposition_of_curve (hbr : BrouwerFPT)
   have hcl2 : IsClosed B₂ :=
     (isCompact_iff_compactSpace.mpr hn2.some.symm.compactSpace).isClosed
   -- transport path-connectedness of the arc interiors down to the plane
-  have hpcB1 : IsPathConnected (B₁ \ {!₂[(-1:ℝ), 0], !₂[(1:ℝ), 0]}) := by
+  have hpcB1 : IsPathConnected (B₁ \ {normalizedLeftEnd, normalizedRightEnd}) := by
     have h := hpcA1.image (continuous_subtype_val (p := fun z => z ∈ range r))
     rwa [Set.image_sdiff Subtype.coe_injective, Set.image_insert_eq, Set.image_singleton,
       hJx, hJy] at h
-  have hpcB2 : IsPathConnected (B₂ \ {!₂[(-1:ℝ), 0], !₂[(1:ℝ), 0]}) := by
+  have hpcB2 : IsPathConnected (B₂ \ {normalizedLeftEnd, normalizedRightEnd}) := by
     have h := hpcA2.image (continuous_subtype_val (p := fun z => z ∈ range r))
     rwa [Set.image_sdiff Subtype.coe_injective, Set.image_insert_eq, Set.image_singleton,
       hJx, hJy] at h

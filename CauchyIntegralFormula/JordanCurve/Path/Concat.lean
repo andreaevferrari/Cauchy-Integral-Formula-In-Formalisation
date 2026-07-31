@@ -58,7 +58,7 @@ the rectangle.  Immediate from `transversal_paths_meet_in_rectangle`,
   using `path_reparametrized_on_neg_one_one` for the horizontal path. -/
 theorem vertical_meets_arc (hbr : BrouwerFPT) {J : Set Plane}
     (hJsub : J ⊆ {p : Plane | p 0 ∈ Icc (-1 : ℝ) 1 ∧ p 1 ∈ Icc (-2 : ℝ) 2})
-    (hJoin : JoinedIn J (!₂[(-1 : ℝ), 0]) (!₂[(1 : ℝ), 0]))
+    (hJoin : JoinedIn J (normalizedLeftEnd) (normalizedRightEnd))
     {v : ℝ → Plane} (hvcont : ContinuousOn v (Icc (-1 : ℝ) 1))
     (hvE : ∀ t ∈ Icc (-1 : ℝ) 1, v t 0 ∈ Icc (-1 : ℝ) 1 ∧ v t 1 ∈ Icc (-2 : ℝ) 2)
     (hv1 : v (-1) 1 = -2) (hv2 : v 1 1 = 2) :

@@ -19,6 +19,42 @@ namespace JordanCurve
 
 open Metric Set Function Bornology
 
+/-- **Math.** The left end of the normalized diameter. After the similarity of
+`exists_similarity_normalizing_farthest_pair`, the farthest pair of the curve
+sits at this point and `normalizedRightEnd`, so the diameter is `2`. -/
+def normalizedLeftEnd : Plane := !₂[(-1 : ℝ), 0]
+
+/-- **Math.** The right end of the normalized diameter. -/
+def normalizedRightEnd : Plane := !₂[(1 : ℝ), 0]
+
+/-- **Math.** Where the vertical axis meets the top edge of the normalized
+rectangle. Maehara's construction runs paths out to it. -/
+def axisTop : Plane := !₂[(0 : ℝ), 2]
+
+/-- **Math.** Where the vertical axis meets the bottom edge of the normalized
+rectangle. -/
+def axisBottom : Plane := !₂[(0 : ℝ), -2]
+
+@[simp] lemma normalizedLeftEnd_coord_zero : normalizedLeftEnd 0 = -1 := by
+  simp [normalizedLeftEnd]
+
+@[simp] lemma normalizedLeftEnd_coord_one : normalizedLeftEnd 1 = 0 := by
+  simp [normalizedLeftEnd]
+
+@[simp] lemma normalizedRightEnd_coord_zero : normalizedRightEnd 0 = 1 := by
+  simp [normalizedRightEnd]
+
+@[simp] lemma normalizedRightEnd_coord_one : normalizedRightEnd 1 = 0 := by
+  simp [normalizedRightEnd]
+
+@[simp] lemma axisTop_coord_zero : axisTop 0 = 0 := by simp [axisTop]
+
+@[simp] lemma axisTop_coord_one : axisTop 1 = 2 := by simp [axisTop]
+
+@[simp] lemma axisBottom_coord_zero : axisBottom 0 = 0 := by simp [axisBottom]
+
+@[simp] lemma axisBottom_coord_one : axisBottom 1 = -2 := by simp [axisBottom]
+
 /-! ## Normalization foundation (Maehara farthest-pair setup)
 
 We prepare Maehara's WLOG normalization: the diameter of `J = range r` is realized
@@ -28,7 +64,8 @@ reduces the geometric core (`step_A`, `step_B`) to *normalized* statements in wh
 the farthest pair sits at `(±1, 0)`. -/
 
 /-- **Math.** `complexToPlaneIsometry 1 = !₂[1,0]`. -/
-private lemma complexToPlaneIsometry_one : Arcs.complexToPlaneIsometry (1 : ℂ) = !₂[(1:ℝ), 0] := by
+private lemma complexToPlaneIsometry_one : Arcs.complexToPlaneIsometry
+  (1 : ℂ) = normalizedRightEnd := by
   have h := Complex.isometryOfOrthonormal_apply (EuclideanSpace.basisFun (Fin 2) ℝ) (1 : ℂ)
   rw [show Arcs.complexToPlaneIsometry
         = Complex.isometryOfOrthonormal (EuclideanSpace.basisFun (Fin 2) ℝ) from rfl, h]
@@ -39,7 +76,7 @@ private lemma complexToPlaneIsometry_one : Arcs.complexToPlaneIsometry (1 : ℂ)
 
 /-- **Math.** `complexToPlaneIsometry (-1) = !₂[-1,0]`. -/
 private lemma complexToPlaneIsometry_negOne :
-    Arcs.complexToPlaneIsometry (-1 : ℂ) = !₂[(-1 : ℝ), 0] :=
+    Arcs.complexToPlaneIsometry (-1 : ℂ) = normalizedLeftEnd :=
   by
   have h := Complex.isometryOfOrthonormal_apply (EuclideanSpace.basisFun (Fin 2) ℝ) (-1 : ℂ)
   rw [show Arcs.complexToPlaneIsometry
@@ -58,18 +95,18 @@ theorem exists_farthest_pair {r : sphere (0 : Plane) 1 → Plane}
       (∀ z ∈ range r, ∀ w ∈ range r, dist z w ≤ dist a b) ∧ a ≠ b := by
   have hcpt : IsCompact (range r) := jordanCurve_isCompact r hcont
   -- two explicit distinct points on the sphere, hence in `range r`
-  have hs1 : (!₂[(1:ℝ), 0] : Plane) ∈ sphere (0 : Plane) 1 := by
+  have hs1 : normalizedRightEnd ∈ sphere (0 : Plane) 1 := by
     rw [mem_sphere_zero_iff_norm, EuclideanSpace.norm_eq, Fin.sum_univ_two]
     simp
-  have hs2 : (!₂[(-1:ℝ), 0] : Plane) ∈ sphere (0 : Plane) 1 := by
+  have hs2 : normalizedLeftEnd ∈ sphere (0 : Plane) 1 := by
     rw [mem_sphere_zero_iff_norm, EuclideanSpace.norm_eq, Fin.sum_univ_two]
     simp
-  set s1 : sphere (0 : Plane) 1 := ⟨!₂[(1:ℝ), 0], hs1⟩ with hs1def
-  set s2 : sphere (0 : Plane) 1 := ⟨!₂[(-1:ℝ), 0], hs2⟩ with hs2def
+  set s1 : sphere (0 : Plane) 1 := ⟨normalizedRightEnd, hs1⟩ with hs1def
+  set s2 : sphere (0 : Plane) 1 := ⟨normalizedLeftEnd, hs2⟩ with hs2def
   have hs12 : s1 ≠ s2 := by
     intro h
     rw [hs1def, hs2def, Subtype.mk_eq_mk] at h
-    have hh : (!₂[(1:ℝ), 0] : Plane) 0 = (!₂[(-1:ℝ), 0] : Plane) 0 := by rw [h]
+    have hh : normalizedRightEnd 0 = normalizedLeftEnd 0 := by rw [h]
     norm_num [PiLp.toLp_apply] at hh
   have hne : (range r).Nonempty := ⟨r s1, mem_range_self _⟩
   have hprod : IsCompact ((range r) ×ˢ (range r)) := hcpt.prod hcpt
@@ -94,7 +131,7 @@ positive factor `2 / dist a b`, with `T a = !₂[-1,0]` and `T b = !₂[1,0]`. -
 theorem exists_similarity_normalizing_farthest_pair {a b : Plane} (hab : a ≠ b) :
     ∃ T : Plane ≃ₜ Plane,
       (∀ z w, dist (T z) (T w) = (2 / dist a b) * dist z w) ∧
-        T a = !₂[(-1:ℝ), 0] ∧ T b = !₂[(1:ℝ), 0] := by
+        T a = normalizedLeftEnd ∧ T b = normalizedRightEnd := by
   set L := Arcs.complexToPlaneIsometry with hL
   set A : ℂ := L.symm a with hA
   set B : ℂ := L.symm b with hB

@@ -23,7 +23,7 @@ open Metric Set Function Bornology
 the farthest pair sits at `!₂[-1,0]`, `!₂[1,0]` (so the diameter is `2`). -/
 theorem exists_bounded_component_of_normalized (hbr : BrouwerFPT)
     {r : sphere (0 : Plane) 1 → Plane} (hcont : Continuous r) (hinj : Injective r)
-    (hm : (!₂[(-1 : ℝ), 0] : Plane) ∈ range r) (hp : (!₂[(1 : ℝ), 0] : Plane) ∈ range r)
+    (hm : normalizedLeftEnd ∈ range r) (hp : normalizedRightEnd ∈ range r)
     (hfar : ∀ z ∈ range r, ∀ w ∈ range r, dist z w ≤ 2) :
     ∃ x ∈ (range r)ᶜ, IsBounded (connectedComponentIn (range r)ᶜ x) := by
   classical
@@ -35,12 +35,6 @@ theorem exists_bounded_component_of_normalized (hbr : BrouwerFPT)
   have hJnr : J_n ⊆ range r := hUnion ▸ subset_union_left
   have hJsr : J_s ⊆ range r := hUnion ▸ subset_union_right
   have hErect := normalized_subset_rectangle hm hp hfar
-  have ha0 : (!₂[(-1 : ℝ), 0] : Plane) 0 = -1 := by simp
-  have hb0 : (!₂[(1 : ℝ), 0] : Plane) 0 = 1 := by simp
-  have hs0 : (!₂[(0 : ℝ), -2] : Plane) 0 = 0 := by simp
-  have hs1 : (!₂[(0 : ℝ), -2] : Plane) 1 = -2 := by simp
-  have hn0 : (!₂[(0 : ℝ), 2] : Plane) 0 = 0 := by simp
-  have hn1 : (!₂[(0 : ℝ), 2] : Plane) 1 = 2 := by simp
   have hz₀0 : z₀ 0 = 0 := by rw [hz₀def]; simp
   have hz₀1e : z₀ 1 = (m 1 + p 1) / 2 := by rw [hz₀def]; simp
   have hmE1 : m 1 ∈ Icc (-2 : ℝ) 2 := (hErect (hJnr hmJn)).2
@@ -63,19 +57,19 @@ theorem exists_bounded_component_of_normalized (hbr : BrouwerFPT)
   have hz₀1lb : (-2 : ℝ) ≤ z₀ 1 := le_of_lt (lt_of_le_of_lt hpE1.1 hpz₀_lt)
   have hz₀1ub : z₀ 1 ≤ 2 := le_of_lt (lt_of_lt_of_le hz₀m_lt hmE1.2)
   -- `a, b ∉` axis points
-  have hmab : m ∉ ({!₂[(-1 : ℝ), 0], !₂[(1 : ℝ), 0]} : Set Plane) := by
+  have hmab : m ∉ ({normalizedLeftEnd, normalizedRightEnd} : Set Plane) := by
     simp only [Set.mem_insert_iff, Set.mem_singleton_iff]
     rintro (h | h) <;>
       (have hc := congrArg (fun x : Plane => x 0) h; simp only [hm0] at hc; norm_num at hc)
-  have hlab : l ∉ ({!₂[(-1 : ℝ), 0], !₂[(1 : ℝ), 0]} : Set Plane) := by
+  have hlab : l ∉ ({normalizedLeftEnd, normalizedRightEnd} : Set Plane) := by
     simp only [Set.mem_insert_iff, Set.mem_singleton_iff]
     rintro (h | h) <;>
       (have hc := congrArg (fun x : Plane => x 0) h; simp only [hl0] at hc; norm_num at hc)
-  have hqab : q ∉ ({!₂[(-1 : ℝ), 0], !₂[(1 : ℝ), 0]} : Set Plane) := by
+  have hqab : q ∉ ({normalizedLeftEnd, normalizedRightEnd} : Set Plane) := by
     simp only [Set.mem_insert_iff, Set.mem_singleton_iff]
     rintro (h | h) <;>
       (have hc := congrArg (fun x : Plane => x 0) h; simp only [hq0] at hc; norm_num at hc)
-  have hpab : p ∉ ({!₂[(-1 : ℝ), 0], !₂[(1 : ℝ), 0]} : Set Plane) := by
+  have hpab : p ∉ ({normalizedLeftEnd, normalizedRightEnd} : Set Plane) := by
     simp only [Set.mem_insert_iff, Set.mem_singleton_iff]
     rintro (h | h) <;>
       (have hc := congrArg (fun x : Plane => x 0) h; simp only [hp0] at hc; norm_num at hc)
@@ -141,10 +135,12 @@ theorem exists_bounded_component_of_normalized (hbr : BrouwerFPT)
     rcases hnotIoo0 with h | h
     · have hx : α tw 0 = -1 := le_antisymm (not_lt.mp h) hwC.1.1
       exact hwnr (show α tw ∈ range r from by
-        rw [show α tw = !₂[(-1 : ℝ), 0] from by ext i; fin_cases i <;> simp [hx, hzero]]; exact hm)
+        rw [show α tw = normalizedLeftEnd from by ext i; fin_cases i <;> simp [hx, hzero]];
+          exact hm)
     · have hx : α tw 0 = 1 := le_antisymm hwC.1.2 (not_lt.mp h)
       exact hwnr (show α tw ∈ range r from by
-        rw [show α tw = !₂[(1 : ℝ), 0] from by ext i; fin_cases i <;> simp [hx, hzero]]; exact hp)
+        rw [show α tw = normalizedRightEnd from by ext i; fin_cases i <;> simp [hx, hzero]];
+          exact hp)
   rcases lt_or_gt_of_ne hw1ne with hwneg | hwpos
   · -- **CASE `α tw ∈ Glo`** : build a bottom→top path missing `J_s`
     obtain ⟨Glo, hGloPC, hsGlo, hGloSub, hGloAvoid, hGloFrom⟩ :=
@@ -152,7 +148,7 @@ theorem exists_bounded_component_of_normalized (hbr : BrouwerFPT)
     have hwGlo : α tw ∈ Glo := hGloFrom (α tw) hwC.1 hwC.2 hwO hwneg
     -- piece 1 : `s → w` inside `Glo`
     obtain ⟨g1, hg1cont, hg1a, hg1b, hg1mem⟩ :=
-      path_reparametrized_on_neg_one_one (hGloPC.joinedIn (!₂[(0 : ℝ), -2]) hsGlo (α tw) hwGlo)
+      path_reparametrized_on_neg_one_one (hGloPC.joinedIn (axisBottom) hsGlo (α tw) hwGlo)
     -- piece 2 : `w → z₀` along the escaping path
     set g2 : ℝ → Plane := fun t => α (tw * (1 - t) / 2) with hg2def
     have hg2cont : ContinuousOn g2 (Icc (-1 : ℝ) 1) :=
@@ -189,17 +185,17 @@ theorem exists_bounded_component_of_normalized (hbr : BrouwerFPT)
       have hmem : g4 t ∈ J_n ∩ J_s := ⟨hg4.1, hJs⟩
       rw [hInter] at hmem; exact hg4.2 hmem
     -- piece 5 : `l → n` along the axis
-    set g5 : ℝ → Plane := segmentParam l (!₂[(0 : ℝ), 2] : Plane) with hg5def
+    set g5 : ℝ → Plane := segmentParam l axisTop with hg5def
     have hg5cont : ContinuousOn g5 (Icc (-1 : ℝ) 1) :=
       (segmentParam_cont _ _).continuousOn
     have hg5a : g5 (-1) = l := segmentParam_neg1 _ _
-    have hg5b : g5 1 = (!₂[(0 : ℝ), 2] : Plane) := segmentParam_one _ _
+    have hg5b : g5 1 = axisTop := segmentParam_one _ _
     have hg5x : ∀ t, g5 t 0 = 0 := fun t => by
       rw [hg5def, segmentParam_coord, hl0]; simp
     have hg5y : ∀ t ∈ Icc (-1 : ℝ) 1, g5 t 1 ∈ Icc (l 1) 2 := fun t ht => by
       rw [hg5def]
       exact segmentParam_coord_mem_Icc 1 ⟨le_refl _, hlE1.2⟩
-        ⟨by rw [hn1]; exact hlE1.2, by rw [hn1]⟩ ht
+        ⟨by rw [axisTop_coord_one]; exact hlE1.2, by rw [axisTop_coord_one]⟩ ht
     have hg5missJs : ∀ t ∈ Icc (-1 : ℝ) 1, g5 t ∉ J_s := by
       intro t ht hJs
       have hy := hg5y t ht; rw [mem_Icc] at hy
@@ -213,8 +209,8 @@ theorem exists_bounded_component_of_normalized (hbr : BrouwerFPT)
     obtain ⟨V, hVcont, hVa, hVb, hVmem⟩ :=
       concatPath5 hg1cont hg2cont hg3cont hg4cont hg5cont
         (by rw [hg1b, hg2a]) (by rw [hg2b, hg3a]) (by rw [hg3b, hg4a]) (by rw [hg4b, hg5a])
-    have hVm1 : V (-1) 1 = -2 := by rw [hVa, hg1a]; exact hs1
-    have hVn1 : V 1 1 = 2 := by rw [hVb, hg5b]; exact hn1
+    have hVm1 : V (-1) 1 = -2 := by rw [hVa, hg1a]; exact axisBottom_coord_one
+    have hVn1 : V 1 1 = 2 := by rw [hVb, hg5b]; exact axisTop_coord_one
     have hVE : ∀ t ∈ Icc (-1 : ℝ) 1, V t 0 ∈ Icc (-1 : ℝ) 1 ∧ V t 1 ∈ Icc (-2 : ℝ) 2 := by
       intro t ht
       rcases hVmem t ht with ((((h | h) | h) | h) | h)
@@ -248,17 +244,17 @@ theorem exists_bounded_component_of_normalized (hbr : BrouwerFPT)
       exists_upper_boundary_path hm hp hfar
     have hwGup : α tw ∈ Gup := hGupFrom (α tw) hwC.1 hwC.2 hwO hwpos
     -- piece 1 : `s → q` along the axis
-    set g1 : ℝ → Plane := segmentParam (!₂[(0 : ℝ), -2] : Plane) q with hg1def
+    set g1 : ℝ → Plane := segmentParam axisBottom q with hg1def
     have hg1cont : ContinuousOn g1 (Icc (-1 : ℝ) 1) :=
       (segmentParam_cont _ _).continuousOn
-    have hg1a : g1 (-1) = (!₂[(0 : ℝ), -2] : Plane) := segmentParam_neg1 _ _
+    have hg1a : g1 (-1) = axisBottom := segmentParam_neg1 _ _
     have hg1b : g1 1 = q := segmentParam_one _ _
     have hg1x : ∀ t, g1 t 0 = 0 := fun t => by
-      rw [hg1def, segmentParam_coord, hs0, hq0]; ring
+      rw [hg1def, segmentParam_coord, axisBottom_coord_zero, hq0]; ring
     have hg1y : ∀ t ∈ Icc (-1 : ℝ) 1, g1 t 1 ∈ Icc (-2 : ℝ) (q 1) := fun t ht => by
       rw [hg1def]
-      exact segmentParam_coord_mem_Icc 1 ⟨by rw [hs1], by rw [hs1]; exact hqE1.1⟩
-        ⟨hqE1.1, le_refl _⟩ ht
+      refine segmentParam_coord_mem_Icc 1 ?_ ⟨hqE1.1, le_refl _⟩ ht
+      exact ⟨by rw [axisBottom_coord_one], by rw [axisBottom_coord_one]; exact hqE1.1⟩
     have hg1missJn : ∀ t ∈ Icc (-1 : ℝ) 1, g1 t ∉ J_n := by
       intro t ht hJn
       have hy := hg1y t ht; rw [mem_Icc] at hy
@@ -301,15 +297,15 @@ theorem exists_bounded_component_of_normalized (hbr : BrouwerFPT)
       exact ⟨by nlinarith [htw.1, ht.1], by nlinarith [htw.1, ht.2]⟩
     -- piece 5 : `w → n` inside `Gup`
     obtain ⟨g5, hg5cont, hg5a, hg5b, hg5mem⟩ :=
-      path_reparametrized_on_neg_one_one (hGupPC.joinedIn (α tw) hwGup (!₂[(0 : ℝ), 2]) hnGup)
+      path_reparametrized_on_neg_one_one (hGupPC.joinedIn (α tw) hwGup (axisTop) hnGup)
     have hg5missJn : ∀ t ∈ Icc (-1 : ℝ) 1, g5 t ∉ J_n := by
       intro t ht hJn; exact hGupAvoid (g5 t) (hg5mem t ht) (hJnr hJn)
     -- concatenate `s → q → p → z₀ → w → n`
     obtain ⟨V, hVcont, hVa, hVb, hVmem⟩ :=
       concatPath5 hg1cont hg2cont hg3cont hg4cont hg5cont
         (by rw [hg1b, hg2a]) (by rw [hg2b, hg3a]) (by rw [hg3b, hg4a]) (by rw [hg4b, hg5a])
-    have hVm1 : V (-1) 1 = -2 := by rw [hVa, hg1a]; exact hs1
-    have hVn1 : V 1 1 = 2 := by rw [hVb, hg5b]; exact hn1
+    have hVm1 : V (-1) 1 = -2 := by rw [hVa, hg1a]; exact axisBottom_coord_one
+    have hVn1 : V 1 1 = 2 := by rw [hVb, hg5b]; exact axisTop_coord_one
     have hVE : ∀ t ∈ Icc (-1 : ℝ) 1, V t 0 ∈ Icc (-1 : ℝ) 1 ∧ V t 1 ∈ Icc (-2 : ℝ) 2 := by
       intro t ht
       rcases hVmem t ht with ((((h | h) | h) | h) | h)
@@ -355,9 +351,9 @@ theorem exists_bounded_component (hbr : BrouwerFPT)
   have hrange : range r' = T '' range r := by
     rw [hr', show (fun p => T (r p)) = (T : Plane → Plane) ∘ r from rfl, Set.range_comp]
   -- normalized hypotheses for `r'`
-  have hm' : (!₂[(-1 : ℝ), 0] : Plane) ∈ range r' := by
+  have hm' : normalizedLeftEnd ∈ range r' := by
     rw [hrange, ← hTa]; exact mem_image_of_mem _ ha
-  have hp' : (!₂[(1 : ℝ), 0] : Plane) ∈ range r' := by
+  have hp' : normalizedRightEnd ∈ range r' := by
     rw [hrange, ← hTb]; exact mem_image_of_mem _ hb
   have hfar' : ∀ z ∈ range r', ∀ w ∈ range r', dist z w ≤ 2 := by
     rw [hrange]
