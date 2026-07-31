@@ -7,7 +7,8 @@ references:
 
 # Definition — G-homotopic closed paths
 
-Two closed paths are the same for the purposes of integration when one can be deformed into the other without leaving the set where the integrand is
+Two closed paths are the same for the purposes of integration when one can
+be deformed into the other without leaving the set where the integrand is
 defined. The deformation is a continuous square-worth of paths, every one of
 them closed.
 
