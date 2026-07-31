@@ -1,9 +1,23 @@
+/-
+Copyright (c) 2026 rkirov. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: rkirov, Xinze Li
+-/
 module
 
-public import Mathlib
-public import CauchyIntegralFormula.External.JordanCurve.Arcs
-public import CauchyIntegralFormula.External.JordanCurve.Counting
-public import CauchyIntegralFormula.External.JordanCurve.Brouwer
+public import CauchyIntegralFormula.JordanCurve.Arcs
+public import CauchyIntegralFormula.JordanCurve.Brouwer
+public import CauchyIntegralFormula.JordanCurve.Counting
+public import Mathlib.Analysis.InnerProductSpace.EuclideanDist
+public import Mathlib.Analysis.Normed.Module.Connected
+public import Mathlib.Topology.ContinuousMap.Bounded.Basic
+public import Mathlib.Analysis.SpecialFunctions.Complex.Circle
+public import Mathlib.Topology.Connected.Clopen
+public import Mathlib.Topology.MetricSpace.Bounded
+public import Mathlib.Topology.Order.Compact
+public import Mathlib.Topology.TietzeExtension
+public import Mathlib.Analysis.Complex.Tietze
+public import Mathlib.Topology.UnitInterval
 
 @[expose] public section
 
@@ -35,10 +49,10 @@ namespace JordanCurve
 
 open Metric Set Function Bornology
 
-/-- The plane `ℝ²` as used by the eval problem. -/
+/-- **Eng.** The plane `ℝ²` as used by the eval problem. -/
 abbrev Plane := EuclideanSpace ℝ (Fin 2)
 
-/-- **Brouwer fixed point theorem** (interface). Every continuous self-map of a
+/-- **Eng.** **Brouwer fixed point theorem** (interface). Every continuous self-map of a
 nonempty convex compact subset of the plane has a fixed point. Discharged
 separately (upstream Mathlib PR #36770, or a standalone build). All of Maehara's
 argument is `BrouwerFPT → …`. -/
@@ -46,7 +60,7 @@ def BrouwerFPT : Prop :=
   ∀ s : Set Plane, Convex ℝ s → IsCompact s → s.Nonempty →
     ∀ f : C(s, s), ∃ x, f x = x
 
-/-- **Lemma 2 (crossing lemma, Maehara).** Two continuous paths in a rectangle
+/-- **Math.** **Lemma 2 (crossing lemma, Maehara).** Two continuous paths in a rectangle
 `[a,b]×[c,d]`, one running from the left edge to the right edge (`h`), the other
 from the bottom edge to the top edge (`v`), must meet. Proved directly from
 Brouwer: if they were disjoint, the explicit normalized map
@@ -230,13 +244,13 @@ argument needs, independent of Brouwer:
 * each connected component of `Jᶜ` is open and path-connected (PRELIM (b)).
 -/
 
-/-- The plane has rank `2 > 1`; the engine for connectivity of ball-complements. -/
+/-- **Math.** The plane has rank `2 > 1`; the engine for connectivity of ball-complements. -/
 theorem one_lt_rank_plane : 1 < Module.rank ℝ Plane := by
   have h : Module.rank ℝ Plane = 2 := by
     rw [← Module.finrank_eq_rank, finrank_euclideanSpace_fin]; norm_num
   rw [h]; norm_num
 
-/-- The exterior `{x | R < ‖x‖}` of a closed ball is connected in the plane
+/-- **Math.** The exterior `{x | R < ‖x‖}` of a closed ball is connected in the plane
 (dimension `2 > 1`). Proved as the continuous image of the connected set
 `sphere 0 1 ×ˢ Ioi R` under `(s, t) ↦ t • s`. -/
 theorem isConnected_compl_closedBall {R : ℝ} (hR : 0 ≤ R) :
@@ -266,44 +280,44 @@ section JordanCurveData
 
 variable (r : sphere (0 : Plane) 1 → Plane)
 
-/-- **Task 1.** The Jordan curve `J = range r` is compact (continuous image of the
+/-- **Math.** **Task 1.** The Jordan curve `J = range r` is compact (continuous image of the
 compact circle `S¹`). -/
 theorem jordanCurve_isCompact (hcont : Continuous r) : IsCompact (range r) :=
   isCompact_range hcont
 
-/-- **Task 1.** The Jordan curve `J = range r` is closed (compact in a Hausdorff
+/-- **Math.** **Task 1.** The Jordan curve `J = range r` is closed (compact in a Hausdorff
 space). -/
 theorem jordanCurve_isClosed (hcont : Continuous r) : IsClosed (range r) :=
   (jordanCurve_isCompact r hcont).isClosed
 
-/-- **Task 2.** The complement of the Jordan curve is open. -/
+/-- **Math.** **Task 2.** The complement of the Jordan curve is open. -/
 theorem isOpen_compl_jordanCurve (hcont : Continuous r) : IsOpen (range r)ᶜ :=
   (jordanCurve_isClosed r hcont).isOpen_compl
 
-/-- **Task 3.** A continuous injection of the compact circle into the plane is a
+/-- **Math.** **Task 3.** A continuous injection of the compact circle into the plane is a
 closed embedding. -/
 theorem r_isClosedEmbedding (hcont : Continuous r) (hinj : Injective r) :
     Topology.IsClosedEmbedding r :=
   hcont.isClosedEmbedding hinj
 
-/-- **Task 3.** `r` is a topological embedding. -/
+/-- **Math.** **Task 3.** `r` is a topological embedding. -/
 theorem r_isEmbedding (hcont : Continuous r) (hinj : Injective r) :
     Topology.IsEmbedding r :=
   (r_isClosedEmbedding r hcont hinj).isEmbedding
 
-/-- **Task 3.** The Jordan curve `J = range r` is homeomorphic to the circle `S¹`. -/
+/-- **Math.** **Task 3.** The Jordan curve `J = range r` is homeomorphic to the circle `S¹`. -/
 noncomputable def jordanCurveHomeo (hcont : Continuous r) (hinj : Injective r) :
     sphere (0 : Plane) 1 ≃ₜ (range r) :=
   (r_isEmbedding r hcont hinj).toHomeomorph
 
-/-- A radius `R ≥ 0` with `range r ⊆ closedBall 0 R` (compact ⇒ bounded). -/
+/-- **Math.** A radius `R ≥ 0` with `range r ⊆ closedBall 0 R` (compact ⇒ bounded). -/
 private theorem exists_jordanCurve_bound (hcont : Continuous r) :
     ∃ R : ℝ, 0 ≤ R ∧ range r ⊆ closedBall (0 : Plane) R := by
   obtain ⟨R, hR⟩ := (jordanCurve_isCompact r hcont).isBounded.subset_closedBall 0
   exact ⟨max R 0, le_max_right R 0,
     hR.trans (closedBall_subset_closedBall (le_max_left R 0))⟩
 
-/-- **PRELIM (a).** `Jᶜ` has an unbounded connected component: pick any point in the
+/-- **Math.** **PRELIM (a).** `Jᶜ` has an unbounded connected component: pick any point in the
 cobounded exterior `{x | R < ‖x‖}` of a ball containing `J`; that exterior is
 connected, lies in `Jᶜ`, and is unbounded, so the component containing it is
 unbounded. -/
@@ -330,7 +344,7 @@ theorem exists_unbounded_component (hcont : Continuous r) :
     hEconn.isPreconnected.subset_connectedComponentIn hxE hEsub
   exact fun hbdd => hEnb (hbdd.subset hEcomp)
 
-/-- **PRELIM (a).** Any two unbounded components of `Jᶜ` coincide: each unbounded
+/-- **Math.** **PRELIM (a).** Any two unbounded components of `Jᶜ` coincide: each unbounded
 component must meet the connected cobounded exterior `{x | R < ‖x‖}`, which therefore
 lies in a single component. -/
 theorem unbounded_component_unique (hcont : Continuous r) {x y : Plane}
@@ -371,13 +385,13 @@ theorem unbounded_component_unique (hcont : Continuous r) {x y : Plane}
     rw [connectedComponentIn_eq hwyc, ← connectedComponentIn_eq (hEcomp hwyE)]
   rw [hx, hy]
 
-/-- **PRELIM (b).** Each connected component of `Jᶜ` is open (`Jᶜ` is open and the
+/-- **Math.** **PRELIM (b).** Each connected component of `Jᶜ` is open (`Jᶜ` is open and the
 plane is locally connected). -/
 theorem isOpen_component (hcont : Continuous r) (x : Plane) :
     IsOpen (connectedComponentIn (range r)ᶜ x) :=
   (isOpen_compl_jordanCurve r hcont).connectedComponentIn
 
-/-- **PRELIM (b).** Each connected component of `Jᶜ` is path-connected (it is open
+/-- **Math.** **PRELIM (b).** Each connected component of `Jᶜ` is path-connected (it is open
 and connected in the locally path-connected plane). -/
 theorem isPathConnected_component (hcont : Continuous r) {x : Plane}
     (hx : x ∈ (range r)ᶜ) :
@@ -519,7 +533,7 @@ theorem arc_not_separates (hbr : BrouwerFPT) {A : Set Plane}
       have h2 : Continuous (fun z => (‖Q z - o‖)⁻¹) :=
         h1.norm.inv₀ (fun z => by
           simp only [ne_eq, norm_eq_zero, sub_eq_zero]; exact hQne z)
-      exact continuous_const.sub (continuous_const.smul (h2.smul h1))
+      exact continuous_const.sub ((continuous_const (y := R)).smul (h2.smul h1))
     have hΦsphere : ∀ z, ‖Φ z - o‖ = R := by
       intro z
       have hne : Q z - o ≠ 0 := sub_ne_zero.mpr (hQne z)
@@ -695,7 +709,7 @@ by a farthest pair `a, b`, and a similarity homeomorphism `T` moves `a ↦ !₂[
 reduces the geometric core (`step_A`, `step_B`) to *normalized* statements in which
 the farthest pair sits at `(±1, 0)`. -/
 
-/-- `complexLIE 1 = !₂[1,0]`. -/
+/-- **Math.** `complexLIE 1 = !₂[1,0]`. -/
 private lemma complexLIE_one : Arcs.complexLIE (1 : ℂ) = !₂[(1:ℝ), 0] := by
   have h := Complex.isometryOfOrthonormal_apply (EuclideanSpace.basisFun (Fin 2) ℝ) (1 : ℂ)
   rw [show Arcs.complexLIE
@@ -705,7 +719,7 @@ private lemma complexLIE_one : Arcs.complexLIE (1 : ℂ) = !₂[(1:ℝ), 0] := b
   ext i; fin_cases i <;>
     simp [EuclideanSpace.single_apply, PiLp.toLp_apply]
 
-/-- `complexLIE (-1) = !₂[-1,0]`. -/
+/-- **Math.** `complexLIE (-1) = !₂[-1,0]`. -/
 private lemma complexLIE_negOne : Arcs.complexLIE (-1 : ℂ) = !₂[(-1:ℝ), 0] := by
   have h := Complex.isometryOfOrthonormal_apply (EuclideanSpace.basisFun (Fin 2) ℝ) (-1 : ℂ)
   rw [show Arcs.complexLIE
@@ -715,7 +729,7 @@ private lemma complexLIE_negOne : Arcs.complexLIE (-1 : ℂ) = !₂[(-1:ℝ), 0]
   ext i; fin_cases i <;>
     simp [EuclideanSpace.single_apply, PiLp.toLp_apply]
 
-/-- **Task 1 (farthest pair).** The compact curve `range r` contains a pair `a, b`
+/-- **Math.** **Task 1 (farthest pair).** The compact curve `range r` contains a pair `a, b`
 realizing the diameter of `J`, and `a ≠ b` (as `r` is injective on the sphere, which
 has at least two points). -/
 theorem exists_farthest_pair {r : sphere (0 : Plane) 1 → Plane}
@@ -754,7 +768,7 @@ theorem exists_farthest_pair {r : sphere (0 : Plane) 1 → Plane}
     rw [hd0] at hle
     exact hs12 (hinj (eq_of_dist_eq_zero (le_antisymm hle dist_nonneg)))
 
-/-- **Task 2 (similarity normalization).** Given `a ≠ b` on the plane there is a
+/-- **Math.** **Task 2 (similarity normalization).** Given `a ≠ b` on the plane there is a
 similarity homeomorphism `T : Plane ≃ₜ Plane` scaling every distance by the fixed
 positive factor `2 / dist a b`, with `T a = !₂[-1,0]` and `T b = !₂[1,0]`. -/
 theorem exists_similarity {a b : Plane} (hab : a ≠ b) :
@@ -799,7 +813,7 @@ theorem exists_similarity {a b : Plane} (hab : a ≠ b) :
     have hval : α * B + β = 1 := by rw [hα, hβ]; field_simp; ring
     rw [hT_apply, ← hB, hval, hL]; exact complexLIE_one
 
-/-- Boundedness is preserved and reflected by a map scaling all distances by a fixed
+/-- **Math.** Boundedness is preserved and reflected by a map scaling all distances by a fixed
 positive factor. -/
 theorem isBounded_image_scaling {T : Plane → Plane} {c : ℝ} (hc : 0 < c)
     (hscale : ∀ z w, dist (T z) (T w) = c * dist z w) (K : Set Plane) :
@@ -819,13 +833,13 @@ theorem isBounded_image_scaling {T : Plane → Plane} {c : ℝ} (hc : 0 < c)
 
 /-! ### Setup lemmas for the normalized frame (Steps A, B) -/
 
-/-- Squared Euclidean distance in `Plane` expanded in coordinates. -/
+/-- **Math.** Squared Euclidean distance in `Plane` expanded in coordinates. -/
 private lemma dist_sq_coord (z w : Plane) :
     dist z w ^ 2 = (z 0 - w 0) ^ 2 + (z 1 - w 1) ^ 2 := by
   rw [EuclideanSpace.dist_eq, Real.sq_sqrt (by positivity)]
   simp [Fin.sum_univ_two, Real.dist_eq, sq_abs]
 
-/-- **Setup 1 (the "lens").** In the normalized frame with the farthest pair at
+/-- **Math.** **Setup 1 (the "lens").** In the normalized frame with the farthest pair at
 `a = !₂[-1,0]`, `b = !₂[1,0]` and diameter `2` (`hfar`), the whole curve lies in
 the rectangle `[-1,1] × [-2,2]`.  For `z ∈ range r`, both `dist z a ≤ 2` and
 `dist z b ≤ 2`, i.e. `(z 0+1)²+(z 1)² ≤ 4` and `(z 0-1)²+(z 1)² ≤ 4`; these force
@@ -856,7 +870,7 @@ theorem normalized_subset_rectangle
   · nlinarith [sq_nonneg (z 0), sq_nonneg (z 1 - 2), sq_nonneg (z 1 + 2)]
   · nlinarith [sq_nonneg (z 0), sq_nonneg (z 1 - 2), sq_nonneg (z 1 + 2)]
 
-/-- **`arc_path` (reusable reparametrization).** A path in a set `S ⊆ Plane`
+/-- **Math.** **`arc_path` (reusable reparametrization).** A path in a set `S ⊆ Plane`
 joining `a` to `b` can be reparametrized to a map `h : ℝ → Plane` on the interval
 `[-1,1]`, with `h (-1) = a`, `h 1 = b`, continuous on `[-1,1]`, and staying in `S`.
 This is exactly the shape required by the `crossing` lemma for the horizontal path
@@ -878,7 +892,7 @@ theorem arc_path {S : Set Plane} {a b : Plane} (hj : JoinedIn S a b) :
     exact hj.somePath.target
   · intro t _; exact hj.somePath_mem _
 
-/-- **Setup 2 (segment meets curve).** The vertical segment from `s = !₂[0,-2]` to
+/-- **Math.** **Setup 2 (segment meets curve).** The vertical segment from `s = !₂[0,-2]` to
 `n = !₂[0,2]` meets the curve.  Proof via the `crossing` lemma with horizontal path
 `h` a curve-path from `a = !₂[-1,0]` to `b = !₂[1,0]` (the curve is path-connected,
 reparametrized by `arc_path`) staying in the rectangle `[-1,1]×[-2,2]`
@@ -931,7 +945,7 @@ theorem segment_meets_curve (hbr : BrouwerFPT)
   · rw [heq, hv0]
   · rw [heq]; exact (hvE t ht).2
 
-/-- **Setup 3 (top of the axis).** The intersection of the curve with the vertical
+/-- **Math.** **Setup 3 (top of the axis).** The intersection of the curve with the vertical
 axis `Jax = {p ∈ range r | p 0 = 0}` is compact (closed subset of the compact
 curve) and nonempty (`segment_meets_curve`), hence attains its `y`-maximum at some
 point `l ∈ range r` with `l 0 = 0`. -/
@@ -956,7 +970,7 @@ theorem exists_ymax_on_axis (hbr : BrouwerFPT)
   intro p hpr hp0
   exact hlmax (show p ∈ Jax from ⟨hpr, hp0⟩)
 
-/-- **Image of an arc under the subtype coercion is again an arc.** If `A ⊆ ↥K`
+/-- **Math.** **Image of an arc under the subtype coercion is again an arc.** If `A ⊆ ↥K`
 (a subset of a subtype of `Plane`) is homeomorphic to `unitInterval`, then its image
 `(↑) '' A ⊆ Plane` is homeomorphic to `unitInterval`.  The composite coercion
 `↥A → Plane` is a continuous injection from a compact space to a Hausdorff space,
@@ -975,7 +989,7 @@ private lemma planar_arc_homeo {K : Set Plane} {A : Set ↥K}
     · rintro ⟨x, hx, rfl⟩; exact ⟨⟨x, hx⟩, rfl⟩
   exact ⟨((Homeomorph.setCongr hrange).symm.trans hemb.toHomeomorph.symm).trans e⟩
 
-/-- **Setup 4 (arc split at `a`, `b`).** The curve `range r` splits at the farthest
+/-- **Math.** **Setup 4 (arc split at `a`, `b`).** The curve `range r` splits at the farthest
 pair `a = !₂[-1,0]`, `b = !₂[1,0]` into two closed arcs `J_n`, `J_s ⊆ Plane`, each
 `≃ₜ unitInterval`, with `J_n ∪ J_s = range r` and `J_n ∩ J_s = {a, b}`, labelled so
 that the `y`-topmost axis point `l` lies in `J_n`. -/
@@ -1046,7 +1060,7 @@ path in the normalized rectangle meets each arc (`vertical_meets_arc`), together
 the plumbing (`concatPath2`, `concatPath3`) that glues path pieces into one
 continuous path on `[-1,1]` whose image is the union of the pieces. -/
 
-/-- An arc `J ⊆ Plane` homeomorphic to `unitInterval` is path-connected. -/
+/-- **Math.** An arc `J ⊆ Plane` homeomorphic to `unitInterval` is path-connected. -/
 theorem arc_isPathConnected {J : Set Plane} (e : ↥J ≃ₜ unitInterval) :
     IsPathConnected J := by
   haveI : PathConnectedSpace unitInterval :=
@@ -1065,12 +1079,12 @@ theorem arc_isPathConnected {J : Set Plane} (e : ↥J ≃ₜ unitInterval) :
     · intro hp; exact ⟨e ⟨p, hp⟩, by simp⟩
   rwa [hrange] at h2
 
-/-- An arc `J ≃ₜ unitInterval` joins any two of its points inside `J`. -/
+/-- **Math.** An arc `J ≃ₜ unitInterval` joins any two of its points inside `J`. -/
 theorem arc_joinedIn {J : Set Plane} (e : ↥J ≃ₜ unitInterval)
     {a b : Plane} (ha : a ∈ J) (hb : b ∈ J) : JoinedIn J a b :=
   (arc_isPathConnected e).joinedIn a ha b hb
 
-/-- **Key reusable tool.** Any path `v` running from the bottom edge (`v (-1) 1 = -2`)
+/-- **Math.** **Key reusable tool.** Any path `v` running from the bottom edge (`v (-1) 1 = -2`)
 to the top edge (`v 1 1 = 2`) of the normalized rectangle `[-1,1]×[-2,2]` must meet an
 arc `J` that joins the left point `a = !₂[-1,0]` to the right point `b = !₂[1,0]` inside
 the rectangle.  Immediate from `crossing`, using `arc_path` for the horizontal path. -/
@@ -1090,7 +1104,7 @@ theorem vertical_meets_arc (hbr : BrouwerFPT) {J : Set Plane}
     (by norm_num : (-2:ℝ) ≤ 2) h v hcontOn hvcont hhE hvE hh1' hh2' hv1 hv2
   exact ⟨t, ht, heq ▸ hhmem s hs⟩
 
-/-- A path piece `f : ℝ → Plane`, continuous on `[-1,1]`, as a `Path (f (-1)) (f 1)`
+/-- **Math.** A path piece `f : ℝ → Plane`, continuous on `[-1,1]`, as a `Path (f (-1)) (f 1)`
 over `unitInterval` (reparametrized by `s ↦ 2s-1`). -/
 private noncomputable def pathOfPiece {f : ℝ → Plane}
     (hf : ContinuousOn f (Icc (-1:ℝ) 1)) : Path (f (-1)) (f 1) :=
@@ -1114,7 +1128,7 @@ private lemma pathOfPiece_range {f : ℝ → Plane}
     show f (2 * ((y + 1) / 2) - 1) = f y
     congr 1; ring
 
-/-- **Path concatenation (2 pieces).** Two path pieces on `[-1,1]` that chain up
+/-- **Math.** **Path concatenation (2 pieces).** Two path pieces on `[-1,1]` that chain up
 (`f 1 = g (-1)`) glue to one path `c` on `[-1,1]` from `f (-1)` to `g 1`, whose image
 is contained in the union of the pieces' images. -/
 theorem concatPath2 {f g : ℝ → Plane}
@@ -1143,7 +1157,7 @@ theorem concatPath2 {f g : ℝ → Plane}
     rw [hr1, hr2] at hmem
     exact hmem
 
-/-- **Path concatenation (3 pieces).** Three chained path pieces on `[-1,1]` glue to
+/-- **Math.** **Path concatenation (3 pieces).** Three chained path pieces on `[-1,1]` glue to
 one path `c` on `[-1,1]` from `f (-1)` to `h 1`, with image in the union of the three
 pieces' images. -/
 theorem concatPath3 {f g h : ℝ → Plane}
@@ -1162,7 +1176,7 @@ theorem concatPath3 {f g h : ℝ → Plane}
     exact Set.mem_union_left _ (huc ▸ hc2mem u hu)
   · exact Set.mem_union_right _ hin
 
-/-- **Path concatenation (5 pieces).** Five chained path pieces on `[-1,1]` glue to one
+/-- **Math.** **Path concatenation (5 pieces).** Five chained path pieces on `[-1,1]` glue to one
 path `c` on `[-1,1]` from `f1 (-1)` to `f5 1`, with image in the union of the five
 pieces' images. -/
 theorem concatPath5 {f1 f2 f3 f4 f5 : ℝ → Plane}
@@ -1192,7 +1206,7 @@ theorem concatPath5 {f1 f2 f3 f4 f5 : ℝ → Plane}
     · exact Or.inl (Or.inr h)
     · exact Or.inr h
 
-/-- **Interior point `m`.** The intersection `J_n ∩ axis` (`axis = {p | p 0 = 0}`) is
+/-- **Math.** **Interior point `m`.** The intersection `J_n ∩ axis` (`axis = {p | p 0 = 0}`) is
 compact and nonempty (it contains `l`), hence attains its `y`-minimum at a point `m`. -/
 theorem exists_ymin_Jn_axis {J_n : Set Plane} (hJncl : IsClosed J_n)
     (hcpt : IsCompact J_n) {l : Plane} (hlJn : l ∈ J_n) (hl0 : l 0 = 0) :
@@ -1208,7 +1222,7 @@ theorem exists_ymin_Jn_axis {J_n : Set Plane} (hJncl : IsClosed J_n)
     hJmcpt.exists_isMinOn hne (f := fun p : Plane => p 1) hcy.continuousOn
   exact ⟨m, hmJm.1, hmJm.2, fun p hpJn hp0 => hmmin (show p ∈ Jm from ⟨hpJn, hp0⟩)⟩
 
-/-- **The vertical segment `m → s` meets `J_s`.** With `s = !₂[0,-2]` (below the
+/-- **Math.** **The vertical segment `m → s` meets `J_s`.** With `s = !₂[0,-2]` (below the
 rectangle's bottom edge), the axis segment from the interior point `m ∈ J_n` down to
 `s` must cross the southern arc `J_s`.  Proof by contradiction: were it disjoint from
 `J_s`, the concatenation `s → m` (axis), `m → l` (a path inside `J_n \ {a,b}`),
@@ -1433,7 +1447,7 @@ theorem exists_construction_points (hbr : BrouwerFPT)
   · rw [show (!₂[(0:ℝ), (m 1 + p 1) / 2] : Plane) 1 = (m 1 + p 1) / 2 from by simp]
     linarith [hpm]
 
-/-- **First-exit lemma (A.1).** A path `α` on `[0,1]` starting inside an open set `O`
+/-- **Math.** **First-exit lemma (A.1).** A path `α` on `[0,1]` starting inside an open set `O`
 and ending outside a closed superset `C ⊇ O` has a *first exit time* `tw ∈ (0,1]`:
 `α tw` lies in the frontier layer `C \ O`, and `α u ∈ O` for all `u < tw`. -/
 theorem exists_first_exit {α : ℝ → Plane} {O C : Set Plane}
@@ -1477,7 +1491,7 @@ theorem exists_first_exit {α : ℝ → Plane} {O C : Set Plane}
     exact this.2
   exact ⟨tw, ⟨htwpos, htw01.2⟩, htwC, htwO, hbelow⟩
 
-/-- A vertical segment `{p | p 0 = c ∧ p 1 ∈ T}` (with `T` path-connected) is
+/-- **Math.** A vertical segment `{p | p 0 = c ∧ p 1 ∈ T}` (with `T` path-connected) is
 path-connected: it is the image of `T` under `y ↦ !₂[c, y]`. -/
 theorem isPathConnected_vertSeg (c : ℝ) {T : Set ℝ} (hT : IsPathConnected T) :
     IsPathConnected {p : Plane | p 0 = c ∧ p 1 ∈ T} := by
@@ -1495,7 +1509,7 @@ theorem isPathConnected_vertSeg (c : ℝ) {T : Set ℝ} (hT : IsPathConnected T)
       exact ⟨p 1, h1, by ext i; fin_cases i <;> simp [h0]⟩
   rwa [hEq] at himg
 
-/-- A horizontal segment `{p | p 1 = c ∧ p 0 ∈ T}` is path-connected. -/
+/-- **Math.** A horizontal segment `{p | p 1 = c ∧ p 0 ∈ T}` is path-connected. -/
 theorem isPathConnected_horizSeg (c : ℝ) {T : Set ℝ} (hT : IsPathConnected T) :
     IsPathConnected {p : Plane | p 1 = c ∧ p 0 ∈ T} := by
   have hfcont : Continuous (fun x : ℝ => (!₂[x, c] : Plane)) := by
@@ -1512,7 +1526,7 @@ theorem isPathConnected_horizSeg (c : ℝ) {T : Set ℝ} (hT : IsPathConnected T
       exact ⟨p 0, h1, by ext i; fin_cases i <;> simp [h0]⟩
   rwa [hEq] at himg
 
-/-- **Curve meets the rectangle boundary only on the axis (A.2).** Any curve point on
+/-- **Math.** **Curve meets the rectangle boundary only on the axis (A.2).** Any curve point on
 the frontier of the normalized rectangle `[-1,1]×[-2,2]` has `y = 0` (so it is `a` or
 `b`).  The "lens" bound `(p 0±1)²+(p 1)² ≤ 4` rules out the top/bottom edges outright
 and pins the left/right edges to `y = 0`. -/
@@ -1536,7 +1550,7 @@ theorem curve_boundary_axis
   · exfalso; nlinarith [hza, hzb, sq_nonneg (p 0 + 1), sq_nonneg (p 0 - 1), h, sq_nonneg (p 1 + 2)]
   · exfalso; nlinarith [hza, hzb, sq_nonneg (p 0 + 1), sq_nonneg (p 0 - 1), h, sq_nonneg (p 1 - 2)]
 
-/-- **Lower boundary arc (A.2).** The part of the rectangle frontier with `y < 0` is
+/-- **Math.** **Lower boundary arc (A.2).** The part of the rectangle frontier with `y < 0` is
 path-connected, contains the bottom axis point `!₂[0,-2]`, lies in the rectangle, and
 avoids the curve; moreover any frontier point with `y < 0` lies in it. -/
 theorem exists_lower_boundary_path
@@ -1589,7 +1603,7 @@ theorem exists_lower_boundary_path
       · exact Or.inl (Or.inr ⟨le_antisymm (not_lt.mp h) hp1.1, hp0⟩)
       · exfalso; linarith [not_lt.mp h]
 
-/-- **Upper boundary arc (A.2).** The part of the rectangle frontier with `y > 0` is
+/-- **Math.** **Upper boundary arc (A.2).** The part of the rectangle frontier with `y > 0` is
 path-connected, contains the top axis point `!₂[0,2]`, lies in the rectangle, and
 avoids the curve; moreover any frontier point with `y > 0` lies in it. -/
 theorem exists_upper_boundary_path
@@ -1643,7 +1657,7 @@ theorem exists_upper_boundary_path
       · exact Or.inl (Or.inr ⟨le_antisymm hp1.2 (not_lt.mp h), hp0⟩)
 
 set_option maxHeartbeats 1600000 in
-/-- **Maehara Step A (normalized).** The geometric core in normalized coordinates:
+/-- **Math.** **Maehara Step A (normalized).** The geometric core in normalized coordinates:
 the farthest pair sits at `!₂[-1,0]`, `!₂[1,0]` (so the diameter is `2`). -/
 theorem step_A_normalized (hbr : BrouwerFPT)
     {r : sphere (0 : Plane) 1 → Plane} (hcont : Continuous r) (hinj : Injective r)
@@ -1967,7 +1981,7 @@ theorem step_A_normalized (hbr : BrouwerFPT)
     obtain ⟨t, ht, htJn⟩ := vertical_meets_arc hbr hJnrect hJoinJn hVcont hVE hVm1 hVn1
     exact hVmiss t ht htJn
 
-/-- **Maehara Step A (geometric core).** The complement `ℝ²∖J` of a Jordan curve
+/-- **Math.** **Maehara Step A (geometric core).** The complement `ℝ²∖J` of a Jordan curve
 has at least one *bounded* connected component.  Reduced to the normalized version
 `step_A_normalized` via the farthest-pair similarity `T`. -/
 theorem step_A_exists_bounded (hbr : BrouwerFPT)
@@ -2012,14 +2026,14 @@ theorem step_A_exists_bounded (hbr : BrouwerFPT)
   rw [hcc] at hxb
   exact (isBounded_image_scaling hcpos hscale _).mp hxb
 
-/-- The Euclidean norm of an axis point `!₂[0,y]` equals `|y|`. -/
+/-- **Math.** The Euclidean norm of an axis point `!₂[0,y]` equals `|y|`. -/
 private lemma norm_axis_pt (y : ℝ) : ‖(!₂[(0:ℝ), y] : Plane)‖ = |y| := by
   have e0 : (!₂[(0:ℝ), y] : Plane) 0 = 0 := by simp
   have e1 : (!₂[(0:ℝ), y] : Plane) 1 = y := by simp
   rw [EuclideanSpace.norm_eq, Fin.sum_univ_two, e0, e1]
   simp [Real.sqrt_sq_eq_abs]
 
-/-- The upward axis ray `{p | p 0 = 0 ∧ c < p 1}` is unbounded. -/
+/-- **Math.** The upward axis ray `{p | p 0 = 0 ∧ c < p 1}` is unbounded. -/
 private lemma axis_ray_up_unbounded (c : ℝ) :
     ¬ IsBounded {p : Plane | p 0 = 0 ∧ p 1 ∈ Ioi c} := by
   intro hb
@@ -2032,7 +2046,7 @@ private lemma axis_ray_up_unbounded (c : ℝ) :
   rw [mem_closedBall_zero_iff, norm_axis_pt, abs_of_nonneg (by positivity : (0:ℝ) ≤ |c| + |M| + 1)] at hin
   linarith [le_abs_self M, abs_nonneg c]
 
-/-- The downward axis ray `{p | p 0 = 0 ∧ p 1 < c}` is unbounded. -/
+/-- **Math.** The downward axis ray `{p | p 0 = 0 ∧ p 1 < c}` is unbounded. -/
 private lemma axis_ray_down_unbounded (c : ℝ) :
     ¬ IsBounded {p : Plane | p 0 = 0 ∧ p 1 ∈ Iio c} := by
   intro hb
@@ -2046,7 +2060,7 @@ private lemma axis_ray_down_unbounded (c : ℝ) :
     abs_of_nonneg (by positivity : (0:ℝ) ≤ |c| + |M| + 1)] at hin
   linarith [le_abs_self M, abs_nonneg c]
 
-/-- The complement of the normalized rectangle `[-1,1]×[-2,2]` is preconnected
+/-- **Math.** The complement of the normalized rectangle `[-1,1]×[-2,2]` is preconnected
 (it is the union of four half-planes chained around the rectangle). -/
 private lemma isPreconnected_rect_compl :
     IsPreconnected {v : Plane | ¬(v 0 ∈ Icc (-1:ℝ) 1 ∧ v 1 ∈ Icc (-2:ℝ) 2)} := by
@@ -2087,7 +2101,7 @@ private lemma isPreconnected_rect_compl :
     tauto
   rw [hEq]; exact hADBC
 
-/-- Straight segment from `P` to `Q`, reparametrized on `[-1,1]`. -/
+/-- **Math.** Straight segment from `P` to `Q`, reparametrized on `[-1,1]`. -/
 private noncomputable def segP (P Q : Plane) : ℝ → Plane := fun t => P + ((t + 1) / 2) • (Q - P)
 
 private lemma segP_cont (P Q : Plane) : Continuous (segP P Q) := by unfold segP; fun_prop
@@ -2124,7 +2138,7 @@ private lemma segP_dist_le' (P Q : Plane) {t : ℝ} (ht : t ∈ Icc (-1:ℝ) 1) 
         mul_le_mul_of_nonneg_right hs dist_nonneg
     _ = dist P Q := one_mul _
 
-/-- A coordinate of a segment point lies in any interval containing both endpoints'
+/-- **Math.** A coordinate of a segment point lies in any interval containing both endpoints'
 corresponding coordinates. -/
 private lemma segP_coord_mem_Icc {P Q : Plane} (i : Fin 2) {lo hi : ℝ}
     (hP : P i ∈ Icc lo hi) (hQ : Q i ∈ Icc lo hi) {t : ℝ} (ht : t ∈ Icc (-1:ℝ) 1) :
@@ -2140,7 +2154,7 @@ private lemma segP_coord_mem_Icc {P Q : Plane} (i : Fin 2) {lo hi : ℝ}
       mul_nonneg (by linarith [hs1] : (0:ℝ) ≤ 1 - (t + 1) / 2) (by linarith [hP.2] : (0:ℝ) ≤ hi - P i)]
 
 set_option maxHeartbeats 1600000 in
-/-- **Maehara Step B (normalized).** Uniqueness of the bounded component in
+/-- **Math.** **Maehara Step B (normalized).** Uniqueness of the bounded component in
 normalized coordinates (farthest pair at `!₂[-1,0]`, `!₂[1,0]`). Any bounded
 component equals the `z₀`-component `U`, hence all bounded components coincide. -/
 theorem step_B_normalized (hbr : BrouwerFPT)
@@ -2475,7 +2489,7 @@ theorem step_B_normalized (hbr : BrouwerFPT)
   intro x hx y hy hxb hyb
   rw [KEY x hx hxb, KEY y hy hyb]
 
-/-- **Maehara Step B (geometric core).** Bounded components of `ℝ²∖J` are unique.
+/-- **Math.** **Maehara Step B (geometric core).** Bounded components of `ℝ²∖J` are unique.
 Reduced to the normalized version `step_B_normalized` via the farthest-pair
 similarity `T`. -/
 theorem step_B_bounded_unique (hbr : BrouwerFPT)
@@ -2527,7 +2541,7 @@ theorem step_B_bounded_unique (hbr : BrouwerFPT)
   rw [hccx, hccy] at hEq
   exact Set.image_injective.mpr T.injective hEq
 
-/-- The Jordan curve theorem reduced to Brouwer (Maehara). The eval `jordan_curve`
+/-- **Math.** The Jordan curve theorem reduced to Brouwer (Maehara). The eval `jordan_curve`
 follows by discharging `BrouwerFPT`. Given the two geometric core facts — existence
 (`step_A_exists_bounded`) and uniqueness (`step_B_bounded_unique`) of a bounded
 component — together with the unique unbounded component (`exists_unbounded_component`,
@@ -2561,7 +2575,7 @@ theorem jordan_curve_of_brouwer (hbr : BrouwerFPT)
         (unbounded_component_unique r hcont hzb hx₀u)
   exact Counting.nat_card_connectedComponents_eq_two a b hab hcover
 
-/-- **Jordan curve theorem** (the eval statement). -/
+/-- **Math.** **Jordan curve theorem** (the eval statement). -/
 theorem jordan_curve
     (r : sphere (0 : EuclideanSpace ℝ (Fin 2)) 1 → EuclideanSpace ℝ (Fin 2))
     (_hcont : Continuous r) (_hinj : Injective r) :

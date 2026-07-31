@@ -6,7 +6,7 @@ lean:
     module: Mathlib.Analysis.Calculus.FDeriv.Defs
     line: 163
     state: proven
-    rev: fabf563a7c95
+    rev: 905b95818eb3
 references:
   - "[[ref-beck|Beck et al., §2.2]]"
 ---

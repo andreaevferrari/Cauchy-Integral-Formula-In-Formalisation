@@ -4,19 +4,19 @@ type: definition
 lean:
   - decl: Metric.sphere
     module: Mathlib.Topology.MetricSpace.Pseudo.Defs
-    line: 429
+    line: 432
     state: proven
-    rev: fabf563a7c95
+    rev: 905b95818eb3
   - decl: Metric.ball
     module: Mathlib.Topology.MetricSpace.Pseudo.Defs
-    line: 367
+    line: 370
     state: proven
-    rev: fabf563a7c95
+    rev: 905b95818eb3
   - decl: Metric.closedBall
     module: Mathlib.Topology.MetricSpace.Pseudo.Defs
-    line: 418
+    line: 421
     state: proven
-    rev: fabf563a7c95
+    rev: 905b95818eb3
 references:
   - "[[ref-beck|Beck et al., §4.4]]"
 ---

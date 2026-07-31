@@ -6,7 +6,7 @@ lean:
     module: Mathlib.Topology.Homotopy.Path
     line: 241
     state: proven
-    rev: fabf563a7c95
+    rev: 905b95818eb3
 references:
   - "[[ref-beck|Beck et al., §4.3]]"
 ---

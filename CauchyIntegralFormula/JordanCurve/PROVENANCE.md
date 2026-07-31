@@ -1,4 +1,4 @@
-# Provenance and modifications
+# Provenance
 
 ## Where this came from
 
@@ -22,8 +22,22 @@ repository's. This repository vendors it; it did not prove it.
 
 ## What was changed
 
-Nothing mathematical. Four mechanical edits, required for the files to build
-as part of this library rather than as a benchmark submission:
+Nothing mathematical — every statement and every proof is the original
+author's. What this repository did:
+
+* moved the files out of `External/` and adopted them as its own, so they are
+  maintained here and diverge from upstream by design;
+* replaced `import Mathlib` with the modules each file actually uses;
+* tagged every documented declaration `**Math.**`, `**Eng.**` or `**Mixed.**`,
+  the convention this library's linter enforces;
+* upgraded the development from Lean v4.31 to v4.32.2, which took two fixes:
+  a `Continuous.subtype_mk` chain in `Brouwer.lean` that now runs past the
+  `isDefEq` heartbeat limit, replaced by `fun_prop`; and a
+  `continuous_const.smul` in `Root.lean` whose scalar argument no longer
+  elaborates without being pinned.
+
+Before that, four mechanical edits were required for the files to build as
+part of this library rather than as a benchmark submission:
 
 1. **Module paths.** `import Submission.X` became
    `import CauchyIntegralFormula.External.JordanCurve.X`.

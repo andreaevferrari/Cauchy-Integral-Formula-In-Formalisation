@@ -5,9 +5,9 @@ type: lemma
 lean:
   - decl: circleIntegral.integral_sub_inv_of_mem_ball
     module: Mathlib.MeasureTheory.Integral.CircleIntegral
-    line: 699
+    line: 698
     state: proven
-    rev: fabf563a7c95
+    rev: 905b95818eb3
 references:
   - "[[ref-beck|Beck et al., Exercise 4.5.4]]"
 ---

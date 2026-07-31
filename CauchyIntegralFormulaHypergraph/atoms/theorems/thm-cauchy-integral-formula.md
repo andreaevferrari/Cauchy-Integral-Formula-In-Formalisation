@@ -7,7 +7,7 @@ lean:
     module: Mathlib.Analysis.Complex.CauchyIntegral
     line: 532
     state: proven
-    rev: fabf563a7c95
+    rev: 905b95818eb3
 references:
   - "[[ref-beck|Beck et al., §4.4, Theorem 4.4.7]]"
 ---

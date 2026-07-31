@@ -1,7 +1,21 @@
+/-
+Copyright (c) 2026 rkirov. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: rkirov, Xinze Li
+-/
 module
 
-public import Mathlib
-public import CauchyIntegralFormula.External.JordanCurve.Arcs
+public import CauchyIntegralFormula.JordanCurve.Arcs
+public import Mathlib.Analysis.Convex.Basic
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.Topology.ContinuousMap.Defs
+public import Mathlib.Topology.Covering.Basic
+public import Mathlib.Topology.Homotopy.Lifting
+public import Mathlib.Topology.Homeomorph.Lemmas
+public import Mathlib.Topology.Homotopy.Path
+public import Mathlib.Topology.MetricSpace.Bounded
+public import Mathlib.Topology.Order.Compact
+public import Mathlib.Topology.UnitInterval
 
 @[expose] public section
 
@@ -29,26 +43,26 @@ namespace JordanCurve.Brouwer
 open Metric Set Function unitInterval Topology
 open scoped RealInnerProductSpace
 
-/-- The plane `ℝ²`. -/
+/-- **Eng.** The plane `ℝ²`. -/
 abbrev Plane := EuclideanSpace ℝ (Fin 2)
 
 /-! ## Phase 1 — the once-around loop on `AddCircle 1` is not nullhomotopic -/
 
-/-- The covering map `ℝ → AddCircle 1`. -/
+/-- **Math.** The covering map `ℝ → AddCircle 1`. -/
 noncomputable def cover : IsCoveringMap ((↑) : ℝ → AddCircle (1 : ℝ)) :=
   AddCircle.isCoveringMap_coe 1
 
-/-- The once-around loop `t ↦ ↑t` in `AddCircle 1`. -/
+/-- **Math.** The once-around loop `t ↦ ↑t` in `AddCircle 1`. -/
 noncomputable def acLoop : C(I, AddCircle (1 : ℝ)) :=
   ⟨fun t => ((t : ℝ) : AddCircle (1 : ℝ)), cover.continuous.comp continuous_subtype_val⟩
 
-/-- The lift of `acLoop` to `ℝ` starting at `0`: the identity `t ↦ ↑t`. -/
+/-- **Math.** The lift of `acLoop` to `ℝ` starting at `0`: the identity `t ↦ ↑t`. -/
 noncomputable def idLift : C(I, ℝ) := ⟨fun t => (t : ℝ), continuous_subtype_val⟩
 
 @[simp] lemma acLoop_apply (t : I) : acLoop t = ((t : ℝ) : AddCircle (1 : ℝ)) := rfl
 @[simp] lemma idLift_apply (t : I) : idLift t = (t : ℝ) := rfl
 
-/-- **Phase 1.** The once-around loop is not homotopic rel endpoints to the
+/-- **Math.** **Phase 1.** The once-around loop is not homotopic rel endpoints to the
 constant loop. -/
 theorem acLoop_not_homotopic :
     ¬ acLoop.HomotopicRel (ContinuousMap.const I (0 : AddCircle (1 : ℝ))) {0, 1} := by
@@ -69,14 +83,14 @@ theorem acLoop_not_homotopic :
 
 /-! ## Phase 1.5 — transport to the geometric circle `sphere (0:ℝ²) 1` -/
 
-/-- The homeomorphism `AddCircle 1 ≃ₜ sphere (0:ℝ²) 1`, via `Circle`. -/
+/-- **Math.** The homeomorphism `AddCircle 1 ≃ₜ sphere (0:ℝ²) 1`, via `Circle`. -/
 noncomputable def acToSphere : AddCircle (1 : ℝ) ≃ₜ sphere (0 : Plane) 1 :=
   (AddCircle.homeomorphCircle (one_ne_zero)).trans Arcs.circleHomeoSphere
 
-/-- The base point of the sphere loop. -/
+/-- **Math.** The base point of the sphere loop. -/
 noncomputable def sBase : sphere (0 : Plane) 1 := acToSphere 0
 
-/-- The once-around loop on the geometric circle `sphere (0:ℝ²) 1`. -/
+/-- **Math.** The once-around loop on the geometric circle `sphere (0:ℝ²) 1`. -/
 noncomputable def sLoop : C(I, sphere (0 : Plane) 1) :=
   (⟨acToSphere, acToSphere.continuous⟩ : C(AddCircle (1 : ℝ), sphere (0 : Plane) 1)).comp acLoop
 
@@ -84,7 +98,7 @@ noncomputable def sLoop : C(I, sphere (0 : Plane) 1) :=
 
 lemma sLoop_zero : sLoop 0 = sBase := by simp [sBase]
 
-/-- **Phase 1.5.** The once-around loop on the geometric circle is not homotopic
+/-- **Math.** **Phase 1.5.** The once-around loop on the geometric circle is not homotopic
 rel endpoints to the constant loop. -/
 theorem sLoop_not_homotopic :
     ¬ sLoop.HomotopicRel (ContinuousMap.const I sBase) {0, 1} := by
@@ -110,7 +124,7 @@ lemma sLoop_one : sLoop 1 = sBase := by
 
 /-! ## Phase 2 — no retraction of the disk onto its boundary circle -/
 
-/-- The straight-line contraction point `(1-t)·(loop s) + t·base` in the disk. -/
+/-- **Math.** The straight-line contraction point `(1-t)·(loop s) + t·base` in the disk. -/
 noncomputable def diskPt (t s : I) : Plane :=
   (1 - (t : ℝ)) • (sLoop s : Plane) + (t : ℝ) • (sBase : Plane)
 
@@ -125,12 +139,12 @@ lemma continuous_diskPt : Continuous (fun p : I × I => diskPt p.1 p.2) := by
   unfold diskPt
   fun_prop
 
-/-- The contraction as a continuous map into the disk. -/
+/-- **Math.** The contraction as a continuous map into the disk. -/
 noncomputable def diskMap : C(I × I, closedBall (0 : Plane) 1) :=
   ⟨fun p => ⟨diskPt p.1 p.2, diskPt_mem p.1 p.2⟩,
     (continuous_diskPt).subtype_mk _⟩
 
-/-- **Phase 2.** There is no retraction of the closed disk onto its boundary
+/-- **Math.** **Phase 2.** There is no retraction of the closed disk onto its boundary
 circle. -/
 theorem no_retraction (ρ : C(closedBall (0 : Plane) 1, closedBall (0 : Plane) 1))
     (hrange : ∀ x, (ρ x : Plane) ∈ sphere (0 : Plane) 1)
@@ -198,21 +212,21 @@ section Disk
 
 variable (f : C(closedBall (0 : Plane) 1, closedBall (0 : Plane) 1))
 
-/-- The direction vector `x - f x` of the ray. -/
+/-- **Math.** The direction vector `x - f x` of the ray. -/
 noncomputable def dvec (x : closedBall (0 : Plane) 1) : Plane := (x : Plane) - (f x : Plane)
 
-/-- Quadratic coefficient `A = ‖x - f x‖²`. -/
+/-- **Math.** Quadratic coefficient `A = ‖x - f x‖²`. -/
 noncomputable def Acoef (x : closedBall (0 : Plane) 1) : ℝ := ⟪dvec f x, dvec f x⟫
-/-- Coefficient `B = ⟪f x, x - f x⟫`. -/
+/-- **Math.** Coefficient `B = ⟪f x, x - f x⟫`. -/
 noncomputable def Bcoef (x : closedBall (0 : Plane) 1) : ℝ := ⟪(f x : Plane), dvec f x⟫
-/-- Coefficient `C = ‖f x‖² - 1 ≤ 0`. -/
+/-- **Math.** Coefficient `C = ‖f x‖² - 1 ≤ 0`. -/
 noncomputable def Ccoef (x : closedBall (0 : Plane) 1) : ℝ := ‖(f x : Plane)‖ ^ 2 - 1
-/-- Discriminant `B² - A·C ≥ 0`. -/
+/-- **Math.** Discriminant `B² - A·C ≥ 0`. -/
 noncomputable def discr (x : closedBall (0 : Plane) 1) : ℝ := (Bcoef f x) ^ 2 - Acoef f x * Ccoef f x
-/-- The (larger) root parameter `t = (-B + √disc)/A`. -/
+/-- **Math.** The (larger) root parameter `t = (-B + √disc)/A`. -/
 noncomputable def tparam (x : closedBall (0 : Plane) 1) : ℝ :=
   (- Bcoef f x + Real.sqrt (discr f x)) / Acoef f x
-/-- The exit point `ρ x = f x + t·(x - f x)` on the boundary circle. -/
+/-- **Math.** The exit point `ρ x = f x + t·(x - f x)` on the boundary circle. -/
 noncomputable def rhoPt (x : closedBall (0 : Plane) 1) : Plane :=
   (f x : Plane) + tparam f x • dvec f x
 
@@ -238,7 +252,7 @@ lemma discr_nonneg (x) : 0 ≤ discr f x := by
   have : 0 ≤ Acoef f x * (- Ccoef f x) := mul_nonneg hA (by linarith)
   rw [discr]; nlinarith [sq_nonneg (Bcoef f x)]
 
-/-- The exit point lies on the unit circle. -/
+/-- **Math.** The exit point lies on the unit circle. -/
 lemma norm_rhoPt (x) : ‖rhoPt f x‖ = 1 := by
   have hA := Acoef_pos f hf x
   have hsq : (Real.sqrt (discr f x)) ^ 2 = discr f x :=
@@ -260,7 +274,7 @@ lemma norm_rhoPt (x) : ‖rhoPt f x‖ = 1 := by
   have := norm_nonneg (rhoPt f x)
   nlinarith [hnormsq, this]
 
-/-- On the boundary circle, `ρ` is the identity. -/
+/-- **Math.** On the boundary circle, `ρ` is the identity. -/
 lemma rhoPt_of_mem_sphere (x : closedBall (0 : Plane) 1)
     (hx : (x : Plane) ∈ sphere (0 : Plane) 1) :
     rhoPt f x = (x : Plane) := by
@@ -334,7 +348,7 @@ lemma continuous_rhoPt : Continuous (rhoPt f) :=
 
 end Disk
 
-/-- **Phase 3.** Brouwer's fixed point theorem for the closed unit disk. -/
+/-- **Math.** **Phase 3.** Brouwer's fixed point theorem for the closed unit disk. -/
 theorem brouwer_disk (f : C(closedBall (0 : Plane) 1, closedBall (0 : Plane) 1)) :
     ∃ x, f x = x := by
   by_contra hcon
@@ -351,7 +365,7 @@ theorem brouwer_disk (f : C(closedBall (0 : Plane) 1, closedBall (0 : Plane) 1))
 
 /-! ## Phase 4 — general nonempty compact convex sets -/
 
-/-- Transfer of the fixed-point property along a homeomorphism. -/
+/-- **Eng.** Transfer of the fixed-point property along a homeomorphism. -/
 theorem fixedPoint_transfer {X Y : Type*} [TopologicalSpace X] [TopologicalSpace Y]
     (φ : X ≃ₜ Y) (hY : ∀ g : C(Y, Y), ∃ y, g y = y) (f : C(X, X)) : ∃ x, f x = x := by
   obtain ⟨y, hy⟩ := hY ((⟨φ, φ.continuous⟩ : C(X, Y)).comp
@@ -363,7 +377,7 @@ theorem fixedPoint_transfer {X Y : Type*} [TopologicalSpace X] [TopologicalSpace
 
 /-! ### Brouwer on an arbitrary closed ball (by rescaling) -/
 
-/-- Rescaling homeomorphism `closedBall 0 R ≃ₜ closedBall 0 1` (`x ↦ R⁻¹ • x`). -/
+/-- **Eng.** Rescaling homeomorphism `closedBall 0 R ≃ₜ closedBall 0 1` (`x ↦ R⁻¹ • x`). -/
 noncomputable def ballScale (R : ℝ) (hR : 0 < R) :
     closedBall (0 : Plane) R ≃ₜ closedBall (0 : Plane) 1 where
   toFun x := ⟨R⁻¹ • (x : Plane), by
@@ -376,10 +390,10 @@ noncomputable def ballScale (R : ℝ) (hR : 0 < R) :
     nlinarith [norm_nonneg (y : Plane)]⟩
   left_inv x := by ext; simp [smul_smul, mul_inv_cancel₀ hR.ne']
   right_inv y := by ext; simp [smul_smul, inv_mul_cancel₀ hR.ne']
-  continuous_toFun := (continuous_const.smul continuous_subtype_val).subtype_mk _
-  continuous_invFun := (continuous_const.smul continuous_subtype_val).subtype_mk _
+  continuous_toFun := by fun_prop
+  continuous_invFun := by fun_prop
 
-/-- **Brouwer for a closed ball of arbitrary positive radius.** -/
+/-- **Eng.** **Brouwer for a closed ball of arbitrary positive radius.** -/
 theorem brouwer_ball (R : ℝ) (hR : 0 < R)
     (f : C(closedBall (0 : Plane) R, closedBall (0 : Plane) R)) : ∃ x, f x = x :=
   fixedPoint_transfer (ballScale R hR) (fun g => brouwer_disk g) f
@@ -395,20 +409,20 @@ section Projection
 
 variable {s : Set Plane} (hconv : Convex ℝ s) (hcomp : IsCompact s) (hne : s.Nonempty)
 
-/-- Nearest-point projection of `u` onto the nonempty compact convex set `s`. -/
+/-- **Eng.** Nearest-point projection of `u` onto the nonempty compact convex set `s`. -/
 noncomputable def projFun (u : Plane) : Plane :=
   (exists_norm_eq_iInf_of_complete_convex hne hcomp.isComplete hconv u).choose
 
 lemma projFun_mem (u : Plane) : projFun hconv hcomp hne u ∈ s :=
   (exists_norm_eq_iInf_of_complete_convex hne hcomp.isComplete hconv u).choose_spec.1
 
-/-- The variational characterization of the projection. -/
+/-- **Eng.** The variational characterization of the projection. -/
 lemma projFun_inner_le (u : Plane) {w : Plane} (hw : w ∈ s) :
     ⟪u - projFun hconv hcomp hne u, w - projFun hconv hcomp hne u⟫ ≤ 0 :=
   (norm_eq_iInf_iff_real_inner_le_zero hconv (projFun_mem hconv hcomp hne u)).mp
     (exists_norm_eq_iInf_of_complete_convex hne hcomp.isComplete hconv u).choose_spec.2 w hw
 
-/-- The projection fixes the points of `s`. -/
+/-- **Eng.** The projection fixes the points of `s`. -/
 lemma projFun_eq_self {u : Plane} (hu : u ∈ s) : projFun hconv hcomp hne u = u := by
   have h := projFun_inner_le hconv hcomp hne u hu
   rw [real_inner_self_eq_norm_sq] at h
@@ -418,7 +432,7 @@ lemma projFun_eq_self {u : Plane} (hu : u ∈ s) : projFun hconv hcomp hne u = u
     rwa [norm_eq_zero] at this
   rw [sub_eq_zero] at hz; exact hz.symm
 
-/-- The projection is nonexpansive. -/
+/-- **Eng.** The projection is nonexpansive. -/
 lemma projFun_dist_le (u₁ u₂ : Plane) :
     ‖projFun hconv hcomp hne u₁ - projFun hconv hcomp hne u₂‖ ≤ ‖u₁ - u₂‖ := by
   set v₁ := projFun hconv hcomp hne u₁

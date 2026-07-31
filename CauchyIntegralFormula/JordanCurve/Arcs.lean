@@ -1,6 +1,16 @@
+/-
+Copyright (c) 2026 rkirov. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: rkirov, Xinze Li
+-/
 module
 
-public import Mathlib
+public import Mathlib.Analysis.SpecialFunctions.Complex.Circle
+public import Mathlib.Analysis.InnerProductSpace.EuclideanDist
+public import Mathlib.Analysis.InnerProductSpace.TwoDim
+public import Mathlib.Topology.Homotopy.Path
+public import Mathlib.Topology.MetricSpace.Pseudo.Defs
+public import Mathlib.Topology.UnitInterval
 
 @[expose] public section
 
@@ -32,17 +42,17 @@ namespace JordanCurve.Arcs
 
 open Metric Set Function Real
 
-/-- The plane `ℝ²`. -/
+/-- **Math.** The plane `ℝ²`. -/
 abbrev Plane := EuclideanSpace ℝ (Fin 2)
 
 /-! ## 1. The circle model bridge -/
 
-/-- A linear isometry equivalence `ℂ ≃ₗᵢ[ℝ] Plane`, from the standard orthonormal
+/-- **Eng.** A linear isometry equivalence `ℂ ≃ₗᵢ[ℝ] Plane`, from the standard orthonormal
 basis of `EuclideanSpace ℝ (Fin 2)`. -/
 noncomputable def complexLIE : ℂ ≃ₗᵢ[ℝ] Plane :=
   Complex.isometryOfOrthonormal (EuclideanSpace.basisFun (Fin 2) ℝ)
 
-/-- The underlying `Equiv` between Mathlib's `Circle` and the unit sphere of the
+/-- **Eng.** The underlying `Equiv` between Mathlib's `Circle` and the unit sphere of the
 plane, induced by `complexLIE`. -/
 noncomputable def circleEquivSphere : Circle ≃ sphere (0 : Plane) 1 where
   toFun z := ⟨complexLIE z, by
@@ -54,13 +64,13 @@ noncomputable def circleEquivSphere : Circle ≃ sphere (0 : Plane) 1 where
   left_inv z := by ext; simp [complexLIE.symm_apply_apply]
   right_inv w := by ext; simp [complexLIE.apply_symm_apply]
 
-/-- **Circle model bridge.** `Circle ≃ₜ sphere (0:Plane) 1`. -/
+/-- **Eng.** **Circle model bridge.** `Circle ≃ₜ sphere (0:Plane) 1`. -/
 noncomputable def circleHomeoSphere : Circle ≃ₜ sphere (0 : Plane) 1 :=
   Continuous.homeoOfEquivCompactToT2 (f := circleEquivSphere) <| by
     apply Continuous.subtype_mk
     exact complexLIE.continuous.comp continuous_subtype_val
 
-/-- **Circle model bridge** (as requested): `sphere (0:Plane) 1 ≃ₜ Circle`. -/
+/-- **Eng.** **Circle model bridge** (as requested): `sphere (0:Plane) 1 ≃ₜ Circle`. -/
 noncomputable def spherePlaneHomeoCircle : sphere (0 : Plane) 1 ≃ₜ Circle :=
   circleHomeoSphere.symm
 
@@ -69,7 +79,7 @@ noncomputable def spherePlaneHomeoCircle : sphere (0 : Plane) 1 ≃ₜ Circle :=
 
 /-! ## 2. The angle parametrization -/
 
-/-- The angle parametrization `ℝ → sphere (0:Plane) 1`, `θ ↦` the plane point at
+/-- **Math.** The angle parametrization `ℝ → sphere (0:Plane) 1`, `θ ↦` the plane point at
 angle `θ` on the unit circle. -/
 noncomputable def param (θ : ℝ) : sphere (0 : Plane) 1 := circleHomeoSphere (Circle.exp θ)
 
@@ -77,16 +87,16 @@ noncomputable def param (θ : ℝ) : sphere (0 : Plane) 1 := circleHomeoSphere (
 lemma continuous_param : Continuous param :=
   circleHomeoSphere.continuous.comp Circle.exp.continuous
 
-/-- Two angles give the same point iff they differ by an integer multiple of `2π`. -/
+/-- **Math.** Two angles give the same point iff they differ by an integer multiple of `2π`. -/
 lemma param_eq_iff {s t : ℝ} : param s = param t ↔ ∃ m : ℤ, s = t + m * (2 * π) := by
   unfold param
   rw [circleHomeoSphere.injective.eq_iff, Circle.exp_eq_exp]
 
-/-- The parametrization is surjective. -/
+/-- **Math.** The parametrization is surjective. -/
 lemma param_surjective : Surjective param :=
   circleHomeoSphere.surjective.comp Circle.exp_surjective
 
-/-- The parametrization is `2π`-periodic. -/
+/-- **Math.** The parametrization is `2π`-periodic. -/
 lemma param_periodic : Function.Periodic param (2 * π) := by
   intro θ
   rw [param_eq_iff]
@@ -94,7 +104,7 @@ lemma param_periodic : Function.Periodic param (2 * π) := by
 
 /-! ## 2. Closed arc ≃ₜ unitInterval -/
 
-/-- On a closed interval shorter than a full turn, `param` is injective. -/
+/-- **Math.** On a closed interval shorter than a full turn, `param` is injective. -/
 lemma param_injOn {a b : ℝ} (h : b - a < 2 * π) : InjOn param (Icc a b) := by
   intro s hs t ht hst
   obtain ⟨m, hm⟩ := param_eq_iff.1 hst
@@ -112,11 +122,11 @@ lemma param_injOn {a b : ℝ} (h : b - a < 2 * π) : InjOn param (Icc a b) := by
     omega
   rw [hm0] at hm; push_cast at hm; linarith
 
-/-- Image of a closed interval of angles under `param` (a "closed arc"). -/
+/-- **Math.** Image of a closed interval of angles under `param` (a "closed arc"). -/
 lemma isClosed_arc (a b : ℝ) : IsClosed (param '' Icc a b) :=
   (isCompact_Icc.image continuous_param).isClosed
 
-/-- On a short closed interval `param` restricts to a homeomorphism onto its
+/-- **Mixed.** On a short closed interval `param` restricts to a homeomorphism onto its
 image (the arc). -/
 noncomputable def arcHomeoIcc {a b : ℝ} (h : b - a < 2 * π) :
     (Icc a b) ≃ₜ (param '' Icc a b) :=
@@ -124,13 +134,13 @@ noncomputable def arcHomeoIcc {a b : ℝ} (h : b - a < 2 * π) :
     (f := Equiv.Set.imageOfInjOn param (Icc a b) (param_injOn h))
     (continuous_induced_rng.2 (continuous_param.comp continuous_subtype_val))
 
-/-- **Closed arc ≃ₜ unitInterval.** A closed arc `param '' Icc a b` with
+/-- **Math.** **Closed arc ≃ₜ unitInterval.** A closed arc `param '' Icc a b` with
 `a < b` and `b - a < 2π` is homeomorphic to the unit interval. -/
 noncomputable def arcHomeoUnitInterval {a b : ℝ} (hab : a < b) (h : b - a < 2 * π) :
     (param '' Icc a b) ≃ₜ unitInterval :=
   (arcHomeoIcc h).symm.trans (iccHomeoI a b hab)
 
-/-- The left endpoint `param a` of the arc maps to `0` under `arcHomeoUnitInterval`. -/
+/-- **Eng.** The left endpoint `param a` of the arc maps to `0` under `arcHomeoUnitInterval`. -/
 lemma arcHomeoUnitInterval_apply_left {a b : ℝ} (hab : a < b) (h : b - a < 2 * π)
     (hmem : param a ∈ param '' Icc a b) :
     arcHomeoUnitInterval hab h ⟨param a, hmem⟩ = 0 := by
@@ -145,7 +155,7 @@ lemma arcHomeoUnitInterval_apply_left {a b : ℝ} (hab : a < b) (h : b - a < 2 *
   show (a - a) / (b - a) = 0
   rw [sub_self, zero_div]
 
-/-- The right endpoint `param b` of the arc maps to `1` under `arcHomeoUnitInterval`. -/
+/-- **Eng.** The right endpoint `param b` of the arc maps to `1` under `arcHomeoUnitInterval`. -/
 lemma arcHomeoUnitInterval_apply_right {a b : ℝ} (hab : a < b) (h : b - a < 2 * π)
     (hmem : param b ∈ param '' Icc a b) :
     arcHomeoUnitInterval hab h ⟨param b, hmem⟩ = 1 := by
@@ -162,7 +172,7 @@ lemma arcHomeoUnitInterval_apply_right {a b : ℝ} (hab : a < b) (h : b - a < 2 
 
 /-! ## 2b. Interior of an arc is path-connected -/
 
-/-- **Interior of an arc is path-connected.** If `A ≃ₜ unitInterval` via `e` and two
+/-- **Math.** **Interior of an arc is path-connected.** If `A ≃ₜ unitInterval` via `e` and two
 points `x, y ∈ A` are the endpoints (`{e x, e y} = {0, 1}`), then `A \ {x, y}` — the
 arc with its endpoints removed — is path-connected. -/
 theorem arc_interior_isPathConnected {X : Type*} [TopologicalSpace X] {A : Set X}
@@ -248,7 +258,7 @@ theorem arc_interior_isPathConnected {X : Type*} [TopologicalSpace X] {A : Set X
   rw [← himg]
   exact hIoo.image hgcont
 
-/-- **`arc_interior_joinedIn`.** For an arc `A ≃ₜ unitInterval` via `e` whose two
+/-- **Math.** **`arc_interior_joinedIn`.** For an arc `A ≃ₜ unitInterval` via `e` whose two
 endpoints are `x, y` (`{e x, e y} = {0, 1}`), any two interior points `u, v ∈ A`
 (neither equal to `x` nor `y`) are joined by a path inside `A \ {x, y}`. -/
 theorem arc_interior_joinedIn {X : Type*} [TopologicalSpace X] {A : Set X}
@@ -261,7 +271,7 @@ theorem arc_interior_joinedIn {X : Type*} [TopologicalSpace X] {A : Set X}
 
 /-! ## 3. The two-point split -/
 
-/-- **Two-point split.** Two distinct points `x`, `y` on the circle cut it into
+/-- **Math.** **Two-point split.** Two distinct points `x`, `y` on the circle cut it into
 two closed arcs `A₁`, `A₂`, each homeomorphic to the unit interval, whose union
 is the whole circle and whose intersection is exactly `{x, y}`. -/
 theorem sphere_split {x y : sphere (0 : Plane) 1} (hxy : x ≠ y) :
@@ -368,7 +378,7 @@ theorem sphere_split {x y : sphere (0 : Plane) 1} (hxy : x ≠ y) :
 
 /-! ## 4. Transport across a homeomorphism to a Jordan curve -/
 
-/-- **Transport to a Jordan curve.** Given a homeomorphism `f` from the circle to
+/-- **Math.** **Transport to a Jordan curve.** Given a homeomorphism `f` from the circle to
 a space `K` and two distinct points, the images of the two arcs split `K` into two
 closed arcs `≃ₜ unitInterval` meeting exactly at `{f x, f y}`. -/
 theorem jordanCurve_split {K : Type*} [TopologicalSpace K]
@@ -390,7 +400,7 @@ theorem jordanCurve_split {K : Type*} [TopologicalSpace K]
 
 /-! ## 5. A proper closed arc containing a proper closed set -/
 
-/-- **Proper arc containing a set.** A proper closed subset `C` of the circle is
+/-- **Math.** **Proper arc containing a set.** A proper closed subset `C` of the circle is
 contained in a proper closed arc `A` (homeomorphic to the unit interval). -/
 theorem exists_proper_arc {C : Set (sphere (0 : Plane) 1)}
     (hC : IsClosed C) (hCne : C ≠ univ) :

@@ -4,9 +4,9 @@ type: definition
 lean:
   - decl: IsOpen
     module: Mathlib.Topology.Defs.Basic
-    line: 92
+    line: 95
     state: proven
-    rev: fabf563a7c95
+    rev: 905b95818eb3
 references:
   - "[[ref-beck|Beck et al., §1.4]]"
 ---

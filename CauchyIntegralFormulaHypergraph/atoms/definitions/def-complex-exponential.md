@@ -6,12 +6,12 @@ lean:
     module: Mathlib.Analysis.Complex.Exponential
     line: 62
     state: proven
-    rev: fabf563a7c95
+    rev: 905b95818eb3
   - decl: Real.pi
     module: Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
     line: 127
     state: proven
-    rev: fabf563a7c95
+    rev: 905b95818eb3
 references:
   - "[[ref-beck|Beck et al., §3.4]]"
 ---

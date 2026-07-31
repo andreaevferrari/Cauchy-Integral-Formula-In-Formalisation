@@ -5,9 +5,9 @@ type: lemma
 lean:
   - decl: intervalIntegral.norm_integral_le_integral_norm
     module: Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
-    line: 747
+    line: 746
     state: proven
-    rev: fabf563a7c95
+    rev: 905b95818eb3
 references:
   - "Standard real analysis"
 ---

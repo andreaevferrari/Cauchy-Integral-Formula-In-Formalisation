@@ -4,9 +4,9 @@ type: definition
 lean:
   - decl: Complex.normSq
     module: Mathlib.Data.Complex.Basic
-    line: 509
+    line: 507
     state: proven
-    rev: fabf563a7c95
+    rev: 905b95818eb3
 references:
   - "[[ref-beck|Beck et al., §1.2]]"
 ---

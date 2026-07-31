@@ -7,7 +7,7 @@ lean:
     module: Mathlib.Analysis.SpecialFunctions.ExpDeriv
     line: 88
     state: proven
-    rev: fabf563a7c95
+    rev: 905b95818eb3
 references:
   - "[[ref-beck|Beck et al., §3.4]]"
 ---
