@@ -53,8 +53,4 @@ declaration, and the card whose `lean:` field names it.
 
 ## Acknowledgements
 
-The repository's shape — its continuous integration in particular — follows
-that of the
-[Sphere Packing in Lean](https://github.com/thefundamentaltheor3m/Sphere-Packing-Lean)
-project, released under the Apache 2.0 licence. We thank the Mathlib
-maintainers and the Lean community.
+We thank the Mathlib maintainers and the Lean community.
