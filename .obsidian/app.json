@@ -5,9 +5,7 @@
     ".lake/",
     "tools/",
     "pipeline/",
-    "README.md",
-    "CONTRIBUTING.md",
-    "CODE_OF_CONDUCT.md"
+    "README.md"
   ],
   "newFileLocation": "folder",
   "newFileFolderPath": "CauchyIntegralFormulaHypergraph"

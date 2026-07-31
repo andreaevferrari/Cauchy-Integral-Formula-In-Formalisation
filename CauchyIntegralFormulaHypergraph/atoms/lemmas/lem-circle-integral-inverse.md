@@ -10,8 +10,7 @@ references:
 
 The one integral in the subject that is computed rather than deduced.
 Everything below is, in the end, a comparison against it: the value $2\pi i$
-in the integral formula is this value, and the factor $\frac{1}{2\pi i}$ is
-there to cancel it.
+in the integral formula is this value, and the factor $\frac{1}{2\pi i}$ is there to cancel it.
 
 ## Statement
 
