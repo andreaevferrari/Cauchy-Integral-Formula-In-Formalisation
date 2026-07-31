@@ -5,7 +5,7 @@ Authors: Xinze Li
 -/
 module
 
-public import CauchyIntegralFormula.JordanCurve.Root
+public import CauchyIntegralFormula.JordanCurve.Main
 
 @[expose] public section
 

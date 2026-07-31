@@ -4,24 +4,24 @@ status: formal
 type: theorem
 lean:
   - decl: JordanCurve.jordan_curve
-    module: CauchyIntegralFormula.JordanCurve.Root
-    line: 2579
+    module: CauchyIntegralFormula.JordanCurve.Main
+    line: 57
     state: proven
   - decl: JordanCurve.exists_unbounded_component
-    module: CauchyIntegralFormula.JordanCurve.Root
-    line: 324
+    module: CauchyIntegralFormula.JordanCurve.Curve.Basic
+    line: 111
     state: proven
   - decl: JordanCurve.unbounded_component_unique
-    module: CauchyIntegralFormula.JordanCurve.Root
-    line: 350
+    module: CauchyIntegralFormula.JordanCurve.Curve.Basic
+    line: 137
     state: proven
   - decl: JordanCurve.step_A_exists_bounded
-    module: CauchyIntegralFormula.JordanCurve.Root
-    line: 1987
+    module: CauchyIntegralFormula.JordanCurve.Component.Bounded
+    line: 350
     state: proven
   - decl: JordanCurve.component_boundary_eq
-    module: CauchyIntegralFormula.JordanCurve.Root
-    line: 608
+    module: CauchyIntegralFormula.JordanCurve.Curve.Separation
+    line: 226
     state: proven
 references:
   - "[[ref-beck|Beck et al., §4.4 — assumed there, not proved]]"
