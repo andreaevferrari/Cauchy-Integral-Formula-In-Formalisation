@@ -80,12 +80,21 @@ section?* and *do its Statement/Proof link into `cardpool/`?*
 
 | status | definition | canvas |
 |---|---|---|
-| `debt` | no `## Proof` section | red |
+| `debt` | no proof of either kind | red |
+| `formal` | no `## Proof` section, but every `lean:` entry resolves and is `state: proven` | green |
 | `proved` | proof present, every citation resolving inside the pool or to a declared ground notion | type colour |
 
-Transition: `debt` → (write the proof) → `proved`. The third state
-`open` — a proof standing on raw-pool cards — cannot occur here, since
-this vault has no raw pool.
+Transitions: `debt` → (write the proof) → `proved`, or → (name a
+machine-checked counterpart) → `formal`. The fourth state `open` — a proof
+standing on raw-pool cards — cannot occur here, since this vault has no raw
+pool.
+
+`formal` and `proved` are deliberately not the same thing. `proved` says a
+reader can follow the argument on the card; `formal` says a machine has
+checked it somewhere else and the card is pointing at where. A card that is
+`formal` and whose statement a reader wants to understand still wants a
+prose proof — the status says the network does not *rest* on an assumption,
+not that there is nothing left to write.
 
 Definition and remark cards carry no status — neither has anything to prove.
 Notes never affect status: a pool link in Notes is a soft pointer, not a

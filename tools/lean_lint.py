@@ -59,9 +59,12 @@ def index_packages():
     and being told so is better than a wrong hit.
     """
     out = {}
-    for pkg in sorted((V / '.lake' / 'packages').glob('*')):
+    # this library first, so a card naming a declaration vendored or written
+    # HERE resolves to this repository rather than to a namesake upstream
+    roots = [V] + sorted((V / '.lake' / 'packages').glob('*'))
+    for pkg in roots:
         for f in pkg.rglob('*.lean'):
-            if '/.lake/' in str(f.relative_to(pkg)):
+            if '.lake/' in str(f.relative_to(pkg)):
                 continue
             try:
                 lines = f.read_text(errors='replace').split('\n')

@@ -44,10 +44,12 @@ jobs:
           fetch-depth: 0 # Fetch all history for all branches and tags
 
       - name: Don't 'import Mathlib', don't "#check"
+        # External/ is vendored code, and restyling somebody else's proof is
+        # how a vendored copy stops being comparable with its upstream.
         run: |
-          ! (find CauchyIntegralFormula -type f -name "*.lean" -exec grep -Hn '^import Mathlib$' {} +)
-          ! (find CauchyIntegralFormula -type f -name "*.lean" -exec grep -Hn '^public import Mathlib$' {} +)
-          ! (find CauchyIntegralFormula -type f -name "*.lean" -exec grep -Hn '^#check' {} +)
+          ! (find CauchyIntegralFormula -type f -name "*.lean" -not -path '*/External/*' -exec grep -Hn '^import Mathlib$' {} +)
+          ! (find CauchyIntegralFormula -type f -name "*.lean" -not -path '*/External/*' -exec grep -Hn '^public import Mathlib$' {} +)
+          ! (find CauchyIntegralFormula -type f -name "*.lean" -not -path '*/External/*' -exec grep -Hn '^#check' {} +)
 
       - name: Build the project
         uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9 # v1.5.0
