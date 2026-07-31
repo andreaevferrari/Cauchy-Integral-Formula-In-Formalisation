@@ -19,6 +19,17 @@ namespace JordanCurve
 
 open Metric Set Function Bornology
 
+/-- **Math.** The closed rectangle `[-1,1] × [-2,2]`, the frame the normalized
+argument works inside: after normalization the curve is contained in it. -/
+def normalizedRectangle : Set Plane :=
+  {z : Plane | z 0 ∈ Icc (-1 : ℝ) 1 ∧ z 1 ∈ Icc (-2 : ℝ) 2}
+
+/-- **Math.** The open rectangle `(-1,1) × (-2,2)`, the interior of
+`normalizedRectangle`. A path leaving the closed rectangle has to leave this
+one first, which is what makes a first exit point available. -/
+def openNormalizedRectangle : Set Plane :=
+  {z : Plane | z 0 ∈ Ioo (-1 : ℝ) 1 ∧ z 1 ∈ Ioo (-2 : ℝ) 2}
+
 /-- **Math.** The left end of the normalized diameter. After the similarity of
 `exists_similarity_normalizing_farthest_pair`, the farthest pair of the curve
 sits at this point and `normalizedRightEnd`, so the diameter is `2`. -/

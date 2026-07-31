@@ -109,59 +109,58 @@ theorem bounded_component_unique_of_normalized (hbr : BrouwerFPT)
       connectedComponentIn (range r)ᶜ x = connectedComponentIn (range r)ᶜ y := by
   classical
   obtain ⟨cfg⟩ := exists_maehara_configuration hbr hcont hinj hm hp hfar
-  obtain ⟨J_n, J_s, l, m, p, q, z₀, hUnion, hInter, hpcJn, hpcJs, hJoinJn, hJoinJs,
-    hlJn, hl0, hlmax, hmJn, hm0, hmmin, hpJs, hp0, hpm, hpmax,
-    hqJs, hq0, hqmin, hz₀def, hml, hqp, hpz₀, hz₀m⟩ := cfg
+  have hRectSub := cfg.subset_rectangle
+  have hUnion := cfg.union_eq
+  have hInter := cfg.inter_eq
+  have hpcJn := cfg.isPathConnected_northern
+  have hpcJs := cfg.isPathConnected_southern
+  have hJoinJn := cfg.joinedIn_northern
+  have hJoinJs := cfg.joinedIn_southern
+  have hlJn := cfg.topOfNorthern_mem
+  have hl0 := cfg.topOfNorthern_coord_zero
+  have hlmax := cfg.topOfNorthern_max
+  have hmJn := cfg.bottomOfNorthern_mem
+  have hm0 := cfg.bottomOfNorthern_coord_zero
+  have hmmin := cfg.bottomOfNorthern_min
+  have hpJs := cfg.topOfSouthernBelow_mem
+  have hp0 := cfg.topOfSouthernBelow_coord_zero
+  have hpm := cfg.topOfSouthernBelow_le
+  have hpmax := cfg.topOfSouthernBelow_max
+  have hqJs := cfg.bottomOfSouthern_mem
+  have hq0 := cfg.bottomOfSouthern_coord_zero
+  have hqmin := cfg.bottomOfSouthern_min
+  have hml := cfg.bottomOfNorthern_le_topOfNorthern
+  have hqp := cfg.bottomOfSouthern_le_topOfSouthernBelow
+  have hpz₀ := cfg.topOfSouthernBelow_le_midpoint
+  have hz₀m := cfg.midpoint_le_bottomOfNorthern
+  set J_n := cfg.northern with hJndef
+  set J_s := cfg.southern with hJsdef
+  set l := cfg.topOfNorthern with hldef
+  set m := cfg.bottomOfNorthern with hmdef
+  set p := cfg.topOfSouthernBelow with hpdef
+  set q := cfg.bottomOfSouthern with hqdef
+  set z₀ := cfg.midpoint with hz₀setdef
   -- basic containments, coordinates, and rectangle bounds
   have hJnr : J_n ⊆ range r := hUnion ▸ subset_union_left
   have hJsr : J_s ⊆ range r := hUnion ▸ subset_union_right
   have hErect := normalized_subset_rectangle hm hp hfar
-  have hz₀0 : z₀ 0 = 0 := by rw [hz₀def]; simp
-  have hz₀1e : z₀ 1 = (m 1 + p 1) / 2 := by rw [hz₀def]; simp
   have hmr : m ∈ range r := hJnr hmJn
   have hlr : l ∈ range r := hJnr hlJn
   have hpr : p ∈ range r := hJsr hpJs
   have hqr : q ∈ range r := hJsr hqJs
-  have hmE1 : m 1 ∈ Icc (-2 : ℝ) 2 := (hErect hmr).2
-  have hlE1 : l 1 ∈ Icc (-2 : ℝ) 2 := (hErect hlr).2
-  have hpE1 : p 1 ∈ Icc (-2 : ℝ) 2 := (hErect hpr).2
-  have hqE1 : q 1 ∈ Icc (-2 : ℝ) 2 := (hErect hqr).2
-  have hpm_lt : p 1 < m 1 := by
-    rcases lt_or_eq_of_le hpm with h | h
-    · exact h
-    · exfalso
-      have hpm_eq : p = m := by ext i; fin_cases i <;> simp [hp0, hm0, h]
-      have hmem : m ∈ J_n ∩ J_s := ⟨hmJn, hpm_eq ▸ hpJs⟩
-      rw [hInter] at hmem
-      rcases hmem with h' | h' <;>
-        (have hc := congrArg (fun x : Plane => x 0) h'; simp only [hm0] at hc; norm_num at hc)
-  have hqm : q 1 < m 1 := lt_of_le_of_lt hqp hpm_lt
-  have hpz₀_lt : p 1 < z₀ 1 := by rw [hz₀1e]; linarith
-  have hz₀m_lt : z₀ 1 < m 1 := by rw [hz₀1e]; linarith
-  have hz₀1lb : (-2 : ℝ) ≤ z₀ 1 := le_of_lt (lt_of_le_of_lt hpE1.1 hpz₀_lt)
-  have hz₀1ub : z₀ 1 ≤ 2 := le_of_lt (lt_of_lt_of_le hz₀m_lt hmE1.2)
-  have hmab : m ∉ ({normalizedLeftEnd, normalizedRightEnd} : Set Plane) := by
-    simp only [Set.mem_insert_iff, Set.mem_singleton_iff]
-    rintro (h | h) <;>
-      (have hc := congrArg (fun x : Plane => x 0) h; simp only [hm0] at hc; norm_num at hc)
-  have hlab : l ∉ ({normalizedLeftEnd, normalizedRightEnd} : Set Plane) := by
-    simp only [Set.mem_insert_iff, Set.mem_singleton_iff]
-    rintro (h | h) <;>
-      (have hc := congrArg (fun x : Plane => x 0) h; simp only [hl0] at hc; norm_num at hc)
-  have hqab : q ∉ ({normalizedLeftEnd, normalizedRightEnd} : Set Plane) := by
-    simp only [Set.mem_insert_iff, Set.mem_singleton_iff]
-    rintro (h | h) <;>
-      (have hc := congrArg (fun x : Plane => x 0) h; simp only [hq0] at hc; norm_num at hc)
-  have hpab : p ∉ ({normalizedLeftEnd, normalizedRightEnd} : Set Plane) := by
-    simp only [Set.mem_insert_iff, Set.mem_singleton_iff]
-    rintro (h | h) <;>
-      (have hc := congrArg (fun x : Plane => x 0) h; simp only [hp0] at hc; norm_num at hc)
-  have hz₀c : z₀ ∈ (range r)ᶜ := by
-    intro hz₀r
-    rw [← hUnion] at hz₀r
-    rcases hz₀r with hJn | hJs
-    · exact absurd (hmmin z₀ hJn hz₀0) (not_le.2 hz₀m_lt)
-    · exact absurd (hpmax z₀ hJs hz₀0 hz₀m_lt.le) (not_le.2 hpz₀_lt)
+  have hqm : q 1 < m 1 := lt_of_le_of_lt hqp cfg.topOfSouthernBelow_lt_bottomOfNorthern
+  have hz₀1lb : (-2 : ℝ) ≤ z₀ 1 := le_of_lt
+    (lt_of_le_of_lt cfg.topOfSouthernBelow_height_mem.1 cfg.topOfSouthernBelow_lt_midpoint)
+  have hz₀1ub : z₀ 1 ≤ 2 := le_of_lt
+    (lt_of_lt_of_le cfg.midpoint_lt_bottomOfNorthern cfg.bottomOfNorthern_height_mem.2)
+  have hmab : m ∉ ({normalizedLeftEnd, normalizedRightEnd} : Set Plane) :=
+    not_mem_ends_of_coord_zero cfg.bottomOfNorthern_coord_zero
+  have hlab : l ∉ ({normalizedLeftEnd, normalizedRightEnd} : Set Plane) :=
+    not_mem_ends_of_coord_zero cfg.topOfNorthern_coord_zero
+  have hqab : q ∉ ({normalizedLeftEnd, normalizedRightEnd} : Set Plane) :=
+    not_mem_ends_of_coord_zero cfg.bottomOfSouthern_coord_zero
+  have hpab : p ∉ ({normalizedLeftEnd, normalizedRightEnd} : Set Plane) :=
+    not_mem_ends_of_coord_zero cfg.topOfSouthernBelow_coord_zero
   -- interval facts
   have hIcc0x : (0 : ℝ) ∈ Icc (-1 : ℝ) 1 := by rw [mem_Icc]; norm_num
   have hIcc0y : (0 : ℝ) ∈ Icc (-2 : ℝ) 2 := by rw [mem_Icc]; norm_num
@@ -172,13 +171,14 @@ theorem bounded_component_unique_of_normalized (hbr : BrouwerFPT)
   -- the `z₀`-component `U`, the rectangle `E`
   set U : Set Plane := connectedComponentIn (range r)ᶜ z₀ with hUdef
   have hUsub : U ⊆ (range r)ᶜ := connectedComponentIn_subset _ _
-  have hz₀U : z₀ ∈ U := mem_connectedComponentIn hz₀c
+  have hz₀U : z₀ ∈ U := mem_connectedComponentIn cfg.midpoint_not_mem_range
   set E : Set Plane := {p : Plane | p 0 ∈ Icc (-1 : ℝ) 1 ∧ p 1 ∈ Icc (-2 : ℝ) 2} with hEdef
   -- the open middle axis segment `(p,m)` lies in `U`
   set Mid : Set Plane := {v : Plane | v 0 = 0 ∧ v 1 ∈ Ioo (p 1) (m 1)} with hMiddef
   have hMidPC : IsPathConnected Mid :=
     isPathConnected_verticalSegment 0
-      ((convex_Ioo (p 1) (m 1)).isPathConnected (Set.nonempty_Ioo.mpr hpm_lt))
+      ((convex_Ioo (p 1) (m 1)).isPathConnected
+        (Set.nonempty_Ioo.mpr cfg.topOfSouthernBelow_lt_bottomOfNorthern))
   have hMidc : Mid ⊆ (range r)ᶜ := by
     rintro v ⟨hv0, hv1⟩ hvr
     rw [← hUnion] at hvr
@@ -186,7 +186,10 @@ theorem bounded_component_unique_of_normalized (hbr : BrouwerFPT)
     · exact absurd (hmmin v h hv0) (not_le.2 hv1.2)
     · exact absurd (hpmax v h hv0 hv1.2.le) (not_le.2 hv1.1)
   have hz₀Mid : z₀ ∈ Mid :=
-    ⟨hz₀0, by rw [hz₀1e]; exact ⟨by linarith [hpm_lt], by linarith [hpm_lt]⟩⟩
+    ⟨cfg.midpoint_coord_zero, by
+      rw [cfg.midpoint_coord_one]
+      exact ⟨by linarith [cfg.topOfSouthernBelow_lt_bottomOfNorthern],
+        by linarith [cfg.topOfSouthernBelow_lt_bottomOfNorthern]⟩⟩
   have hMidU : Mid ⊆ U :=
     hMidPC.isConnected.isPreconnected.subset_connectedComponentIn hz₀Mid hMidc
   -- upward and downward axis rays lie in the complement
@@ -285,17 +288,20 @@ theorem bounded_component_unique_of_normalized (hbr : BrouwerFPT)
       · obtain ⟨u, hu, hue⟩ := h; rw [← hue]
         exact ⟨segmentParam_coord_mem_Icc 0 (by rw [axisTop_coord_zero]; exact hIcc0x)
           (by rw [hl0]; exact hIcc0x) hu,
-          segmentParam_coord_mem_Icc 1 (by rw [axisTop_coord_one]; exact hIcc2y) hlE1 hu⟩
+          segmentParam_coord_mem_Icc 1 (by rw [axisTop_coord_one]; exact hIcc2y)
+            cfg.topOfNorthern_height_mem hu⟩
       · obtain ⟨u, hu, hue⟩ := h; rw [← hue]; exact hErect (hJnr (hlm_mem u hu).1)
       · obtain ⟨u, hu, hue⟩ := h; rw [← hue]
         exact ⟨segmentParam_coord_mem_Icc 0 (by rw [hm0]; exact hIcc0x)
           (by rw [hp0]; exact hIcc0x) hu,
-          segmentParam_coord_mem_Icc 1 hmE1 hpE1 hu⟩
+          segmentParam_coord_mem_Icc 1 cfg.bottomOfNorthern_height_mem
+            cfg.topOfSouthernBelow_height_mem hu⟩
       · obtain ⟨u, hu, hue⟩ := h; rw [← hue]; exact hErect (hJsr (hpq_mem u hu).1)
       · obtain ⟨u, hu, hue⟩ := h; rw [← hue]
         exact ⟨segmentParam_coord_mem_Icc 0 (by rw [hq0]; exact hIcc0x)
           (by rw [axisBottom_coord_zero]; exact hIcc0x) hu,
-          segmentParam_coord_mem_Icc 1 hqE1 (by rw [axisBottom_coord_one]; exact hIccm2y) hu⟩
+          segmentParam_coord_mem_Icc 1 cfg.bottomOfSouthern_height_mem
+            (by rw [axisBottom_coord_one]; exact hIccm2y) hu⟩
     have hβmiss : ∀ t ∈ Icc (-1 : ℝ) 1, β t ∉ W := by
       intro t ht
       rcases hβmem t ht with ((((h | h) | h) | h) | h)
@@ -303,26 +309,28 @@ theorem bounded_component_unique_of_normalized (hbr : BrouwerFPT)
         refine avoid_up _ ?_ ?_
         · rw [segmentParam_coord, axisTop_coord_zero, hl0]; ring
         · rw [segmentParam_coord, axisTop_coord_one]; rw [mem_Icc] at hu; nlinarith [hu.1,
-          hu.2, hlE1.2]
+          hu.2, cfg.topOfNorthern_height_mem.2]
       · obtain ⟨u, hu, hue⟩ := h; rw [← hue]
         exact fun hW => hWsub hW (hJnr (hlm_mem u hu).1)
       · obtain ⟨u, hu, hue⟩ := h; rw [← hue]
         refine avoid_mid _ ?_ ?_ ?_
         · rw [segmentParam_coord, hm0, hp0]; ring
-        · rw [segmentParam_coord]; rw [mem_Icc] at hu; nlinarith [hu.1, hu.2, hpm_lt.le]
-        · rw [segmentParam_coord]; rw [mem_Icc] at hu; nlinarith [hu.1, hu.2, hpm_lt.le]
+        · rw [segmentParam_coord]; rw [mem_Icc] at hu; nlinarith
+          [hu.1, hu.2, cfg.topOfSouthernBelow_lt_bottomOfNorthern.le]
+        · rw [segmentParam_coord]; rw [mem_Icc] at hu; nlinarith
+          [hu.1, hu.2, cfg.topOfSouthernBelow_lt_bottomOfNorthern.le]
       · obtain ⟨u, hu, hue⟩ := h; rw [← hue]
         exact fun hW => hWsub hW (hJsr (hpq_mem u hu).1)
       · obtain ⟨u, hu, hue⟩ := h; rw [← hue]
         refine avoid_down _ ?_ ?_
         · rw [segmentParam_coord, hq0, axisBottom_coord_zero]; ring
         · rw [segmentParam_coord, axisBottom_coord_one]; rw [mem_Icc] at hu; nlinarith [hu.1,
-          hu.2, hqE1.1]
+          hu.2, cfg.bottomOfSouthern_height_mem.1]
     -- `a, b ∈ closure W` (frontier of a component is the whole curve)
     have hfrW : frontier W = range r := by
       have hexists : ∃ y ∈ (range r)ᶜ,
           connectedComponentIn (range r)ᶜ y ≠ connectedComponentIn (range r)ᶜ w := by
-        refine ⟨z₀, hz₀c, ?_⟩
+        refine ⟨z₀, cfg.midpoint_not_mem_range, ?_⟩
         rw [← hUdef, ← hWdef]; exact fun h => hWne h.symm
       have hcbe := component_boundary_eq hbr hcont hinj hw hexists
       rwa [← hWdef] at hcbe

@@ -227,6 +227,7 @@ theorem exists_maehara_configuration (hbr : BrouwerFPT)
             topOfNorthern := l, bottomOfNorthern := m
             topOfSouthernBelow := p, bottomOfSouthern := q
             midpoint := !₂[(0 : ℝ), (m 1 + p 1) / 2]
+            subset_rectangle := normalized_subset_rectangle hm hp hfar
             union_eq := hUnion, inter_eq := hInter
             isPathConnected_northern := hpcJn, isPathConnected_southern := hpcJs
             joinedIn_northern := hJoinJn, joinedIn_southern := hJoinJs

@@ -27,17 +27,6 @@ namespace JordanCurve
 
 open Metric Set Function Bornology
 
-/-- **Math.** The closed rectangle `[-1,1] × [-2,2]`, the frame the normalized
-argument works inside: after normalization the curve is contained in it. -/
-def normalizedRectangle : Set Plane :=
-  {z : Plane | z 0 ∈ Icc (-1 : ℝ) 1 ∧ z 1 ∈ Icc (-2 : ℝ) 2}
-
-/-- **Math.** The open rectangle `(-1,1) × (-2,2)`, the interior of
-`normalizedRectangle`. A path leaving the closed rectangle has to leave this
-one first, which is what makes a first exit point available. -/
-def openNormalizedRectangle : Set Plane :=
-  {z : Plane | z 0 ∈ Ioo (-1 : ℝ) 1 ∧ z 1 ∈ Ioo (-2 : ℝ) 2}
-
 /-- **Math.** The normalized rectangle is bounded: it sits inside the closed
 ball of radius `3` about the origin, since `1² + 2² = 5 ≤ 9`. -/
 theorem isBounded_normalizedRectangle : IsBounded normalizedRectangle := by

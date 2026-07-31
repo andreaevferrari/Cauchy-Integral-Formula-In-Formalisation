@@ -17,7 +17,7 @@ lean:
     state: proven
   - decl: JordanCurve.exists_bounded_component
     module: CauchyIntegralFormula.JordanCurve.Component.Bounded
-    line: 340
+    line: 347
     state: proven
   - decl: JordanCurve.component_boundary_eq
     module: CauchyIntegralFormula.JordanCurve.Curve.Separation
