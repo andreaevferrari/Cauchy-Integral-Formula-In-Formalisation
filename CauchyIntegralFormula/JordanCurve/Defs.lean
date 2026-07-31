@@ -19,13 +19,13 @@ public import Mathlib.Topology.TietzeExtension
 public import Mathlib.Analysis.Complex.Tietze
 public import Mathlib.Topology.UnitInterval
 
-@[expose] public section
-
 /-!
 # The plane, and the Brouwer interface the argument is stated over
 
 Part of the Jordan curve development; see `PROVENANCE.md` beside this file.
 -/
+
+@[expose] public section
 
 namespace JordanCurve
 

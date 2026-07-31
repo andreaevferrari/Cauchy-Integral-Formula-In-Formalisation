@@ -12,8 +12,6 @@ public import Mathlib.Data.Set.Basic
 public import Mathlib.Data.Set.Image
 public import Mathlib.Data.Subtype
 
-@[expose] public section
-
 /-!
 # Counting connected components
 
@@ -41,6 +39,8 @@ are the original author's; what changed here is the imports (`import Mathlib`
 narrowed to the six modules actually used), the docstring tags, and this
 header.
 -/
+
+@[expose] public section
 
 namespace JordanCurve.Counting
 

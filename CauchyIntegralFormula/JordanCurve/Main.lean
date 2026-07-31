@@ -7,13 +7,13 @@ module
 
 public import CauchyIntegralFormula.JordanCurve.Component.Unbounded
 
-@[expose] public section
-
 /-!
 # The Jordan curve theorem
 
 Part of the Jordan curve development; see `PROVENANCE.md` beside this file.
 -/
+
+@[expose] public section
 
 namespace JordanCurve
 

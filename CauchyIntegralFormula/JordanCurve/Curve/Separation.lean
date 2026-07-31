@@ -7,13 +7,13 @@ module
 
 public import CauchyIntegralFormula.JordanCurve.Curve.Basic
 
-@[expose] public section
-
 /-!
 # An arc does not separate the plane
 
 Part of the Jordan curve development; see `PROVENANCE.md` beside this file.
 -/
+
+@[expose] public section
 
 namespace JordanCurve
 
@@ -53,7 +53,7 @@ theorem arc_not_separates (hbr : BrouwerFPT) {A : Set Plane}
     intro a ha
     have h1 := DFunLike.congr_fun hg ⟨a, ha⟩
     simp only [ContinuousMap.restrict_apply, ContinuousMap.id_apply] at h1
-    show (g a : Plane) = a
+    change (g a : Plane) = a
     exact congrArg Subtype.val h1
   -- A radius `R0 ≥ 0` with `A ⊆ closedBall 0 R0`; the cobounded exterior `E`.
   obtain ⟨R0, hR0, hAsub⟩ : ∃ R0 : ℝ, 0 ≤ R0 ∧ A ⊆ closedBall (0 : Plane) R0 := by
@@ -76,7 +76,7 @@ theorem arc_not_separates (hbr : BrouwerFPT) {A : Set Plane}
       ∃ w ∈ E, w ∈ connectedComponentIn Aᶜ z := by
     intro z _ hzu
     by_contra hcon
-    push_neg at hcon
+    push Not at hcon
     apply hzu
     have hsubBall : connectedComponentIn Aᶜ z ⊆ closedBall (0 : Plane) R0 := by
       intro w hw
@@ -194,7 +194,7 @@ theorem arc_not_separates (hbr : BrouwerFPT) {A : Set Plane}
     rw [hz, norm_zero] at hx0R
     exact absurd hx0R.symm hRpos.ne'
   · -- No bounded component: every point's component equals that of `p`.
-    push_neg at hbdd
+    push Not at hbdd
     have hAeq : Aᶜ ⊆ connectedComponentIn Aᶜ p := by
       intro x hx
       obtain ⟨w, hwE, hwx⟩ := meetsE x hx (hbdd x hx)

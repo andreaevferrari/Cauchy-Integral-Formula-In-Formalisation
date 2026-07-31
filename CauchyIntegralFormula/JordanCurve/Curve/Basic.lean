@@ -7,13 +7,13 @@ module
 
 public import CauchyIntegralFormula.JordanCurve.Crossing
 
-@[expose] public section
-
 /-!
 # A Jordan curve and the topology of its complement
 
 Part of the Jordan curve development; see `PROVENANCE.md` beside this file.
 -/
+
+@[expose] public section
 
 namespace JordanCurve
 
@@ -152,7 +152,7 @@ theorem unbounded_component_unique (hcont : Continuous r) {x y : Plane}
       ∃ w ∈ E, w ∈ connectedComponentIn (range r)ᶜ z := by
     intro z hz
     by_contra hcon
-    push_neg at hcon
+    push Not at hcon
     apply hz
     have hsubBall : connectedComponentIn (range r)ᶜ z ⊆ closedBall (0 : Plane) R := by
       intro w hw

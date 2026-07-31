@@ -7,8 +7,6 @@ module
 
 public import CauchyIntegralFormula.JordanCurve.Main
 
-@[expose] public section
-
 /-!
 # Regression anchor for the Jordan curve theorem
 
@@ -32,6 +30,8 @@ The rule that goes with the file: **it is never edited to make it compile.**
 If it breaks, the refactor broke something, and the refactor is what gets
 fixed.
 -/
+
+@[expose] public section
 
 namespace CauchyIntegralFormula.Topology
 

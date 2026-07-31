@@ -17,8 +17,6 @@ public import Mathlib.Topology.MetricSpace.Bounded
 public import Mathlib.Topology.Order.Compact
 public import Mathlib.Topology.UnitInterval
 
-@[expose] public section
-
 /-!
 # Toward the 2D Brouwer fixed point theorem
 
@@ -38,6 +36,8 @@ point theorem, in four phases:
 * **Phase 4** — the general convex/compact/nonempty statement `brouwerFPT`.
 -/
 
+@[expose] public section
+
 namespace JordanCurve.Brouwer
 
 open Metric Set Function unitInterval Topology
@@ -49,7 +49,7 @@ abbrev Plane := EuclideanSpace ℝ (Fin 2)
 /-! ## Phase 1 — the once-around loop on `AddCircle 1` is not nullhomotopic -/
 
 /-- **Math.** The covering map `ℝ → AddCircle 1`. -/
-noncomputable def cover : IsCoveringMap ((↑) : ℝ → AddCircle (1 : ℝ)) :=
+theorem cover : IsCoveringMap ((↑) : ℝ → AddCircle (1 : ℝ)) :=
   AddCircle.isCoveringMap_coe 1
 
 /-- **Math.** The once-around loop `t ↦ ↑t` in `AddCircle 1`. -/
@@ -164,26 +164,26 @@ theorem no_retraction (ρ : C(closedBall (0 : Plane) 1, closedBall (0 : Plane) 1
   · -- H (0, s) = sLoop s
     intro s
     have hmem : (diskMap (0, s) : Plane) ∈ sphere (0 : Plane) 1 := by
-      show diskPt 0 s ∈ _
+      change diskPt 0 s ∈ _
       simp only [diskPt, Set.Icc.coe_zero, sub_zero, one_smul, zero_smul, add_zero]
       exact (sLoop s).2
     apply Subtype.ext
-    show (ρ (diskMap (0, s)) : Plane) = (sLoop s : Plane)
+    change (ρ (diskMap (0, s)) : Plane) = (sLoop s : Plane)
     rw [hid _ hmem]
     show (diskMap (0, s) : Plane) = (sLoop s : Plane)
-    show diskPt 0 s = (sLoop s : Plane)
+    change diskPt 0 s = (sLoop s : Plane)
     simp [diskPt]
   · -- H (1, s) = base
     intro s
     have hmem : (diskMap (1, s) : Plane) ∈ sphere (0 : Plane) 1 := by
-      show diskPt 1 s ∈ _
+      change diskPt 1 s ∈ _
       simp only [diskPt, Set.Icc.coe_one, sub_self, zero_smul, one_smul, zero_add]
       exact sBase.2
     apply Subtype.ext
-    show (ρ (diskMap (1, s)) : Plane) = (sBase : Plane)
+    change (ρ (diskMap (1, s)) : Plane) = (sBase : Plane)
     rw [hid _ hmem]
     show (diskMap (1, s) : Plane) = (sBase : Plane)
-    show diskPt 1 s = (sBase : Plane)
+    change diskPt 1 s = (sBase : Plane)
     simp [diskPt]
   · -- rel endpoints: for s ∈ {0,1}, H t s = sLoop s = base
     intro t s hs
@@ -192,14 +192,14 @@ theorem no_retraction (ρ : C(closedBall (0 : Plane) 1, closedBall (0 : Plane) 1
       · rw [show s = (0 : I) from h, sLoop_zero]
       · rw [show s = (1 : I) from h, sLoop_one]
     have hmem : (diskMap (t, s) : Plane) ∈ sphere (0 : Plane) 1 := by
-      show diskPt t s ∈ _
+      change diskPt t s ∈ _
       simp only [diskPt, hs', ← add_smul, sub_add_cancel, one_smul]
       exact sBase.2
     apply Subtype.ext
-    show (ρ (diskMap (t, s)) : Plane) = (sLoop s : Plane)
+    change (ρ (diskMap (t, s)) : Plane) = (sLoop s : Plane)
     rw [hid _ hmem, hs']
     show (diskMap (t, s) : Plane) = (sBase : Plane)
-    show diskPt t s = (sBase : Plane)
+    change diskPt t s = (sBase : Plane)
     simp only [diskPt, hs', ← add_smul, sub_add_cancel, one_smul]
 
 /-! ## Phase 3 — Brouwer for the closed unit disk
@@ -222,7 +222,8 @@ noncomputable def Bcoef (x : closedBall (0 : Plane) 1) : ℝ := ⟪(f x : Plane)
 /-- **Math.** Coefficient `C = ‖f x‖² - 1 ≤ 0`. -/
 noncomputable def Ccoef (x : closedBall (0 : Plane) 1) : ℝ := ‖(f x : Plane)‖ ^ 2 - 1
 /-- **Math.** Discriminant `B² - A·C ≥ 0`. -/
-noncomputable def discr (x : closedBall (0 : Plane) 1) : ℝ := (Bcoef f x) ^ 2 - Acoef f x * Ccoef f x
+noncomputable def discr (x : closedBall (0 : Plane) 1) : ℝ :=
+  (Bcoef f x) ^ 2 - Acoef f x * Ccoef f x
 /-- **Math.** The (larger) root parameter `t = (-B + √disc)/A`. -/
 noncomputable def tparam (x : closedBall (0 : Plane) 1) : ℝ :=
   (- Bcoef f x + Real.sqrt (discr f x)) / Acoef f x
@@ -230,27 +231,55 @@ noncomputable def tparam (x : closedBall (0 : Plane) 1) : ℝ :=
 noncomputable def rhoPt (x : closedBall (0 : Plane) 1) : Plane :=
   (f x : Plane) + tparam f x • dvec f x
 
-variable (hf : ∀ x, (f x : Plane) ≠ (x : Plane))
-include hf
-
-lemma dvec_ne (x) : dvec f x ≠ 0 := by
-  simp only [dvec, sub_ne_zero]; exact fun h => hf x h.symm
-
-lemma Acoef_pos (x) : 0 < Acoef f x := by
-  rw [Acoef, real_inner_self_eq_norm_sq]
-  exact pow_pos (norm_pos_iff.mpr (dvec_ne f hf x)) 2
-
 lemma Ccoef_nonpos (x) : Ccoef f x ≤ 0 := by
   rw [Ccoef, sub_nonpos]
   have : ‖(f x : Plane)‖ ≤ 1 := by
     have := (f x).2; rw [mem_closedBall, dist_zero_right] at this; exact this
   nlinarith [norm_nonneg (f x : Plane)]
 
+
+lemma continuous_fval : Continuous fun x : closedBall (0 : Plane) 1 => (f x : Plane) :=
+  continuous_subtype_val.comp (map_continuous f)
+
+
+lemma continuous_dvec : Continuous (dvec f) :=
+  continuous_subtype_val.sub (continuous_fval f)
+
+
+lemma continuous_Acoef : Continuous (Acoef f) :=
+  (continuous_dvec f).inner (continuous_dvec f)
+
+
+lemma continuous_Bcoef : Continuous (Bcoef f) :=
+  (continuous_fval f).inner (continuous_dvec f)
+
+
+lemma continuous_Ccoef : Continuous (Ccoef f) :=
+  ((continuous_fval f).norm.pow 2).sub continuous_const
+
+
+lemma continuous_discr : Continuous (discr f) :=
+  ((continuous_Bcoef f).pow 2).sub ((continuous_Acoef f).mul (continuous_Ccoef f))
+
+
+variable (hf : ∀ x, (f x : Plane) ≠ (x : Plane))
+include hf
+
+lemma dvec_ne (x) : dvec f x ≠ 0 := by
+  simp only [dvec, sub_ne_zero]; exact fun h => hf x h.symm
+
+
+lemma Acoef_pos (x) : 0 < Acoef f x := by
+  rw [Acoef, real_inner_self_eq_norm_sq]
+  exact pow_pos (norm_pos_iff.mpr (dvec_ne f hf x)) 2
+
+
 lemma discr_nonneg (x) : 0 ≤ discr f x := by
   have hA := (Acoef_pos f hf x).le
-  have hC := Ccoef_nonpos f hf x
+  have hC := Ccoef_nonpos f x
   have : 0 ≤ Acoef f x * (- Ccoef f x) := mul_nonneg hA (by linarith)
   rw [discr]; nlinarith [sq_nonneg (Bcoef f x)]
+
 
 /-- **Math.** The exit point lies on the unit circle. -/
 lemma norm_rhoPt (x) : ‖rhoPt f x‖ = 1 := by
@@ -273,6 +302,7 @@ lemma norm_rhoPt (x) : ‖rhoPt f x‖ = 1 := by
     nlinarith [hsq, hA]
   have := norm_nonneg (rhoPt f x)
   nlinarith [hnormsq, this]
+
 
 /-- **Math.** On the boundary circle, `ρ` is the identity. -/
 lemma rhoPt_of_mem_sphere (x : closedBall (0 : Plane) 1)
@@ -315,33 +345,11 @@ lemma rhoPt_of_mem_sphere (x : closedBall (0 : Plane) 1)
 
 /-! ### Continuity of the retraction -/
 
-omit hf in
-lemma continuous_fval : Continuous fun x : closedBall (0 : Plane) 1 => (f x : Plane) :=
-  continuous_subtype_val.comp (map_continuous f)
-
-omit hf in
-lemma continuous_dvec : Continuous (dvec f) :=
-  continuous_subtype_val.sub (continuous_fval f)
-
-omit hf in
-lemma continuous_Acoef : Continuous (Acoef f) :=
-  (continuous_dvec f).inner (continuous_dvec f)
-
-omit hf in
-lemma continuous_Bcoef : Continuous (Bcoef f) :=
-  (continuous_fval f).inner (continuous_dvec f)
-
-omit hf in
-lemma continuous_Ccoef : Continuous (Ccoef f) :=
-  ((continuous_fval f).norm.pow 2).sub continuous_const
-
-omit hf in
-lemma continuous_discr : Continuous (discr f) :=
-  ((continuous_Bcoef f).pow 2).sub ((continuous_Acoef f).mul (continuous_Ccoef f))
 
 lemma continuous_tparam : Continuous (tparam f) :=
   Continuous.div (((continuous_Bcoef f).neg).add (continuous_discr f).sqrt)
     (continuous_Acoef f) (fun x => (Acoef_pos f hf x).ne')
+
 
 lemma continuous_rhoPt : Continuous (rhoPt f) :=
   (continuous_fval f).add ((continuous_tparam f hf).smul (continuous_dvec f))
@@ -352,15 +360,15 @@ end Disk
 theorem brouwer_disk (f : C(closedBall (0 : Plane) 1, closedBall (0 : Plane) 1)) :
     ∃ x, f x = x := by
   by_contra hcon
-  push_neg at hcon
+  push Not at hcon
   have hf : ∀ x, (f x : Plane) ≠ (x : Plane) := fun x h => hcon x (Subtype.ext h)
   have hρmem : ∀ x, rhoPt f x ∈ closedBall (0 : Plane) 1 := fun x => by
     rw [mem_closedBall, dist_zero_right, norm_rhoPt f hf x]
   refine no_retraction ⟨fun x => ⟨rhoPt f x, hρmem x⟩, (continuous_rhoPt f hf).subtype_mk _⟩
     (fun x => ?_) (fun x hx => ?_)
-  · show rhoPt f x ∈ sphere (0 : Plane) 1
+  · change rhoPt f x ∈ sphere (0 : Plane) 1
     rw [mem_sphere_zero_iff_norm]; exact norm_rhoPt f hf x
-  · show rhoPt f x = (x : Plane)
+  · change rhoPt f x = (x : Plane)
     exact rhoPt_of_mem_sphere f hf x hx
 
 /-! ## Phase 4 — general nonempty compact convex sets -/
@@ -485,5 +493,7 @@ theorem brouwerFPT : ∀ s : Set Plane, Convex ℝ s → IsCompact s → s.Nonem
   have hval : (f (r x) : Plane) = (x : Plane) := congrArg Subtype.val hx
   have hxs : (x : Plane) ∈ s := by rw [← hval]; exact (f (r x)).2
   have hrx : ((r x : s) : Plane) = (x : Plane) := projFun_eq_self hconv hcomp hne hxs
-  show (f (r x) : Plane) = ((r x : s) : Plane)
+  change (f (r x) : Plane) = ((r x : s) : Plane)
   rw [hval, hrx]
+
+end JordanCurve.Brouwer

@@ -7,13 +7,13 @@ module
 
 public import CauchyIntegralFormula.JordanCurve.Defs
 
-@[expose] public section
-
 /-!
 # Maehara's crossing lemma
 
 Part of the Jordan curve development; see `PROVENANCE.md` beside this file.
 -/
+
+@[expose] public section
 
 namespace JordanCurve
 
@@ -26,16 +26,16 @@ Brouwer: if they were disjoint, the explicit normalized map
 `F(s,t) = ((v₁ t − h₁ s)/N, (h₂ s − v₂ t)/N)` (with `N` the sup-norm of
 `h s − v t`) sends the parameter square `[-1,1]²` to its boundary with no fixed
 point. Coordinates are `p 0`, `p 1` of `p : Plane`. -/
-theorem crossing (hbr : BrouwerFPT) {a b c d : ℝ} (hab : a ≤ b) (hcd : c ≤ d)
+theorem crossing (hbr : BrouwerFPT) {a b c d : ℝ} (_hab : a ≤ b) (_hcd : c ≤ d)
     (h v : ℝ → Plane)
     (hh : ContinuousOn h (Icc (-1) 1)) (hv : ContinuousOn v (Icc (-1) 1))
-    (hhE : ∀ t ∈ Icc (-1:ℝ) 1, h t 0 ∈ Icc a b ∧ h t 1 ∈ Icc c d)
-    (hvE : ∀ t ∈ Icc (-1:ℝ) 1, v t 0 ∈ Icc a b ∧ v t 1 ∈ Icc c d)
+    (hhE : ∀ t ∈ Icc (-1 : ℝ) 1, h t 0 ∈ Icc a b ∧ h t 1 ∈ Icc c d)
+    (hvE : ∀ t ∈ Icc (-1 : ℝ) 1, v t 0 ∈ Icc a b ∧ v t 1 ∈ Icc c d)
     (hh1 : h (-1) 0 = a) (hh2 : h 1 0 = b)
     (hv1 : v (-1) 1 = c) (hv2 : v 1 1 = d) :
     ∃ s ∈ Icc (-1:ℝ) 1, ∃ t ∈ Icc (-1:ℝ) 1, h s = v t := by
   by_contra hcon
-  push_neg at hcon
+  push Not at hcon
   -- `hcon : ∀ s ∈ Icc (-1) 1, ∀ t ∈ Icc (-1) 1, h s ≠ v t`
   -- The parameter square `Q = [-1,1]²`.
   set Q : Set Plane := {p | p 0 ∈ Icc (-1:ℝ) 1 ∧ p 1 ∈ Icc (-1:ℝ) 1} with hQdef
@@ -124,11 +124,11 @@ theorem crossing (hbr : BrouwerFPT) {a b c d : ℝ} (hab : a ≤ b) (hcd : c ≤
     intro p hp
     have hN := hNpos p hp
     refine ⟨?_, ?_⟩
-    · show |(v (p 1) 0 - h (p 0) 0) / N p| ≤ 1
+    · change |(v (p 1) 0 - h (p 0) 0) / N p| ≤ 1
       rw [abs_div, abs_of_pos hN, div_le_one hN]
       calc |v (p 1) 0 - h (p 0) 0| = |h (p 0) 0 - v (p 1) 0| := abs_sub_comm _ _
         _ ≤ N p := le_max_left _ _
-    · show |(h (p 0) 1 - v (p 1) 1) / N p| ≤ 1
+    · change |(h (p 0) 1 - v (p 1) 1) / N p| ≤ 1
       rw [abs_div, abs_of_pos hN, div_le_one hN]
       exact le_max_right _ _
   have hmaps : MapsTo F Q Q := by

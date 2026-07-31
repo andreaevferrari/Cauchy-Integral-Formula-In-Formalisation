@@ -7,13 +7,13 @@ module
 
 public import CauchyIntegralFormula.JordanCurve.Curve.Separation
 
-@[expose] public section
-
 /-!
 # The normalized frame: farthest pair, similarity, scaling
 
 Part of the Jordan curve development; see `PROVENANCE.md` beside this file.
 -/
+
+@[expose] public section
 
 namespace JordanCurve
 
@@ -35,7 +35,7 @@ private lemma complexLIE_one : Arcs.complexLIE (1 : ℂ) = !₂[(1:ℝ), 0] := b
   simp only [Complex.one_re, Complex.one_im, one_smul, zero_smul, add_zero,
     EuclideanSpace.basisFun_apply]
   ext i; fin_cases i <;>
-    simp [EuclideanSpace.single_apply, PiLp.toLp_apply]
+    simp
 
 /-- **Math.** `complexLIE (-1) = !₂[-1,0]`. -/
 private lemma complexLIE_negOne : Arcs.complexLIE (-1 : ℂ) = !₂[(-1:ℝ), 0] := by
@@ -45,7 +45,7 @@ private lemma complexLIE_negOne : Arcs.complexLIE (-1 : ℂ) = !₂[(-1:ℝ), 0]
   simp only [Complex.neg_re, Complex.one_re, Complex.neg_im, Complex.one_im, neg_zero,
     zero_smul, add_zero, EuclideanSpace.basisFun_apply]
   ext i; fin_cases i <;>
-    simp [EuclideanSpace.single_apply, PiLp.toLp_apply]
+    simp
 
 /-- **Math.** **Task 1 (farthest pair).** The compact curve `range r` contains a pair `a, b`
 realizing the diameter of `J`, and `a ≠ b` (as `r` is injective on the sphere, which
@@ -58,10 +58,10 @@ theorem exists_farthest_pair {r : sphere (0 : Plane) 1 → Plane}
   -- two explicit distinct points on the sphere, hence in `range r`
   have hs1 : (!₂[(1:ℝ), 0] : Plane) ∈ sphere (0 : Plane) 1 := by
     rw [mem_sphere_zero_iff_norm, EuclideanSpace.norm_eq, Fin.sum_univ_two]
-    simp [PiLp.toLp_apply]
+    simp
   have hs2 : (!₂[(-1:ℝ), 0] : Plane) ∈ sphere (0 : Plane) 1 := by
     rw [mem_sphere_zero_iff_norm, EuclideanSpace.norm_eq, Fin.sum_univ_two]
-    simp [PiLp.toLp_apply]
+    simp
   set s1 : sphere (0 : Plane) 1 := ⟨!₂[(1:ℝ), 0], hs1⟩ with hs1def
   set s2 : sphere (0 : Plane) 1 := ⟨!₂[(-1:ℝ), 0], hs2⟩ with hs2def
   have hs12 : s1 ≠ s2 := by

@@ -7,13 +7,13 @@ module
 
 public import CauchyIntegralFormula.JordanCurve.Normalization.Frame
 
-@[expose] public section
-
 /-!
 # Setup lemmas in the normalized frame
 
 Part of the Jordan curve development; see `PROVENANCE.md` beside this file.
 -/
+
+@[expose] public section
 
 namespace JordanCurve
 
@@ -34,7 +34,7 @@ the rectangle `[-1,1] × [-2,2]`.  For `z ∈ range r`, both `dist z a ≤ 2` an
 `z 0 ∈ [-1,1]` and (adding them) `(z 0)²+(z 1)² ≤ 3`, hence `z 1 ∈ [-2,2]`. -/
 theorem normalized_subset_rectangle
     {r : sphere (0 : Plane) 1 → Plane}
-    (hm : (!₂[(-1:ℝ), 0] : Plane) ∈ range r) (hp : (!₂[(1:ℝ), 0] : Plane) ∈ range r)
+    (hm : (!₂[(-1 : ℝ), 0] : Plane) ∈ range r) (hp : (!₂[(1 : ℝ), 0] : Plane) ∈ range r)
     (hfar : ∀ z ∈ range r, ∀ w ∈ range r, dist z w ≤ 2) :
     range r ⊆ {p : Plane | p 0 ∈ Icc (-1:ℝ) 1 ∧ p 1 ∈ Icc (-2:ℝ) 2} := by
   intro z hz
@@ -70,11 +70,11 @@ theorem arc_path {S : Set Plane} {a b : Plane} (hj : JoinedIn S a b) :
     ?_, ?_, ?_, ?_⟩
   · exact (hj.somePath.continuous.comp
       (continuous_projIcc.comp (by fun_prop))).continuousOn
-  · show hj.somePath _ = a
+  · change hj.somePath _ = a
     rw [show Set.projIcc (0:ℝ) 1 (by norm_num) (((-1:ℝ) + 1) / 2) = 0 from
       Subtype.ext (by rw [Set.coe_projIcc]; norm_num)]
     exact hj.somePath.source
-  · show hj.somePath _ = b
+  · change hj.somePath _ = b
     rw [show Set.projIcc (0:ℝ) 1 (by norm_num) (((1:ℝ) + 1) / 2) = 1 from
       Subtype.ext (by rw [Set.coe_projIcc]; norm_num)]
     exact hj.somePath.target
@@ -88,8 +88,8 @@ reparametrized by `arc_path`) staying in the rectangle `[-1,1]×[-2,2]`
 bottom edge `y=-2` to the top edge `y=2`.  Delivers a curve point on the vertical
 axis. -/
 theorem segment_meets_curve (hbr : BrouwerFPT)
-    {r : sphere (0 : Plane) 1 → Plane} (hcont : Continuous r) (hinj : Injective r)
-    (hm : (!₂[(-1:ℝ), 0] : Plane) ∈ range r) (hp : (!₂[(1:ℝ), 0] : Plane) ∈ range r)
+    {r : sphere (0 : Plane) 1 → Plane} (hcont : Continuous r) (_hinj : Injective r)
+    (hm : (!₂[(-1 : ℝ), 0] : Plane) ∈ range r) (hp : (!₂[(1 : ℝ), 0] : Plane) ∈ range r)
     (hfar : ∀ z ∈ range r, ∀ w ∈ range r, dist z w ≤ 2) :
     ∃ p ∈ range r, p 0 = 0 ∧ p 1 ∈ Icc (-2:ℝ) 2 := by
   -- the curve is path-connected (continuous image of the path-connected circle)
@@ -139,7 +139,7 @@ curve) and nonempty (`segment_meets_curve`), hence attains its `y`-maximum at so
 point `l ∈ range r` with `l 0 = 0`. -/
 theorem exists_ymax_on_axis (hbr : BrouwerFPT)
     {r : sphere (0 : Plane) 1 → Plane} (hcont : Continuous r) (hinj : Injective r)
-    (hm : (!₂[(-1:ℝ), 0] : Plane) ∈ range r) (hp : (!₂[(1:ℝ), 0] : Plane) ∈ range r)
+    (hm : (!₂[(-1 : ℝ), 0] : Plane) ∈ range r) (hp : (!₂[(1 : ℝ), 0] : Plane) ∈ range r)
     (hfar : ∀ z ∈ range r, ∀ w ∈ range r, dist z w ≤ 2) :
     ∃ l ∈ range r, l 0 = 0 ∧ ∀ p ∈ range r, p 0 = 0 → p 1 ≤ l 1 := by
   set Jax : Set Plane := {p ∈ range r | p 0 = 0} with hJax
@@ -183,7 +183,7 @@ pair `a = !₂[-1,0]`, `b = !₂[1,0]` into two closed arcs `J_n`, `J_s ⊆ Plan
 that the `y`-topmost axis point `l` lies in `J_n`. -/
 theorem jordan_arcs (hbr : BrouwerFPT)
     {r : sphere (0 : Plane) 1 → Plane} (hcont : Continuous r) (hinj : Injective r)
-    (hm : (!₂[(-1:ℝ), 0] : Plane) ∈ range r) (hp : (!₂[(1:ℝ), 0] : Plane) ∈ range r)
+    (hm : (!₂[(-1 : ℝ), 0] : Plane) ∈ range r) (hp : (!₂[(1 : ℝ), 0] : Plane) ∈ range r)
     (hfar : ∀ z ∈ range r, ∀ w ∈ range r, dist z w ≤ 2) :
     ∃ J_n J_s : Set Plane,
       IsClosed J_n ∧ IsClosed J_s ∧
@@ -227,11 +227,11 @@ theorem jordan_arcs (hbr : BrouwerFPT)
   -- transport path-connectedness of the arc interiors down to the plane
   have hpcB1 : IsPathConnected (B₁ \ {!₂[(-1:ℝ), 0], !₂[(1:ℝ), 0]}) := by
     have h := hpcA1.image (continuous_subtype_val (p := fun z => z ∈ range r))
-    rwa [Set.image_diff Subtype.coe_injective, Set.image_insert_eq, Set.image_singleton,
+    rwa [Set.image_sdiff Subtype.coe_injective, Set.image_insert_eq, Set.image_singleton,
       hJx, hJy] at h
   have hpcB2 : IsPathConnected (B₂ \ {!₂[(-1:ℝ), 0], !₂[(1:ℝ), 0]}) := by
     have h := hpcA2.image (continuous_subtype_val (p := fun z => z ∈ range r))
-    rwa [Set.image_diff Subtype.coe_injective, Set.image_insert_eq, Set.image_singleton,
+    rwa [Set.image_sdiff Subtype.coe_injective, Set.image_insert_eq, Set.image_singleton,
       hJx, hJy] at h
   -- `l` lies in `range r = B₁ ∪ B₂`; label the containing arc `J_n`
   have hlB : l ∈ B₁ ∪ B₂ := by rw [hBu]; exact hlr
