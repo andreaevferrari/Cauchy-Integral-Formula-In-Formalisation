@@ -108,10 +108,10 @@ theorem bounded_component_unique_of_normalized (hbr : BrouwerFPT)
       IsBounded (connectedComponentIn (range r)ᶜ y) →
       connectedComponentIn (range r)ᶜ x = connectedComponentIn (range r)ᶜ y := by
   classical
-  obtain ⟨J_n, J_s, l, m, p, q, z₀, hUnion, hInter, hpcJn,
-    ⟨hlJn, hl0, hlmax⟩, ⟨hmJn, hm0, hmmin⟩, ⟨hpJs, hp0, hpm, hpmax⟩,
-    ⟨hqJs, hq0, hqmin⟩, hz₀def, hml, hqp, hpz₀, hz₀m,
-    hpcJs, hJoinJn, hJoinJs⟩ := exists_maehara_points_on_axis hbr hcont hinj hm hp hfar
+  obtain ⟨cfg⟩ := exists_maehara_configuration hbr hcont hinj hm hp hfar
+  obtain ⟨J_n, J_s, l, m, p, q, z₀, hUnion, hInter, hpcJn, hpcJs, hJoinJn, hJoinJs,
+    hlJn, hl0, hlmax, hmJn, hm0, hmmin, hpJs, hp0, hpm, hpmax,
+    hqJs, hq0, hqmin, hz₀def, hml, hqp, hpz₀, hz₀m⟩ := cfg
   -- basic containments, coordinates, and rectangle bounds
   have hJnr : J_n ⊆ range r := hUnion ▸ subset_union_left
   have hJsr : J_s ⊆ range r := hUnion ▸ subset_union_right

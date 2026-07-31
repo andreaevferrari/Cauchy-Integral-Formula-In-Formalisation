@@ -166,23 +166,11 @@ on the vertical axis `x = 0`:
 The established `y`-ordering is `q 1 ≤ p 1 ≤ z₀ 1 ≤ m 1 ≤ l 1`.  (Note `p` is the
 `J_s`-max **restricted to heights `≤ m 1`**; this is what makes `p 1 ≤ m 1` — hence
 the placement of `z₀` between `p` and `m` — provable at this stage.) -/
-theorem exists_maehara_points_on_axis (hbr : BrouwerFPT)
+theorem exists_maehara_configuration (hbr : BrouwerFPT)
     {r : sphere (0 : Plane) 1 → Plane} (hcont : Continuous r) (hinj : Injective r)
     (hm : normalizedLeftEnd ∈ range r) (hp : normalizedRightEnd ∈ range r)
     (hfar : ∀ z ∈ range r, ∀ w ∈ range r, dist z w ≤ 2) :
-    ∃ (J_n J_s : Set Plane) (l m p q z₀ : Plane),
-      J_n ∪ J_s = range r ∧
-      J_n ∩ J_s = {normalizedLeftEnd, normalizedRightEnd} ∧
-      IsPathConnected (J_n \ {normalizedLeftEnd, normalizedRightEnd}) ∧
-      (l ∈ J_n ∧ l 0 = 0 ∧ ∀ w ∈ range r, w 0 = 0 → w 1 ≤ l 1) ∧
-      (m ∈ J_n ∧ m 0 = 0 ∧ ∀ w ∈ J_n, w 0 = 0 → m 1 ≤ w 1) ∧
-      (p ∈ J_s ∧ p 0 = 0 ∧ p 1 ≤ m 1 ∧ ∀ w ∈ J_s, w 0 = 0 → w 1 ≤ m 1 → w 1 ≤ p 1) ∧
-      (q ∈ J_s ∧ q 0 = 0 ∧ ∀ w ∈ J_s, w 0 = 0 → q 1 ≤ w 1) ∧
-      z₀ = !₂[(0 : ℝ), (m 1 + p 1) / 2] ∧
-      m 1 ≤ l 1 ∧ q 1 ≤ p 1 ∧ p 1 ≤ z₀ 1 ∧ z₀ 1 ≤ m 1 ∧
-      IsPathConnected (J_s \ {normalizedLeftEnd, normalizedRightEnd}) ∧
-      JoinedIn J_n (normalizedLeftEnd) (normalizedRightEnd) ∧
-      JoinedIn J_s (normalizedLeftEnd) (normalizedRightEnd) := by
+    Nonempty (MaeharaConfiguration r) := by
   obtain ⟨J_n, J_s, hJncl, hJscl, hUnion, hInter, ⟨eJn⟩, ⟨eJs⟩, hpcJn, hpcJs,
     l, hlr, hl0, hlmax, hlJn⟩ := exists_arc_decomposition_of_curve hbr hcont hinj hm hp hfar
   have hcptr : IsCompact (range r) := jordanCurve_isCompact r hcont
@@ -235,11 +223,28 @@ theorem exists_maehara_points_on_axis (hbr : BrouwerFPT)
     exact this.2
   have hJoinJn : JoinedIn J_n (normalizedLeftEnd) (normalizedRightEnd) := arc_joinedIn eJn haJn hbJn
   have hJoinJs : JoinedIn J_s (normalizedLeftEnd) (normalizedRightEnd) := arc_joinedIn eJs haJs hbJs
-  refine ⟨J_n, J_s, l, m, p, q, !₂[(0 : ℝ), (m 1 + p 1) / 2], hUnion, hInter, hpcJn,
-    ⟨hlJn, hl0, hlmax⟩, ⟨hmJn, hm0, hmmin⟩,
-    ⟨hpSp.1, hpSp.2.1, hpm, fun w hwJs hw0 hwm => hpmax ⟨hwJs, hw0, hwm⟩⟩,
-    ⟨hqSq.1, hqSq.2, fun w hwJs hw0 => hqmin ⟨hwJs, hw0⟩⟩, rfl, hml, hqp, ?_, ?_,
-    hpcJs, hJoinJn, hJoinJs⟩
+  refine ⟨{ northern := J_n, southern := J_s
+            topOfNorthern := l, bottomOfNorthern := m
+            topOfSouthernBelow := p, bottomOfSouthern := q
+            midpoint := !₂[(0 : ℝ), (m 1 + p 1) / 2]
+            union_eq := hUnion, inter_eq := hInter
+            isPathConnected_northern := hpcJn, isPathConnected_southern := hpcJs
+            joinedIn_northern := hJoinJn, joinedIn_southern := hJoinJs
+            topOfNorthern_mem := hlJn, topOfNorthern_coord_zero := hl0
+            topOfNorthern_max := hlmax
+            bottomOfNorthern_mem := hmJn, bottomOfNorthern_coord_zero := hm0
+            bottomOfNorthern_min := hmmin
+            topOfSouthernBelow_mem := hpSp.1
+            topOfSouthernBelow_coord_zero := hpSp.2.1
+            topOfSouthernBelow_le := hpm
+            topOfSouthernBelow_max := fun w hwJs hw0 hwm => hpmax ⟨hwJs, hw0, hwm⟩
+            bottomOfSouthern_mem := hqSq.1, bottomOfSouthern_coord_zero := hqSq.2
+            bottomOfSouthern_min := fun w hwJs hw0 => hqmin ⟨hwJs, hw0⟩
+            midpoint_eq := rfl
+            bottomOfNorthern_le_topOfNorthern := hml
+            bottomOfSouthern_le_topOfSouthernBelow := hqp
+            topOfSouthernBelow_le_midpoint := ?_
+            midpoint_le_bottomOfNorthern := ?_ }⟩
   · rw [show (!₂[(0 : ℝ), (m 1 + p 1) / 2] : Plane) 1 = (m 1 + p 1) / 2 from by simp]
     linarith [hpm]
   · rw [show (!₂[(0 : ℝ), (m 1 + p 1) / 2] : Plane) 1 = (m 1 + p 1) / 2 from by simp]

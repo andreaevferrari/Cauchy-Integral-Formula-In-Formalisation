@@ -5,7 +5,7 @@ Authors: rkirov, Xinze Li
 -/
 module
 
-public import CauchyIntegralFormula.JordanCurve.Normalization.Frame
+public import CauchyIntegralFormula.JordanCurve.Normalization.Configuration
 
 /-!
 # Setup lemmas in the normalized frame
