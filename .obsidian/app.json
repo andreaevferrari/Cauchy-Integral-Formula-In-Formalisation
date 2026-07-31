@@ -1,0 +1,14 @@
+{
+  "userIgnoreFilters": [
+    "CauchyIntegralFormula/",
+    ".github/",
+    ".lake/",
+    "tools/",
+    "pipeline/",
+    "README.md",
+    "CONTRIBUTING.md",
+    "CODE_OF_CONDUCT.md"
+  ],
+  "newFileLocation": "folder",
+  "newFileFolderPath": "CauchyIntegralFormulaHypergraph"
+}

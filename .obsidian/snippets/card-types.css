@@ -1,0 +1,26 @@
+/* One colour per kind of statement — the callout type equals the card's
+ * `type:` frontmatter. Single file on purpose: this vault used to carry a
+ * second snippet defining the SAME callout types with different colours, and
+ * whichever loaded last won — which is how every statement went grey. */
+
+.callout[data-callout="definition"] { --callout-color: 62, 124, 180;  --callout-icon: lucide-book-marked; }
+.callout[data-callout="theorem"]    { --callout-color: 158, 87, 231;  --callout-icon: lucide-award; }
+.callout[data-callout="proposition"]{ --callout-color: 232, 148, 36;  --callout-icon: lucide-box; }
+.callout[data-callout="lemma"]      { --callout-color: 20, 165, 160;  --callout-icon: lucide-puzzle; }
+.callout[data-callout="corollary"]  { --callout-color: 219, 82, 132;  --callout-icon: lucide-git-branch; }
+.callout[data-callout="claim"]      { --callout-color: 128, 128, 220; --callout-icon: lucide-flag; }
+.callout[data-callout="remark"]     { --callout-color: 140, 140, 146; --callout-icon: lucide-message-circle; }
+.callout[data-callout="equation"]   { --callout-color: 130, 150, 148; --callout-icon: lucide-equal; }
+
+/* Visible in BOTH themes: a solid bar and a real tint, not the 10% wash. */
+.callout[data-callout="definition"],
+.callout[data-callout="theorem"],
+.callout[data-callout="proposition"],
+.callout[data-callout="lemma"],
+.callout[data-callout="corollary"],
+.callout[data-callout="claim"],
+.callout[data-callout="remark"],
+.callout[data-callout="equation"] {
+  border-left: 3px solid rgb(var(--callout-color));
+  background-color: rgba(var(--callout-color), 0.12);
+}

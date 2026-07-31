@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: >
+  If you use this project in your work, please cite it using the metadata below.
+title: "The Cauchy Integral Formula in Lean"
+version: 0.1.0
+date-released: 2026-07-31
+authors:
+  - family-names: Ferrari
+    given-names: Andrea E. V.
+repository-code: https://github.com/andreaevferrari/Cauchy-Integral-Formula-In-Formalisation
+url: https://andreaevferrari.github.io/Cauchy-Integral-Formula-In-Formalisation
+abstract: >
+  A formalisation of the Cauchy integral formula in Lean 4, with a hypergraph
+  of its statements.
+keywords:
+  - complex analysis
+  - formalisation
+  - Lean
