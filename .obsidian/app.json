@@ -1,0 +1,12 @@
+{
+  "userIgnoreFilters": [
+    "JordanCurve/",
+    ".github/",
+    ".lake/",
+    "tools/",
+    "pipeline/",
+    "README.md"
+  ],
+  "newFileLocation": "folder",
+  "newFileFolderPath": "JordanCurveHypergraph"
+}

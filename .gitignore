@@ -1,0 +1,15 @@
+.lake/
+
+# Mac stuff
+.DS_Store
+
+# Obsidian writes these when the vault is opened — one reader's screen,
+# not part of the network.
+.obsidian/workspace.json
+.obsidian/workspace.json.bak
+.obsidian/workspaces.json
+.obsidian/cache/
+
+# tools/frontier.py regenerates this in a second, and a stale copy claims
+# to say what to do next while describing an older graph.
+FRONTIER.md
