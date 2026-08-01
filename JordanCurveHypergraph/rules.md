@@ -23,8 +23,8 @@ One card per mathematical statement, filed under `atoms/<type>s/`:
 id: 7a4b8dc3d01c    sha256 of the normalized Statement — the identity
 type: theorem
 references:         (optional; provenance is metadata, not content.
-  - "[[ref-x|Author, §n]]"   one quoted wikilink per citation — the locus
-  - "[[pool-card]]"          in the display text; pool cards bare; a
+  - "`[[ref-x|Author, §n]]`"   one quoted wikilink per citation — the locus
+  - "`[[pool-card]]`"          in the display text; pool cards bare; a
   - "plain citation"         source without a bibliography card stays a
 ---                          plain string. Never hashed.)
 # Theorem — <content-descriptive title>
@@ -35,7 +35,7 @@ references:         (optional; provenance is metadata, not content.
 ## Proof            (folded; absent = status: debt, see § Status)
 ## Notes            (folded callout like Proof; free commentary, never
                     hashed — background, intuition, figures:
-                    ![[assets/*.svg]])
+                    `![[assets/*.svg]]`)
 ```
 
 - The **id** is the mathematics: it changes exactly when the Statement

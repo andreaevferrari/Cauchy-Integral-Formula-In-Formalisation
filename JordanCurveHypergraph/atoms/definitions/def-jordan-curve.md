@@ -22,4 +22,4 @@ in every neighbourhood of a point, and no tangent anywhere.
 ## Notes
 
 > [!note]- Notes (click to expand)
-> - This is *not* the notion of path used in the Cauchy integral formula cards, which asks for [[def-piecewise-smooth-path|piecewise smoothness]]. Contour integration needs a derivative to integrate against; separation does not, and assuming it here would weaken the theorem.
+> - No smoothness is assumed, and none may be: a Jordan curve can have infinite length and no tangent anywhere. Assuming rectifiability or piecewise smoothness would make the theorem easy and would not be this theorem.

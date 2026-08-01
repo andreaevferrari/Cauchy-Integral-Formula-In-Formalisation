@@ -73,7 +73,12 @@ theorem is unconditional.
 
 ## What this repository uses it for
 
-`thm-jordan-curve` in the hypergraph, which `def-inside-of-path` rests on:
-"inside" is defined as the bounded component of the complement, so the card
-needs the bounded/unbounded split and not only the count of two. The
-benchmark statement gives the count; these declarations give the rest.
+The whole of it. This repository's subject is the Jordan curve theorem, and
+the hypergraph beside the library states the same argument card by card.
+
+The benchmark statement gives only the count of two components. The cards
+need more than that — which component is bounded, and that the curve is the
+boundary of each — and the development proves those too, in
+`exists_bounded_component`, `bounded_component_unique`,
+`exists_unbounded_component`, `unbounded_component_unique` and
+`component_boundary_eq`.
