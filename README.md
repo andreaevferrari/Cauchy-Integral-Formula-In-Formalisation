@@ -1,13 +1,10 @@
 # The Jordan Curve Theorem
 
-A loop in the plane that does not cross itself divides the plane into an
-inside and an outside. This repository carries that theorem in three layers,
-and they correspond:
+A loop in the plane that does not cross itself divides the plane into an inside and an outside. This repository carries that theorem in three layers, and they correspond:
 
 * `JordanCurve/` — the Lean library. Maehara's proof via the Brouwer fixed
   point theorem, `sorry`-free, and audited: every theorem the cards name
-  depends on exactly `propext`, `Classical.choice` and `Quot.sound`. Mathlib
-  does not have this theorem.
+  depends on exactly `propext`, `Classical.choice` and `Quot.sound`. Mathlib does not have this theorem.
 * `JordanCurveHypergraph/` — the statements as a hypergraph, one Markdown
   file per statement and one per declared dependency, readable as an Obsidian
   vault. [`rules.md`](/JordanCurveHypergraph/rules.md) says what a card is,
