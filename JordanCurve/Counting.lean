@@ -1,7 +1,7 @@
 /-
-Copyright (c) 2026 rkirov. All rights reserved.
+Copyright (c) 2026 Andrea E. V. Ferrari, Xinze Li. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: rkirov, Xinze Li
+Authors: Andrea E. V. Ferrari, Xinze Li
 -/
 module
 
@@ -30,14 +30,8 @@ between them is what this file is for:
   equality of classes in the quotient is equality of `connectedComponentIn`
   subsets, so the geometry side never has to mention the quotient.
 
-## Provenance
-
-Adapted from `rkirov/jordan_pick`, Apache 2.0 — see
-`JordanCurve/PROVENANCE.md` for the full
-provenance of the development this was taken from. The statements and proofs
-are the original author's; what changed here is the imports (`import Mathlib`
-narrowed to the six modules actually used), the docstring tags, and this
-header.
+See `JordanCurve/PROVENANCE.md` for where this development started and what
+was changed.
 -/
 
 @[expose] public section

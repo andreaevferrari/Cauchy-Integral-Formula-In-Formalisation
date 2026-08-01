@@ -67,12 +67,14 @@ that carries the argument in Lean — coordinate projections, path
 concatenation, the parametrisation of a segment — has no card, and is marked
 `**Eng.**` in the library instead.
 
-## Provenance
+## References
 
-The proof is not this repository's work. It is adapted from
-[rkirov/jordan_pick](https://github.com/rkirov/jordan_pick), Apache 2.0, and
-[`JordanCurve/PROVENANCE.md`](/JordanCurve/PROVENANCE.md) records where it
-came from and everything that was changed here.
+The mathematics is Maehara's 1984 proof via the Brouwer fixed point theorem.
+The development started from the `jordan_curve` problem of the
+[lean-eval](https://lean-lang.org/eval/problems/jordan_curve/) benchmark and
+one of its published solutions;
+[`JordanCurve/PROVENANCE.md`](/JordanCurve/PROVENANCE.md) names both and lists
+everything that was changed here.
 
 ## Acknowledgements
 

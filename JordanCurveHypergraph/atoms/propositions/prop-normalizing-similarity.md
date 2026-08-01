@@ -12,7 +12,7 @@ lean:
     line: 35
     state: proven
 references:
-  - "Maehara, The Jordan curve theorem via the Brouwer fixed point theorem, 1984"
+  - "[[ref-maehara|Maehara 1984]]"
 ---
 
 # Proposition — a similarity puts the farthest pair at ±1 and the curve in a rectangle

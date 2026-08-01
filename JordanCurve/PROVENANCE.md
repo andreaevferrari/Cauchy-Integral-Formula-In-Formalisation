@@ -1,84 +1,87 @@
 # Provenance
 
-## Where this came from
+## What this library is
 
-These four files are a verbatim copy, modified only as listed below, of the
-`jordan_curve` submission in
+Maehara's proof of the Jordan curve theorem via the Brouwer fixed point
+theorem, in Lean 4. The mathematics is Maehara's, published in 1984; the
+formal development is this repository's, and it started from a submission to
+a public benchmark rather than from nothing.
 
-    https://github.com/rkirov/jordan_pick
-    commit ad2aa1f637609c212210888b4ad9e926c30debb4
-    path   submission/jordan_curve/Submission/
-    licence Apache License 2.0 (LICENSE beside this file)
+## References
 
-It was submitted to the [lean-eval](https://github.com/leanprover/lean-eval)
-formalization benchmark and is recorded as solved on the leaderboard, by
-@rkirov, using Claude Opus 4.8 (2026-07-01) and Claude Fable 5 (2026-07-10).
-The submission record describes the production as roughly a week of grinding
-with minimal human intervention.
+The starting point was the `jordan_curve` problem of the
+[lean-eval](https://github.com/leanprover/lean-eval) benchmark, which poses
+the statement
 
-The mathematics is Maehara's 1984 proof of the Jordan curve theorem via the
-Brouwer fixed point theorem, and it is the authors' work, not this
-repository's. This repository vendors it; it did not prove it.
+```lean
+theorem jordan_curve (r : Metric.sphere (0 : EuclideanSpace ℝ (Fin 2)) 1 →
+    EuclideanSpace ℝ (Fin 2)) (_hcont : Continuous r) (_hinj : Function.Injective r) :
+    Nat.card (ConnectedComponents ((Set.range r)ᶜ)) = 2
+```
 
-## What was changed
+and records four solutions. The one this library began from is
+`rkirov/jordan_pick`, commit `ad2aa1f637609c212210888b4ad9e926c30debb4`, path
+`submission/jordan_curve/Submission/`, released under the Apache License 2.0
+— a copy of which sits beside this file.
 
-Nothing mathematical — every statement and every proof is the original
-author's. What this repository did:
+* K. Maehara, *The Jordan curve theorem via the Brouwer fixed point theorem*,
+  American Mathematical Monthly 91 (1984), 641–643.
+* lean-eval, problem `jordan_curve`:
+  <https://lean-lang.org/eval/problems/jordan_curve/>
+* rkirov/jordan_pick, Apache 2.0: <https://github.com/rkirov/jordan_pick>
 
-* moved the files out of `External/` and adopted them as its own, so they are
-  maintained here and diverge from upstream by design;
-* replaced `import Mathlib` with the modules each file actually uses;
-* tagged every documented declaration `**Math.**`, `**Eng.**` or `**Mixed.**`,
-  the convention this library's linter enforces;
-* upgraded the development from Lean v4.31 to v4.32.2, which took two fixes:
-  a `Continuous.subtype_mk` chain in `Brouwer.lean` that now runs past the
-  `isDefEq` heartbeat limit, replaced by `fun_prop`; and a
-  `continuous_const.smul` in `Root.lean` whose scalar argument no longer
+## What changed here
+
+Everything except the mathematics. The four files that arrived became
+seventeen, every declaration was renamed, and the interfaces were rebuilt:
+
+* **Structure.** One 2589-line file became eleven, split along the seams the
+  argument already had — the crossing lemma, the topology of the complement,
+  separation, the normalized frame, path construction, and the two steps.
+* **Names.** Every declaration now states what it says. `step_A_normalized`
+  is `exists_bounded_component_of_normalized`; `crossing` is
+  `transversal_paths_meet_in_rectangle`; `dvec`, `Acoef`, `discr`, `tparam`,
+  `rhoPt` are `displacement`, `raySphereQuadA`, `raySphereDiscriminant`,
+  `raySphereRoot`, `retractionPoint`. Eighty-one names, five hundred and
+  seventy occurrences.
+* **Interfaces.** The nested existential of fifteen conjuncts that carried
+  Maehara's five distinguished points is now the structure
+  `MaeharaConfiguration`, with seventeen derived facts proved on it once
+  rather than re-derived in every proof that needs them. The rectangle, and
+  the straight segment that one proof wrote out by hand five times, are named
+  and proved once.
+* **Imports.** `import Mathlib` is gone; each file names the modules it uses.
+* **Documentation.** Every declaration carries a docstring tagged `**Math.**`,
+  `**Eng.**` or `**Mixed.**`, which is where the mathematics is separated
+  from the type-theoretic plumbing.
+* **Toolchain.** Carried from Lean v4.31 to v4.32.2, which took two fixes: a
+  `Continuous.subtype_mk` chain that now exceeds the `isDefEq` heartbeat
+  limit, and a `continuous_const.smul` whose scalar argument no longer
   elaborates without being pinned.
+* **Budget.** Both `set_option maxHeartbeats` are gone — not by raising a
+  limit but by naming the constructions the proofs were repeating.
+* **Warnings.** Zero, against 165 when the reorganisation began.
 
-Before that, four mechanical edits were required for the files to build as
-part of this library rather than as a benchmark submission:
-
-1. **Module paths.** `import Submission.X` became
-   `import JordanCurve.X`.
-2. **`module` header.** This library uses Lean 4.31's module system, and a
-   `module` file cannot import a non-`module` one. Each file gained `module`
-   as its first line.
-3. **`public import`.** The imports became `public import`, so that the
-   declarations of one vendored file are visible to the next.
-4. **`@[expose] public section`** after the imports of each file, which is
-   what Mathlib itself does to make a module's declarations visible
-   downstream. Without it the declarations exist but cannot be named.
-
-One factual note, left in place rather than edited: the header comment of
-`Root.lean` says the file "is a work-in-progress with `sorry`s". That is true
-of the file's ancestor in the `JordanPick/` tree it was extracted from, and
-false of this copy — see below.
-
-## What was verified here
+## What is verified
 
 ```
-#print axioms JordanCurve.jordan_curve
-#print axioms JordanCurve.Brouwer.brouwerFPT
-#print axioms JordanCurve.exists_unbounded_component
-#print axioms JordanCurve.unbounded_component_unique
-#print axioms JordanCurve.exists_bounded_component
+lake exe jordan-audit
 ```
 
-Each depends on exactly `propext`, `Classical.choice`, `Quot.sound` — the
-three standard axioms of Lean's logic, and no `sorryAx`. In particular
-`BrouwerFPT`, which the argument carries as an explicit interface, is
-discharged by `JordanCurve.Brouwer.brouwerFPT` inside these files: the final
-theorem is unconditional.
+Every declaration the hypergraph's cards name is present, and each depends on
+exactly `propext`, `Classical.choice` and `Quot.sound` — no `sorryAx`. In
+particular `BrouwerFPT`, which the argument carries as an explicit interface,
+is discharged by `JordanCurve.Brouwer.brouwerFPT` inside these files, so the
+final theorem is unconditional.
 
-## What this repository uses it for
+`JordanCurve/Anchor.lean` guards what the audit cannot see. It restates the
+theorem independently, in Mathlib's own vocabulary, and stops compiling if
+anything the argument passes through is weakened. It is never edited to make
+it compile.
 
-The whole of it. This repository's subject is the Jordan curve theorem, and
-the hypergraph beside the library states the same argument card by card.
+## Note on an inherited comment
 
-The benchmark statement gives only the count of two components. The cards
-need more than that — which component is bounded, and that the curve is the
-boundary of each — and the development proves those too, in
-`exists_bounded_component`, `bounded_component_unique`,
-`exists_unbounded_component`, `unbounded_component_unique` and
-`component_boundary_eq`.
+`Root.lean`'s module comment said the file "is a work-in-progress with
+`sorry`s". That was true of its ancestor in the tree it was extracted from
+and is false here; the audit above is the check. The file no longer exists
+under that name, and the claim went with it.

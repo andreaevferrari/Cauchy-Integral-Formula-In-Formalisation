@@ -8,7 +8,7 @@ lean:
     line: 467
     state: proven
 references:
-  - "Maehara, The Jordan curve theorem via the Brouwer fixed point theorem, 1984"
+  - "[[ref-maehara|Maehara 1984]]"
 ---
 
 # Theorem — the bounded component is unique

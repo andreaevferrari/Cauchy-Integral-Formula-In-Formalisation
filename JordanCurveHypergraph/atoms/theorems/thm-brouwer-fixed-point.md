@@ -8,7 +8,7 @@ lean:
     line: 502
     state: proven
 references:
-  - "Maehara, The Jordan curve theorem via the Brouwer fixed point theorem, 1984"
+  - "[[ref-maehara|Maehara 1984]]"
 ---
 
 # Theorem — a continuous self-map of a compact convex set has a fixed point

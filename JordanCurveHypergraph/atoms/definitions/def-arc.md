@@ -2,7 +2,7 @@
 id: b7141fe3793f
 type: definition
 references:
-  - "Maehara, The Jordan curve theorem via the Brouwer fixed point theorem, 1984"
+  - "[[ref-maehara|Maehara 1984]]"
 ---
 
 # Definition — arc

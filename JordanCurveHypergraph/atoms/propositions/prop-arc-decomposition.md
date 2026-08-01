@@ -8,7 +8,7 @@ lean:
     line: 187
     state: proven
 references:
-  - "Maehara, The Jordan curve theorem via the Brouwer fixed point theorem, 1984"
+  - "[[ref-maehara|Maehara 1984]]"
 ---
 
 # Proposition — the two ends of the diameter cut the curve into two arcs
