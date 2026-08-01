@@ -1,32 +1,36 @@
 ---
-topic: cauchy-integral-formula
+topic: jordan-curve-theorem
 type: topic
 section: "0"
 date: 2026-07-31
-tags: [complex-analysis, contour-integration]
+tags: [topology, plane-topology, brouwer]
 ---
-# The Cauchy Integral Formula
+# The Jordan curve theorem
 
-How the values of a holomorphic function on a closed curve determine its values everywhere inside, and why one hand-computed integral is the whole reason.
+A loop in the plane that does not cross itself divides the plane into an inside and an outside — and why that is a theorem rather than an observation.
 
-Take a smooth real function on a disc and write down its values on the boundary circle. You have written down almost nothing: push a bump up in the middle, flatten it before the edge, and the boundary is unmoved. The interior is free.
+Draw a closed loop on paper without lifting the pen and without crossing your own line. It has an inside and an outside. Nothing looks less in need of proof.
 
-Ask the same of a complex-differentiable function and the answer inverts. The boundary values determine the function at every interior point, and they determine it by an explicit formula with a fixed kernel that knows nothing about the function. Everything that makes complex analysis unlike the real theory it appears to generalise descends from this.
+The trouble is that "a loop that does not cross itself" is a much larger class of objects than the ones a pen draws. It includes curves of infinite length, curves with no tangent at any point, curves that wander into every neighbourhood of every one of their points. For those, the picture is no guide at all, and the statement is not obvious — it is one of the earliest hard theorems of topology, and every known proof is long out of proportion to how the statement reads.
 
 ## The result
 
-![[thm-cauchy-integral-formula]]
+![[thm-jordan-curve]]
 
-## The mechanism
+## What is hard about it
 
-One integral is computed by hand — $\frac{1}{z-w}$ around a circle centred at $w$ — and its value is $2\pi i$ no matter how small the circle. That independence of the radius is the entire mechanism. Cauchy's theorem says a contour may be deformed without changing the integral of a holomorphic function, so the integral over a large circle may be evaluated over an arbitrarily small one; on a small circle the function is nearly constant, and a constant is exactly what the hand computation handles. The factor $\frac{1}{2\pi i}$ is not a choice: it undoes that one integral.
+Three things have to be produced: a bounded piece, an unbounded piece, and the fact that there is nothing else. The unbounded piece is easy — a curve is [[def-compact|compact]], so it sits inside some disc, and everything far away is connected. The other two are not.
 
-The general contour is reached from the circle by deformation, which is where plane topology enters and where this account takes on its debts.
+The difficulty is that no hypothesis is available to work with. The curve is continuous and injective and that is all. There is no derivative to integrate, no length to measure, no polygon to approximate with — approximation is exactly what fails, since a nearby polygon can have a completely different inside.
 
-## What it buys
+## The route
 
-Differentiating the formula under the integral sign costs nothing — the kernel is smooth in $w$ — so a function differentiable once is differentiable infinitely often, a statement with no real-variable analogue. Expanding the kernel as a geometric series makes every holomorphic function locally a power series. Letting the radius grow in the formula for the derivative of a bounded entire function forces that derivative to vanish, which is Liouville's theorem and with it a short proof that every non-constant polynomial has a root.
+This account follows Maehara's proof, which reduces everything to one topological input:
 
-## What is established here
+![[thm-brouwer-fixed-point]]
 
-Three cards carry no proof: Cauchy's theorem itself, which the source states and declares beyond its scope [[ref-beck]], together with the two facts of plane topology that the deformation argument needs. Everything else is proved line by line, and what §5 establishes is a complete reduction of the general formula to the case of a circle.
+From Brouwer comes a lemma about rectangles — two paths crossing a rectangle in transverse directions must meet — and from that lemma, everything else. The proof is remarkable for how little it needs: no homology, no degree theory, no covering spaces beyond the one that establishes Brouwer itself.
+
+## What the network carries
+
+Every statement here has a machine-checked counterpart, and the cards name it in their `lean:` field. There are no proof debts: the argument is complete, and its foundations are the three standard axioms of Lean's logic and nothing else.

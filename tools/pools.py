@@ -14,7 +14,7 @@ import pathlib
 V = pathlib.Path(__file__).resolve().parent.parent
 
 #: Curated pools, in the order tools should report them.
-CLEAN = [V / 'CauchyIntegralFormulaHypergraph']
+CLEAN = [V / 'JordanCurveHypergraph']
 
 #: Raw material, mechanically cut from sources. Empty: see the module docstring.
 RAW = []
@@ -22,7 +22,7 @@ RAW = []
 ALL = CLEAN + RAW
 
 #: The card the network is grown from.
-ROOT = 'thm-cauchy-integral-formula'
+ROOT = 'thm-jordan-curve'
 
 #: Surnames that must not appear in a Statement or Proof. Mathematics is
 #: attributed in Notes and in the `references:` frontmatter, never in the

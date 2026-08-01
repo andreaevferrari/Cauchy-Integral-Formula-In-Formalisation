@@ -45,16 +45,16 @@ jobs:
 
       - name: Don't 'import Mathlib', don't "#check"
         run: |
-          ! (find CauchyIntegralFormula -type f -name "*.lean" -exec grep -Hn '^import Mathlib$' {} +)
-          ! (find CauchyIntegralFormula -type f -name "*.lean" -exec grep -Hn '^public import Mathlib$' {} +)
-          ! (find CauchyIntegralFormula -type f -name "*.lean" -exec grep -Hn '^#check' {} +)
+          ! (find JordanCurve -type f -name "*.lean" -exec grep -Hn '^import Mathlib$' {} +)
+          ! (find JordanCurve -type f -name "*.lean" -exec grep -Hn '^public import Mathlib$' {} +)
+          ! (find JordanCurve -type f -name "*.lean" -exec grep -Hn '^#check' {} +)
 
       - name: Build the project
         uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9 # v1.5.0
         with:
           use-github-cache: false
-      - name: "lake exe cif-audit"
-        run: lake exe cif-audit
+      - name: "lake exe jordan-audit"
+        run: lake exe jordan-audit
 
       - name: "lake exe mk_all --check --module"
         run: |

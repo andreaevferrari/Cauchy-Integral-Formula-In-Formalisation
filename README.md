@@ -1,19 +1,25 @@
-# The Cauchy Integral Formula in Lean
+# The Jordan Curve Theorem
 
-This project carries two layers of the same mathematics:
+A loop in the plane that does not cross itself divides the plane into an
+inside and an outside. This repository carries that theorem in three layers,
+and they correspond:
 
-* `CauchyIntegralFormula/` — the Lean library.
-* `CauchyIntegralFormulaHypergraph/` — the statements as a hypergraph, one
-  Markdown file per statement and one per declared dependency, readable as an
-  Obsidian vault. [`rules.md`](/CauchyIntegralFormulaHypergraph/rules.md) says
-  what a card is, what an edge means and what may appear where;
-  [`notation.md`](/CauchyIntegralFormulaHypergraph/notation.md) is normative
-  for symbols. `bibliography/references/` holds one card per source, and the
-  sources themselves live untracked in `pipeline/sources/`.
+* `JordanCurve/` — the Lean library. Maehara's proof via the Brouwer fixed
+  point theorem, `sorry`-free, and audited: every theorem the cards name
+  depends on exactly `propext`, `Classical.choice` and `Quot.sound`. Mathlib
+  does not have this theorem.
+* `JordanCurveHypergraph/` — the statements as a hypergraph, one Markdown
+  file per statement and one per declared dependency, readable as an Obsidian
+  vault. [`rules.md`](/JordanCurveHypergraph/rules.md) says what a card is,
+  what an edge means and what may appear where;
+  [`notation.md`](/JordanCurveHypergraph/notation.md) is normative for
+  symbols. Cards name their formal counterpart in a `lean:` field.
+* The numbered files at the root are the exposition: prose that connects the
+  cards, which render in place as embeds. Start at
+  [`00-introduction.md`](/00-introduction.md).
 
-The six numbered files at the root are the exposition: prose that connects the
-cards, which render in place as embeds. Start at
-[`00-introduction.md`](/00-introduction.md).
+There are no proof debts. `python3 tools/frontier.py` says so, and would say
+otherwise if a statement were being assumed.
 
 Once the first build has run, the API documentation is at
 [andreaevferrari.github.io/Cauchy-Integral-Formula-In-Formalisation](https://andreaevferrari.github.io/Cauchy-Integral-Formula-In-Formalisation/).
@@ -23,11 +29,18 @@ Once the first build has run, the API documentation is at
 ```bash
 lake exe cache get         # fetch Mathlib's compiled oleans
 lake build
-lake exe mk_all --module   # regenerate CauchyIntegralFormula.lean after adding files
+lake exe jordan-audit      # public API present, and no axiom beyond the three
+lake exe mk_all --module   # regenerate JordanCurve.lean after adding files
+lake build JordanCurve:docs
 ```
 
-CI checks that the root import file is up to date, and rejects a bare
-`import Mathlib` or a `#check` left at the top level.
+`jordan-audit` runs in CI. It is the check that matters: `lake build`
+succeeding proves the files elaborate, not that the theorems rest on nothing.
+`JordanCurve/Anchor.lean` guards the other failure mode — it restates the
+theorem independently and stops compiling if anything it passes through is
+weakened. It is never edited to make it compile.
+
+CI also rejects a bare `import Mathlib` and a top-level `#check`.
 
 ## Working on the hypergraph
 
@@ -42,14 +55,24 @@ python3 tools/render_lint.py   # tex → Obsidian rendering
 python3 tools/noise_lint.py    # no bibliographic noise inside the mathematics
 python3 tools/edge_lint.py     # edges mirror the text, exactly
 python3 tools/bib_lint.py      # every reference card has a label and an entry
+python3 tools/lean_lint.py     # every `lean:` declaration still exists
 ```
 
-All five must print clean. `python3 tools/frontier.py` is the one to run when
-deciding what to do next: it prints the proof debts and a layering of the
-cards, leaves first, in the order a Lean skeleton would be written.
+All six must print clean. `python3 tools/frontier.py` prints the proof debts
+and a layering of the cards, leaves first, in the order a Lean skeleton would
+be written.
 
-A pull request that adds mathematics should touch both layers — the Lean
-declaration, and the card whose `lean:` field names it.
+A card names a mathematical statement, not a Lean declaration: the plumbing
+that carries the argument in Lean — coordinate projections, path
+concatenation, the parametrisation of a segment — has no card, and is marked
+`**Eng.**` in the library instead.
+
+## Provenance
+
+The proof is not this repository's work. It is adapted from
+[rkirov/jordan_pick](https://github.com/rkirov/jordan_pick), Apache 2.0, and
+[`JordanCurve/PROVENANCE.md`](/JordanCurve/PROVENANCE.md) records where it
+came from and everything that was changed here.
 
 ## Acknowledgements
 

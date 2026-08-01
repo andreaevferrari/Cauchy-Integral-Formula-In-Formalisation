@@ -6,7 +6,7 @@ Authors: Xinze Li
 import Lean
 
 /-!
-# `lake exe cif-audit`
+# `lake exe jordan-audit`
 
 One-command health check for this library. Performs:
 
@@ -32,7 +32,7 @@ that introduced a gap: `lake build` succeeding proves only that the files
 elaborate, not that the theorems still rest on nothing.
 
 The audit catches an unexpected axiom. It does NOT catch a statement that
-has been weakened — for that, see `CauchyIntegralFormula.Topology.Anchor`,
+has been weakened — for that, see `JordanCurve.Anchor`,
 which restates the theorem verbatim and will stop compiling if an internal
 statement drifts.
 
@@ -75,7 +75,7 @@ deliberately planted `sorry`.
 step that was missing, and it also reads the pre-computed axiom sets that
 imported declarations carry. Do not replace it with something local. -/
 private def axiomsOf (env : Environment) (thm : Name) : IO (Array Name) := do
-  let ctx : Core.Context := { fileName := "<cif-audit>", fileMap := default }
+  let ctx : Core.Context := { fileName := "<jordan-audit>", fileMap := default }
   let (axs, _) ← Core.CoreM.toIO (Lean.collectAxioms thm) ctx { env := env }
   return axs
 
@@ -115,10 +115,10 @@ private def publicTheorems : List (Name × String) :=
 def main : IO UInt32 := do
   Lean.initSearchPath (← Lean.findSysroot)
   let env ← Lean.importModules
-    #[(`CauchyIntegralFormula : Import)] {} (trustLevel := 0)
+    #[(`JordanCurve : Import)] {} (trustLevel := 0)
 
-  IO.println "CauchyIntegralFormula library audit"
-  IO.println "==================================="
+  IO.println "JordanCurve library audit"
+  IO.println "=========================="
   IO.println ""
 
   let mut allOk := true

@@ -1,6 +1,6 @@
 {
   "userIgnoreFilters": [
-    "CauchyIntegralFormula/",
+    "JordanCurve/",
     ".github/",
     ".lake/",
     "tools/",
@@ -8,5 +8,5 @@
     "README.md"
   ],
   "newFileLocation": "folder",
-  "newFileFolderPath": "CauchyIntegralFormulaHypergraph"
+  "newFileFolderPath": "JordanCurveHypergraph"
 }
