@@ -161,7 +161,7 @@ card names a **declaration**, never a line:
 
 ```yaml
 lean:
-  - decl: Complex.circleIntegral_sub_inv_smul_of_differentiable_on_off_countable
+  - decl: IsCoveringMap.liftPath_apply_one_eq_of_homotopicRel
 ```
 
 Everything else is resolved by `tools/lean_lint.py` against the checkout in
@@ -169,8 +169,8 @@ Everything else is resolved by `tools/lean_lint.py` against the checkout in
 
 ```yaml
 lean:
-  - decl: Complex.circleIntegral_sub_inv_smul_of_differentiable_on_off_countable
-    module: Mathlib.Analysis.Complex.CauchyIntegral
+  - decl: IsCoveringMap.liftPath_apply_one_eq_of_homotopicRel
+    module: Mathlib.Topology.Homotopy.Lifting
     line: 532
     state: proven
     rev: fabf563a7c95

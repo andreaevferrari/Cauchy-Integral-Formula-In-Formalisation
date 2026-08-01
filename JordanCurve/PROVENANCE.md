@@ -40,7 +40,7 @@ Before that, four mechanical edits were required for the files to build as
 part of this library rather than as a benchmark submission:
 
 1. **Module paths.** `import Submission.X` became
-   `import CauchyIntegralFormula.External.JordanCurve.X`.
+   `import JordanCurve.X`.
 2. **`module` header.** This library uses Lean 4.31's module system, and a
    `module` file cannot import a non-`module` one. Each file gained `module`
    as its first line.

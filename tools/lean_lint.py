@@ -6,14 +6,14 @@ never by line number, which is not: Mathlib moves constantly, and a line
 written by hand is a claim that goes quietly false. So the author writes
 
     lean:
-      - decl: Complex.circleIntegral_sub_inv_smul_of_differentiable_on_off_countable
+      - decl: IsCoveringMap.liftPath_apply_one_eq_of_homotopicRel
 
 and this tool fills in the rest by finding the declaration in
 `.lake/packages/`:
 
     lean:
-      - decl: Complex.circleIntegral_sub_inv_smul_of_differentiable_on_off_countable
-        module: Mathlib.Analysis.Complex.CauchyIntegral
+      - decl: IsCoveringMap.liftPath_apply_one_eq_of_homotopicRel
+        module: Mathlib.Topology.Homotopy.Lifting
         line: 532
         state: proven
         rev: 4e28ab0...

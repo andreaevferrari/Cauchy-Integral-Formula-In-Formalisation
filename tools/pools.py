@@ -27,8 +27,8 @@ ROOT = 'thm-jordan-curve'
 #: Surnames that must not appear in a Statement or Proof. Mathematics is
 #: attributed in Notes and in the `references:` frontmatter, never in the
 #: statement itself. These are the source's authors — the names this vault is
-#: tempted to write. Names that are part of a result's name (Cauchy, Goursat,
-#: Jordan) are not attributions and are not listed.
+#: tempted to write. A name that is part of a result's name (Jordan, Brouwer,
+#: Maehara) is not an attribution and is not listed.
 AUTHORS = ['Marchesi', 'Pixton', 'Sabalka']
 
 
