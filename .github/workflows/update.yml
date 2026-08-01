@@ -1,8 +1,9 @@
 name: Update Dependencies
+# Manual only. A Mathlib bump can break this proof — carrying it from v4.31 to
+# v4.32.2 took two fixes — so the upgrade wants a person looking at it, not a
+# weekly pull request nobody asked for.
 on:
-  schedule:             # Sets a schedule to trigger the workflow
-  - cron: "0 8 */7 * *" # Every 7 days at 08:00 AM UTC (for more info on the cron syntax see https://docs.github.com/en/actions/writing-workflows/choosing-when-your-workflow-runs/events-that-trigger-workflows#schedule)
-  workflow_dispatch:    # Allows the workflow to be triggered manually via the GitHub interface
+  workflow_dispatch:
 
 jobs:
   check-for-updates: # Determines which updates to apply.
