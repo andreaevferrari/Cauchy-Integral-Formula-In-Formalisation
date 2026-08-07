@@ -1,0 +1,88 @@
+# Publish this project's `.ilean` files for astrolabe.network.
+#
+# `.ilean` is a JSON file `lake build` already writes beside each `.olean`, so
+# the language server can answer go-to-definition and find-references. It
+# records every constant a module mentions, that constant's defining module,
+# and the declaration each use sits inside — all resolved by the elaborator.
+#
+# Astrolabe draws this development's dependency graph. Without these files it
+# has to read the `.lean` sources as text, and on this project that misses half
+# of what is there: three declarations here end in `.Plane`, so `Plane` is
+# ambiguous by suffix and every mention of it is dropped — the central
+# definition of the development comes out with one edge instead of 63.
+#
+# Two things are the contract, and they are the last two steps: a release
+# tagged `astrolabe-ilean-<sha>`, carrying `ilean.tar.gz`. The site fetches the
+# artifact for the commit a submission pinned, or none — so what is published
+# cannot change because of an unrelated push.
+#
+# The build below mirrors `build.yml`: the same disk cleanup, which that
+# workflow found necessary, and the same pinned `lean-action`. It is a separate
+# workflow rather than two more steps in `build.yml` so that nothing here can
+# affect whether the build passes or what it deploys.
+name: astrolabe-ilean
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  # To attach the artifact to a release. Nothing else.
+  contents: write
+
+concurrency:
+  group: astrolabe-ilean-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ilean:
+    name: Publish .ilean for astrolabe.network
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cleanup to free disk space
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # v1.3.1
+        with:
+          tool-cache: false
+          android: true
+          dotnet: false
+          haskell: false
+          large-packages: false
+          docker-images: false
+          swap-storage: false
+
+      - name: Checkout project
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Build the project
+        uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9 # v1.5.0
+        with:
+          use-github-cache: false
+
+      - name: Collect .ilean
+        run: |
+          set -euo pipefail
+          # Everything under a `.lake/packages` is Mathlib and not this project.
+          # Publishing it would republish somebody else's library as part of
+          # this network, and turn a quarter-megabyte artifact into a gigabyte.
+          find . -path '*/.lake/packages' -prune -o -name '*.ilean' -print0 > /tmp/ilean-list
+          count=$(tr -cd '\0' < /tmp/ilean-list | wc -c | tr -d ' ')
+          if [ "$count" = "0" ]; then
+            echo "::error::the build produced no .ilean files"
+            exit 1
+          fi
+          tar --null -czf ilean.tar.gz --files-from=/tmp/ilean-list
+          echo "collected $count .ilean files, $(du -h ilean.tar.gz | cut -f1)"
+
+      - name: Publish for this commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          # A prerelease, so it stays out of this repository's "Latest release".
+          tag="astrolabe-ilean-${GITHUB_SHA}"
+          gh release create "$tag" ilean.tar.gz \
+            --title "Astrolabe graph data — ${GITHUB_SHA:0:7}" \
+            --notes "\`.ilean\` files from \`lake build\` at ${GITHUB_SHA:0:7}, for astrolabe.network." \
+            --prerelease --latest=false \
+          || gh release upload "$tag" ilean.tar.gz --clobber
