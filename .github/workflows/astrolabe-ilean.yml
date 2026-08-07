@@ -59,6 +59,13 @@ jobs:
         with:
           use-github-cache: false
 
+      - name: Build the audit too
+        # `lake build` stops at defaultTargets, which is JordanCurve alone, so
+        # Util.Audit got no .ilean and its declarations arrived with no edges.
+        # A card is made for every declaration in the sources; the artifact has
+        # to cover the same set or the difference shows up as isolated cards.
+        run: lake build jordan-audit
+
       - name: Collect .ilean
         run: |
           set -euo pipefail
